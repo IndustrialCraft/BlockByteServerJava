@@ -10,7 +10,6 @@ import org.java_websocket.WebSocket;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class BlockByteServerMain {
@@ -24,11 +23,13 @@ public class BlockByteServerMain {
         while (true){
             WebSocket connection = sockets.poll();
             if(connection != null){
-                ArrayList<MessageS2C.InitializeBlocks.BlockRenderData> renderData = new ArrayList<>();
-                renderData.add(new MessageS2C.InitializeBlocks.BlockRenderData("grass_side", "grass_side", "grass", "dirt", "grass_side", "grass_side"));
-                renderData.add(new MessageS2C.InitializeBlocks.BlockRenderData("cobble", "cobble", "cobble", "cobble", "cobble", "cobble"));
+                ArrayList<MessageS2C.InitializeContent.BlockRenderData> renderData = new ArrayList<>();
+                renderData.add(new MessageS2C.InitializeContent.BlockRenderData("grass_side", "grass_side", "grass", "dirt", "grass_side", "grass_side"));
+                renderData.add(new MessageS2C.InitializeContent.BlockRenderData("cobble", "cobble", "cobble", "cobble", "cobble", "cobble"));
+                ArrayList<MessageS2C.InitializeContent.EntityRenderData> entityRenderData = new ArrayList<>();
+                entityRenderData.add(new MessageS2C.InitializeContent.EntityRenderData("player", "player"));
                 try {
-                    connection.send(new MessageS2C.InitializeBlocks(renderData).toBytes());
+                    connection.send(new MessageS2C.InitializeContent(renderData, entityRenderData).toBytes());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

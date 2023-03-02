@@ -36,11 +36,13 @@ public class MessageC2S {
         public final float y;
         public final float z;
         public final boolean shifting;
+        public final float rotation;
         public PlayerPosition(DataInputStream stream) throws IOException {
             this.x = stream.readFloat();
             this.y = stream.readFloat();
             this.z = stream.readFloat();
             this.shifting = stream.readBoolean();
+            this.rotation = stream.readFloat();
         }
     }
     public static MessageC2S fromBytes(byte[] data) throws IOException {

@@ -2,11 +2,7 @@ package com.github.industrialcraft.blockbyteserver.net;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
-import java.util.zip.DataFormatException;
-import java.util.zip.DeflaterInputStream;
-import java.util.zip.Inflater;
 
 public abstract class MessageS2C {
     public abstract byte[] toBytes() throws IOException;
@@ -87,12 +83,14 @@ public abstract class MessageS2C {
         public final float x;
         public final float y;
         public final float z;
-        public AddEntity(int entityType, int id, float x, float y, float z) {
+        public final float rotation;
+        public AddEntity(int entityType, int id, float x, float y, float z, float rotation) {
             this.entityType = entityType;
             this.id = id;
             this.x = x;
             this.y = y;
             this.z = z;
+            this.rotation = rotation;
         }
         @Override
         public byte[] toBytes() throws IOException {
@@ -104,6 +102,7 @@ public abstract class MessageS2C {
             stream.writeFloat(x);
             stream.writeFloat(y);
             stream.writeFloat(z);
+            stream.writeFloat(rotation);
             return byteStream.toByteArray();
         }
     }
@@ -112,11 +111,13 @@ public abstract class MessageS2C {
         public final float x;
         public final float y;
         public final float z;
-        public MoveEntity(int id, float x, float y, float z) {
+        public final float rotation;
+        public MoveEntity(int id, float x, float y, float z, float rotation) {
             this.id = id;
             this.x = x;
             this.y = y;
             this.z = z;
+            this.rotation = rotation;
         }
         @Override
         public byte[] toBytes() throws IOException {
@@ -127,6 +128,7 @@ public abstract class MessageS2C {
             stream.writeFloat(x);
             stream.writeFloat(y);
             stream.writeFloat(z);
+            stream.writeFloat(rotation);
             return byteStream.toByteArray();
         }
     }
@@ -144,10 +146,12 @@ public abstract class MessageS2C {
             return byteStream.toByteArray();
         }
     }
-    public static class InitializeBlocks extends MessageS2C{
+    public static class InitializeContent extends MessageS2C{
         public final List<BlockRenderData> blockRenderData;
-        public InitializeBlocks(List<BlockRenderData> blockRenderData) {
+        public final List<EntityRenderData> entityRenderData;
+        public InitializeContent(List<BlockRenderData> blockRenderData, List<EntityRenderData> entityRenderData) {
             this.blockRenderData = blockRenderData;
+            this.entityRenderData = entityRenderData;
         }
         @Override
         public byte[] toBytes() throws IOException {
@@ -163,6 +167,11 @@ public abstract class MessageS2C {
                 writeString(stream, blockData.left);
                 writeString(stream, blockData.right);
             }
+            stream.writeShort(entityRenderData.size());
+            for (EntityRenderData entityData : entityRenderData) {
+                writeString(stream, entityData.model);
+                writeString(stream, entityData.texture);
+            }
             return byteStream.toByteArray();
         }
         private static void writeString(DataOutputStream stream, String value) throws IOException {
@@ -173,6 +182,9 @@ public abstract class MessageS2C {
             }
         }
         public record BlockRenderData(String north, String south, String up, String down, String left, String right){
+
+        }
+        public record EntityRenderData(String model, String texture){
 
         }
     }

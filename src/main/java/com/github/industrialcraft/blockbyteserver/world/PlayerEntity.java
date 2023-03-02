@@ -37,12 +37,15 @@ public class PlayerEntity extends Entity{
             if(message instanceof MessageC2S.PlayerPosition playerPosition){
                 teleport(new Position(playerPosition.x, playerPosition.y, playerPosition.z));
                 this.shifting = playerPosition.shifting;
+                this.rotation = playerPosition.rotation;
             }
             if(message instanceof MessageC2S.LeftClickBlock leftClickBlock){
+                System.out.println("destroy");
                 BlockPosition blockPosition = new BlockPosition(leftClickBlock.x, leftClickBlock.y, leftClickBlock.z);
                 chunk.parent.setBlock(blockPosition, Block.AIR);
             }
             if(message instanceof MessageC2S.RightClickBlock rightClickBlock){
+                System.out.println("place");
                 BlockPosition blockPosition = new BlockPosition(rightClickBlock.x + rightClickBlock.face.xOffset, rightClickBlock.y + rightClickBlock.face.yOffset, rightClickBlock.z + rightClickBlock.face.zOffset);
                 for (Entity entity : chunk.getEntities()) {
                     if(entity.getBoundingBox().getCollisionsOnGrid().contains(blockPosition))
@@ -68,8 +71,7 @@ public class PlayerEntity extends Entity{
         if(this.chunk != newChunk){
             HashSet<ChunkPosition> previousLoadingChunks = getLoadingChunks(chunk.position);
             HashSet<ChunkPosition> currentLoadingChunks = getLoadingChunks(newChunk.position);
-            this.chunk.removeEntity(this);
-            newChunk.addEntity(this);
+            this.chunk.transferEntity(this, newChunk);
             if(this.chunk.parent == world) {
                 for (ChunkPosition chunkPosition : Sets.difference(previousLoadingChunks, currentLoadingChunks)) {
                     world.getChunk(chunkPosition).removeViewer(this);
@@ -86,6 +88,8 @@ public class PlayerEntity extends Entity{
                 }
             }
             this.chunk = newChunk;
+        } else {
+            this.chunk.announceToViewersExcept(new MessageS2C.MoveEntity(clientId, position.x(), position.y(), position.z(), rotation), this);
         }
     }
 
@@ -96,7 +100,7 @@ public class PlayerEntity extends Entity{
         try {
             socket.send(message.toBytes());
         } catch (Exception e){
-            System.out.println("sending to closed connection");
+            System.out.println("closed");
         }
     }
     public HashSet<ChunkPosition> getLoadingChunks(ChunkPosition chunkPosition){
@@ -114,8 +118,16 @@ public class PlayerEntity extends Entity{
     public void remove() {
         throw new IllegalStateException("cannot remove player");
     }
+
+    @Override
+    public int getClientType() {
+        return 0;
+    }
+
     @Override
     public boolean isRemoved() {
-        return this.socket.isClosed();
+        if(!this.socket.isOpen())
+            System.out.println("disconnected");
+        return !this.socket.isOpen();
     }
 }

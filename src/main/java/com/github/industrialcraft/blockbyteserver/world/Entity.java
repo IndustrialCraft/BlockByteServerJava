@@ -1,5 +1,6 @@
 package com.github.industrialcraft.blockbyteserver.world;
 
+import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.AABB;
 import com.github.industrialcraft.blockbyteserver.util.Position;
 
@@ -7,12 +8,13 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Entity {
-    private final AtomicInteger ID_GENERATOR = new AtomicInteger(0);
+public abstract class Entity {
+    private static final AtomicInteger ID_GENERATOR = new AtomicInteger(0);
 
     public final int clientId;
     public final UUID id;
     protected Position position;
+    protected float rotation;
     protected Chunk chunk;
     private boolean removed;
     public Entity(Position position, World world) {
@@ -24,6 +26,7 @@ public class Entity {
             throw new IllegalStateException("Attempting to spawn entity to unloaded chunk");
         this.chunk.addEntity(this);
         this.removed = false;
+        this.rotation = 0f;
     }
     public void tick(){}
     public AABB getBoundingBox(){
@@ -35,9 +38,10 @@ public class Entity {
             throw new IllegalArgumentException("Attempting to teleport entity to unloaded chunk");
         this.position = position;
         if(this.chunk != newChunk){
-            this.chunk.removeEntity(this);
-            newChunk.addEntity(this);
+            this.chunk.transferEntity(this, newChunk);
             this.chunk = newChunk;
+        } else {
+            this.chunk.announceToViewersExcept(new MessageS2C.MoveEntity(clientId, position.x(), position.y(), position.z(), rotation), null);
         }
     }
     public void teleport(Position position){
@@ -55,6 +59,7 @@ public class Entity {
     public void remove(){
         this.removed = true;
     }
+    public abstract int getClientType();
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
