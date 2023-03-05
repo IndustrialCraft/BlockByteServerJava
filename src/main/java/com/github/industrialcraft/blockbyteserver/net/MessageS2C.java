@@ -1,5 +1,8 @@
 package com.github.industrialcraft.blockbyteserver.net;
 
+import com.github.industrialcraft.blockbyteserver.content.ItemRenderData;
+import com.google.gson.JsonObject;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -149,9 +152,11 @@ public abstract class MessageS2C {
     public static class InitializeContent extends MessageS2C{
         public final List<BlockRenderData> blockRenderData;
         public final List<EntityRenderData> entityRenderData;
-        public InitializeContent(List<BlockRenderData> blockRenderData, List<EntityRenderData> entityRenderData) {
+        public final List<ItemRenderData> itemRenderData;
+        public InitializeContent(List<BlockRenderData> blockRenderData, List<EntityRenderData> entityRenderData, List<ItemRenderData> itemRenderData) {
             this.blockRenderData = blockRenderData;
             this.entityRenderData = entityRenderData;
+            this.itemRenderData = itemRenderData;
         }
         @Override
         public byte[] toBytes() throws IOException {
@@ -172,20 +177,39 @@ public abstract class MessageS2C {
                 writeString(stream, entityData.model);
                 writeString(stream, entityData.texture);
             }
-            return byteStream.toByteArray();
-        }
-        private static void writeString(DataOutputStream stream, String value) throws IOException {
-            byte[] data = value.getBytes(StandardCharsets.UTF_8);
-            stream.writeShort(data.length);
-            for (byte ch : data) {
-                stream.writeByte(ch);
+            stream.writeShort(itemRenderData.size());
+            for (ItemRenderData itemData : itemRenderData) {
+                writeString(stream, itemData.name());
+                writeString(stream, itemData.texture());
             }
+            return byteStream.toByteArray();
         }
         public record BlockRenderData(String north, String south, String up, String down, String left, String right){
 
         }
         public record EntityRenderData(String model, String texture){
 
+        }
+    }
+    public static class GUIData extends MessageS2C{
+        public final JsonObject json;
+        public GUIData(JsonObject json) {
+            this.json = json;
+        }
+        @Override
+        public byte[] toBytes() throws IOException {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(byteStream);
+            stream.writeByte(7);
+            writeString(stream, json.toString());
+            return byteStream.toByteArray();
+        }
+    }
+    private static void writeString(DataOutputStream stream, String value) throws IOException {
+        byte[] data = value.getBytes(StandardCharsets.UTF_8);
+        stream.writeShort(data.length);
+        for (byte ch : data) {
+            stream.writeByte(ch);
         }
     }
 }

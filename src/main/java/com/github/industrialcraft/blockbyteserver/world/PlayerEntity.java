@@ -1,12 +1,16 @@
 package com.github.industrialcraft.blockbyteserver.world;
 
+import com.github.industrialcraft.blockbyteserver.content.Block;
+import com.github.industrialcraft.blockbyteserver.content.BlockByteItem;
+import com.github.industrialcraft.blockbyteserver.content.BlockInstance;
 import com.github.industrialcraft.blockbyteserver.net.MessageC2S;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
-import com.github.industrialcraft.blockbyteserver.util.AABB;
-import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
-import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
-import com.github.industrialcraft.blockbyteserver.util.Position;
+import com.github.industrialcraft.blockbyteserver.util.*;
+import com.github.industrialcraft.identifier.Identifier;
+import com.github.industrialcraft.inventorysystem.Inventory;
+import com.github.industrialcraft.inventorysystem.ItemStack;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonObject;
 import org.java_websocket.WebSocket;
 
 import java.io.IOException;
@@ -17,6 +21,7 @@ public class PlayerEntity extends Entity{
     public final WebSocket socket;
     private final ConcurrentLinkedQueue<MessageC2S> messages;
     private boolean shifting;
+    public final Inventory inventory;
     public PlayerEntity(Position position, World world, WebSocket socket) {
         super(position, world);
         this.socket = socket;
@@ -26,6 +31,19 @@ public class PlayerEntity extends Entity{
             world.getOrLoadChunk(chunkPosition).addViewer(this);
         }
         this.shifting = false;
+        this.inventory = new ListeningInventory(9, (inventory1, is) -> {/*todo*/}, this, (slot, item) -> {
+            JsonObject json = new JsonObject();
+            json.addProperty("slot", slot);
+            if(item != null) {
+                json.addProperty("type", "setItem");
+                json.addProperty("item", ((BlockByteItem) item.getItem()).clientId);
+                json.addProperty("count", item.getCount());
+            } else {
+                json.addProperty("type", "removeItem");
+            }
+            PlayerEntity.this.send(new MessageS2C.GUIData(json));
+        });
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","cobble")), 3));
     }
     public boolean isShifting() {
         return shifting;
@@ -40,19 +58,30 @@ public class PlayerEntity extends Entity{
                 this.rotation = playerPosition.rotation;
             }
             if(message instanceof MessageC2S.LeftClickBlock leftClickBlock){
-                System.out.println("destroy");
                 BlockPosition blockPosition = new BlockPosition(leftClickBlock.x, leftClickBlock.y, leftClickBlock.z);
-                chunk.parent.setBlock(blockPosition, Block.AIR);
+                BlockInstance previousBlock = chunk.parent.getBlock(blockPosition);
+                if(previousBlock.parent != Block.AIR) {
+                    if(previousBlock.parent.lootTable != null)
+                        previousBlock.parent.lootTable.addToInventory(this.inventory, chunk.parent.itemRegistry);
+                    chunk.parent.setBlock(blockPosition, Block.AIR);
+                }
             }
             if(message instanceof MessageC2S.RightClickBlock rightClickBlock){
-                System.out.println("place");
-                BlockPosition blockPosition = new BlockPosition(rightClickBlock.x + rightClickBlock.face.xOffset, rightClickBlock.y + rightClickBlock.face.yOffset, rightClickBlock.z + rightClickBlock.face.zOffset);
-                for (Entity entity : chunk.getEntities()) {
-                    if(entity.getBoundingBox().getCollisionsOnGrid().contains(blockPosition))
-                        return;
+                boolean placeCancelled = false;
+                if(!isShifting()){
+                    BlockPosition rightClickedPosition = new BlockPosition(rightClickBlock.x, rightClickBlock.y, rightClickBlock.z);
+                    BlockInstance rightClicked = chunk.parent.getBlock(rightClickedPosition);
+                    placeCancelled = rightClicked.parent.onRightClick(chunk.parent, rightClickedPosition, rightClicked, this);
                 }
-                if(chunk.parent.getBlock(blockPosition) == Block.AIR){
-                    chunk.parent.setBlock(blockPosition, Block.COBBLE);
+                if(!placeCancelled) {
+                    BlockPosition blockPosition = new BlockPosition(rightClickBlock.x + rightClickBlock.face.xOffset, rightClickBlock.y + rightClickBlock.face.yOffset, rightClickBlock.z + rightClickBlock.face.zOffset);
+                    for (Entity entity : chunk.getEntities()) {
+                        if (entity.getBoundingBox().getCollisionsOnGrid().contains(blockPosition))
+                            return;
+                    }
+                    if (chunk.parent.getBlock(blockPosition).parent == Block.AIR) {
+                        chunk.parent.setBlock(blockPosition, chunk.parent.blockRegistry.getBlock(Identifier.of("bb", "cobble")));
+                    }
                 }
             }
             message = this.messages.poll();

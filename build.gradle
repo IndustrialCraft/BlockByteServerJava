@@ -7,9 +7,13 @@ version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
     implementation 'org.java-websocket:Java-WebSocket:1.5.3'
     implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'com.github.industrialcraft:identifier:fd2e641267'
+    implementation 'com.github.industrialcraft:inventorysystem:f1e0c4f075'
+    implementation 'com.google.code.gson:gson:2.10.1'
 }

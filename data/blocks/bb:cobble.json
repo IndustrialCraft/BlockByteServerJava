@@ -1,0 +1,10 @@
+{
+  "model": {
+    "north": "cobble",
+    "south": "cobble",
+    "left": "cobble",
+    "right": "cobble",
+    "up": "cobble",
+    "down": "cobble"
+  }
+}

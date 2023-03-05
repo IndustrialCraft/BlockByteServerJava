@@ -1,5 +1,9 @@
 package com.github.industrialcraft.blockbyteserver.world;
 
+import com.github.industrialcraft.blockbyteserver.content.BlockRegistry;
+import com.github.industrialcraft.blockbyteserver.content.Block;
+import com.github.industrialcraft.blockbyteserver.content.BlockInstance;
+import com.github.industrialcraft.blockbyteserver.content.ItemRegistry;
 import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
 import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
 
@@ -9,7 +13,11 @@ import java.util.List;
 
 public class World {
     private HashMap<ChunkPosition,Chunk> chunks;
-    public World() {
+    public final BlockRegistry blockRegistry;
+    public final ItemRegistry itemRegistry;
+    public World(BlockRegistry blockRegistry, ItemRegistry itemRegistry) {
+        this.blockRegistry = blockRegistry;
+        this.itemRegistry = itemRegistry;
         this.chunks = new HashMap<>();
     }
     public void tick(){
@@ -26,7 +34,7 @@ public class World {
             throw new IllegalStateException("Attempting to set block in unloaded chunk");
         chunk.setBlock(block, blockPosition.getChunkXOffset(), blockPosition.getChunkYOffset(), blockPosition.getChunkZOffset());
     }
-    public Block getBlock(BlockPosition blockPosition){
+    public BlockInstance getBlock(BlockPosition blockPosition){
         ChunkPosition chunkPosition = blockPosition.toChunkPos();
         Chunk chunk = getChunk(chunkPosition);
         if(chunk == null)

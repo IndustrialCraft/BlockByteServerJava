@@ -1,7 +1,10 @@
 package com.github.industrialcraft.blockbyteserver.world;
 
+import com.github.industrialcraft.blockbyteserver.content.Block;
+import com.github.industrialcraft.blockbyteserver.content.BlockInstance;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
+import com.github.industrialcraft.identifier.Identifier;
 import com.google.common.collect.Sets;
 
 import java.io.ByteArrayOutputStream;
@@ -15,7 +18,7 @@ import java.util.zip.Deflater;
 public class Chunk {
     public final World parent;
     public final ChunkPosition position;
-    private Block[] blocks;
+    private BlockInstance[] blocks;
     private HashSet<Entity> entities;
     private HashSet<Entity> toAdd;
     private HashSet<PlayerEntity> viewers;
@@ -25,12 +28,17 @@ public class Chunk {
         this.entities = new HashSet<>();
         this.viewers = new HashSet<>();
         this.toAdd = new HashSet<>();
-        this.blocks = new Block[16*16*16];
-        for(int i = 0;i < 16*16*16;i++)
-            this.blocks[i] = Block.AIR;
+        this.blocks = new BlockInstance[16*16*16];
+        for(int x = 0;x < 16;x++) {
+            for (int y = 0; y < 16; y++) {
+                for (int z = 0; z < 16; z++) {
+                    setBlock(Block.AIR, x, y, z);
+                }
+            }
+        }
         for(int x = 0;x < 16;x++){
             for(int z = 0;z < 16;z++){
-                setBlock(Block.GRASS, x, 0, z);
+                setBlock(parent.blockRegistry.getBlock(Identifier.of("bb", "grass")), x, 0, z);
             }
         }
     }
@@ -45,12 +53,12 @@ public class Chunk {
     }
     public void setBlock(Block block, int x, int y, int z){
         checkOffset(x, y, z);
-        this.blocks[x+(y*16)+z*(16*16)] = block;
+        this.blocks[x+(y*16)+z*(16*16)] = block.createBlockInstance(this, x, y, z);
         for(PlayerEntity viewer : viewers){
             viewer.send(new MessageS2C.SetBlock((position.x()*16)+x, (position.y()*16)+y, (position.z()*16)+z, block.getClientId()));
         }
     }
-    public Block getBlock(int x, int y, int z){
+    public BlockInstance getBlock(int x, int y, int z){
         checkOffset(x, y, z);
         return this.blocks[x+(y*16)+z*(16*16)];
     }
@@ -91,7 +99,7 @@ public class Chunk {
             for(int y = 0;y < 16;y++){
                 for(int z = 0;z < 16;z++){
                     try {
-                        stream.writeInt(getBlock(x, y, z).getClientId());
+                        stream.writeInt(getBlock(x, y, z).parent.getClientId());
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
