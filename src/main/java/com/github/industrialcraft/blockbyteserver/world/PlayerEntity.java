@@ -45,6 +45,7 @@ public class PlayerEntity extends Entity{
             PlayerEntity.this.send(new MessageS2C.GUIData(json));
         });
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","cobble")), 3));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","stand")), 3));
     }
     public int getSlot() {
         return slot;

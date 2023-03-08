@@ -1,5 +1,6 @@
 {
   "model": {
+    "type": "cube",
     "north": "cobble",
     "south": "cobble",
     "left": "cobble",

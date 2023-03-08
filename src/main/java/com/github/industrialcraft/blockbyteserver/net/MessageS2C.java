@@ -165,12 +165,7 @@ public abstract class MessageS2C {
             stream.writeByte(6);
             stream.writeShort(blockRenderData.size());
             for (BlockRenderData blockData : blockRenderData) {
-                writeString(stream, blockData.north);
-                writeString(stream, blockData.south);
-                writeString(stream, blockData.up);
-                writeString(stream, blockData.down);
-                writeString(stream, blockData.left);
-                writeString(stream, blockData.right);
+                writeString(stream, blockData.json.toString());
             }
             stream.writeShort(entityRenderData.size());
             for (EntityRenderData entityData : entityRenderData) {
@@ -184,7 +179,7 @@ public abstract class MessageS2C {
             }
             return byteStream.toByteArray();
         }
-        public record BlockRenderData(String north, String south, String up, String down, String left, String right){
+        public record BlockRenderData(JsonObject json){
 
         }
         public record EntityRenderData(String model, String texture){

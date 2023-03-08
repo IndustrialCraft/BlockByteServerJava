@@ -1,0 +1,6 @@
+{
+  "name": "stand",
+  "texture": "cobble",
+  "stackSize": 1,
+  "place": "bb:stand"
+}
