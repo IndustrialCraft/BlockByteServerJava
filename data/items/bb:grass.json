@@ -1,0 +1,6 @@
+{
+  "name": "grass block",
+  "texture": "grass",
+  "stackSize": 10,
+  "place": "bb:grass"
+}

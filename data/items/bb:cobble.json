@@ -1,5 +1,6 @@
 {
   "name": "cobblestone",
   "texture": "cobble",
-  "stackSize": 10
+  "stackSize": 10,
+  "place": "bb:cobble"
 }

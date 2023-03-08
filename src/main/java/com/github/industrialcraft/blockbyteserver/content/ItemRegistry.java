@@ -1,6 +1,5 @@
 package com.github.industrialcraft.blockbyteserver.content;
 
-import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.identifier.Identifier;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -41,7 +40,8 @@ public class ItemRegistry {
         if(items.containsKey(id))
             throw new IllegalStateException("item with id " + id + " is already registered");
         ItemRenderData renderData = new ItemRenderData(json.get("name").getAsString(), json.get("texture").getAsString());
-        BlockByteItem item = new BlockByteItem(json.get("stackSize").getAsInt(), renderData, clientIds);
+        String place = json.get("place").getAsString();
+        BlockByteItem item = new BlockByteItem(json.get("stackSize").getAsInt(), renderData, clientIds, place==null?null:Identifier.parse(place));
         clientIds++;
         items.put(id, item);
         return item;

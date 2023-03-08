@@ -6,5 +6,6 @@
     "right": "cobble",
     "up": "cobble",
     "down": "cobble"
-  }
+  },
+  "loot": {"item":"bb:cobble","count": 1}
 }

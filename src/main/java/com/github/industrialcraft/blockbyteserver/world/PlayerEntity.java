@@ -22,6 +22,7 @@ public class PlayerEntity extends Entity{
     private final ConcurrentLinkedQueue<MessageC2S> messages;
     private boolean shifting;
     public final Inventory inventory;
+    private int slot;
     public PlayerEntity(Position position, World world, WebSocket socket) {
         super(position, world);
         this.socket = socket;
@@ -44,6 +45,9 @@ public class PlayerEntity extends Entity{
             PlayerEntity.this.send(new MessageS2C.GUIData(json));
         });
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","cobble")), 3));
+    }
+    public int getSlot() {
+        return slot;
     }
     public boolean isShifting() {
         return shifting;
@@ -79,15 +83,34 @@ public class PlayerEntity extends Entity{
                         if (entity.getBoundingBox().getCollisionsOnGrid().contains(blockPosition))
                             return;
                     }
-                    if (chunk.parent.getBlock(blockPosition).parent == Block.AIR) {
-                        chunk.parent.setBlock(blockPosition, chunk.parent.blockRegistry.getBlock(Identifier.of("bb", "cobble")));
+                    BlockInstance previousBlock = chunk.parent.getBlock(blockPosition);
+                    ItemStack hand = getItemInHand();
+                    if(hand != null) {
+                        BlockByteItem item = (BlockByteItem) hand.getItem();
+                        if (previousBlock.parent == Block.AIR && item.place != null) {
+                            chunk.parent.setBlock(blockPosition, chunk.parent.blockRegistry.getBlock(item.place));
+                            hand.removeCount(1);
+                            updateHand();
+                        }
                     }
                 }
+            }
+            if(message instanceof MessageC2S.SelectSlot selectSlot){
+                this.slot = selectSlot.slot;//todo: clamp
+                JsonObject json = new JsonObject();
+                json.addProperty("slot", slot);
+                json.addProperty("type", "selectSlot");
+                send(new MessageS2C.GUIData(json));
             }
             message = this.messages.poll();
         }
     }
-
+    public ItemStack getItemInHand(){
+        return inventory.getAt(slot);
+    }
+    public void updateHand(){
+        ((ListeningInventory)inventory).updateSlot(slot);
+    }
     @Override
     public AABB getBoundingBox() {
         return new AABB(position.x() - 0.3f, position.y(), position.z() - 0.3f, 0.6f, 1.75f-(shifting?0.5f:0f), 0.6f);

@@ -16,6 +16,10 @@ public class ListeningInventory extends Inventory {
         if(this.changeListener != null)
             this.changeListener.onChange(index, itemStack);
     }
+    public void updateSlot(int index){
+        if(this.changeListener != null)
+            this.changeListener.onChange(index, getAt(index));
+    }
     public interface InventoryChangeListener{
         void onChange(int slot, ItemStack item);
     }

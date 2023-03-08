@@ -6,5 +6,7 @@
     "right": "grass_side",
     "up": "grass",
     "down": "dirt"
-  }
+  },
+  "loot": {"item":"bb:grass","count": 1}
+
 }
