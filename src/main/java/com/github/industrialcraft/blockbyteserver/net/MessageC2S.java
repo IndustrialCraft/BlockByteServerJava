@@ -53,6 +53,16 @@ public class MessageC2S {
             this.y = stream.readInt();
         }
     }
+    public static class Keyboard extends MessageC2S{
+        public final int key;
+        public final boolean down;
+        public final boolean repeat;
+        public Keyboard(DataInputStream stream) throws IOException {
+            this.key = stream.readInt();
+            this.down = stream.readBoolean();
+            this.repeat = stream.readBoolean();
+        }
+    }
     public static MessageC2S fromBytes(byte[] data) throws IOException {
         ByteArrayInputStream byteStream = new ByteArrayInputStream(data);
         DataInputStream stream = new DataInputStream(byteStream);
@@ -65,6 +75,8 @@ public class MessageC2S {
                 return new PlayerPosition(stream);
             case 3:
                 return new MouseScroll(stream);
+            case 4:
+                return new Keyboard(stream);
             default:
                 return null;
         }

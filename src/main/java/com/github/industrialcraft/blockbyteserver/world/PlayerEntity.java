@@ -117,6 +117,14 @@ public class PlayerEntity extends Entity{
             if(message instanceof MessageC2S.MouseScroll mouseScroll){
                 setSlot((((getSlot()-mouseScroll.y)%9)+9)%9);
             }
+            if(message instanceof MessageC2S.Keyboard keyboard){
+                if(keyboard.down && !keyboard.repeat) {
+                    int slot = keyboard.key - 49;
+                    if (slot >= 0 && slot <= 8) {
+                        setSlot(slot);
+                    }
+                }
+            }
             message = this.messages.poll();
         }
     }
