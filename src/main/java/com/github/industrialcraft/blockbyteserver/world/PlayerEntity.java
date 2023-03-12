@@ -62,6 +62,14 @@ public class PlayerEntity extends Entity{
             json.add("color", MessageS2C.GUIData.createColor(1, 0, 0, 1));
             PlayerEntity.this.send(new MessageS2C.GUIData(json));
         }
+        {
+            JsonObject json = new JsonObject();
+            json.addProperty("type", "setCursor");
+            json.addProperty("texture", "cursor");
+            json.addProperty("width", 0.05);
+            json.addProperty("height", 0.05);
+            PlayerEntity.this.send(new MessageS2C.GUIData(json));
+        }
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","cobble")), 3));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","stand")), 3));
     }
