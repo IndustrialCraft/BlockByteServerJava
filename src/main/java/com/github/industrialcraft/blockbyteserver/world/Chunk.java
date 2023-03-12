@@ -29,18 +29,7 @@ public class Chunk {
         this.viewers = new HashSet<>();
         this.toAdd = new HashSet<>();
         this.blocks = new BlockInstance[16*16*16];
-        for(int x = 0;x < 16;x++) {
-            for (int y = 0; y < 16; y++) {
-                for (int z = 0; z < 16; z++) {
-                    setBlock(Block.AIR, x, y, z);
-                }
-            }
-        }
-        for(int x = 0;x < 16;x++){
-            for(int z = 0;z < 16;z++){
-                setBlock(parent.blockRegistry.getBlock(Identifier.of("bb", "grass")), x, 0, z);
-            }
-        }
+        this.parent.chunkGenerator.generateChunk(this.blocks, position, parent, this);
     }
     public Set<Entity> getEntities(){
         return Collections.unmodifiableSet(entities);

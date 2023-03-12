@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "cube",
+    "north": "dirt",
+    "south": "dirt",
+    "left": "dirt",
+    "right": "dirt",
+    "up": "dirt",
+    "down": "dirt"
+  },
+  "loot": {"item":"bb:dirt","count": 1}
+}

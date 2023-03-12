@@ -1,0 +1,6 @@
+{
+  "name": "dirt block",
+  "texture": "dirt",
+  "stackSize": 10,
+  "place": "bb:dirt"
+}

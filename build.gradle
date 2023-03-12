@@ -8,6 +8,9 @@ version = '1.0-SNAPSHOT'
 repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
+    maven {
+        url "https://repo.spongepowered.org/repository/maven-public/"
+    }
 }
 
 dependencies {
@@ -16,4 +19,5 @@ dependencies {
     implementation 'com.github.industrialcraft:identifier:fd2e641267'
     implementation 'com.github.industrialcraft:inventorysystem:f1e0c4f075'
     implementation 'com.google.code.gson:gson:2.10.1'
+    implementation "org.spongepowered:noise:2.0.0-SNAPSHOT"
 }

@@ -1,6 +1,7 @@
 package com.github.industrialcraft.blockbyteserver.net;
 
 import com.github.industrialcraft.blockbyteserver.content.ItemRenderData;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.io.*;
@@ -198,6 +199,14 @@ public abstract class MessageS2C {
             stream.writeByte(7);
             writeString(stream, json.toString());
             return byteStream.toByteArray();
+        }
+        public static JsonArray createColor(float r, float g, float b, float a){
+            var col = new JsonArray();
+            col.add(r);
+            col.add(g);
+            col.add(b);
+            col.add(a);
+            return col;
         }
     }
     private static void writeString(DataOutputStream stream, String value) throws IOException {

@@ -15,9 +15,11 @@ public class World {
     private HashMap<ChunkPosition,Chunk> chunks;
     public final BlockRegistry blockRegistry;
     public final ItemRegistry itemRegistry;
-    public World(BlockRegistry blockRegistry, ItemRegistry itemRegistry) {
+    public final IChunkGenerator chunkGenerator;
+    public World(BlockRegistry blockRegistry, ItemRegistry itemRegistry, IChunkGenerator chunkGenerator) {
         this.blockRegistry = blockRegistry;
         this.itemRegistry = itemRegistry;
+        this.chunkGenerator = chunkGenerator;
         this.chunks = new HashMap<>();
     }
     public void tick(){

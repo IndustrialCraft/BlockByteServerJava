@@ -34,16 +34,34 @@ public class PlayerEntity extends Entity{
         this.shifting = false;
         this.inventory = new ListeningInventory(9, (inventory1, is) -> {/*todo*/}, this, (slot, item) -> {
             JsonObject json = new JsonObject();
-            json.addProperty("slot", slot);
+            json.addProperty("id", "hotbar_" + slot);
+            json.addProperty("type", "editElement");
+            json.addProperty("data_type", "item");
             if(item != null) {
-                json.addProperty("type", "setItem");
-                json.addProperty("item", ((BlockByteItem) item.getItem()).clientId);
-                json.addProperty("count", item.getCount());
-            } else {
-                json.addProperty("type", "removeItem");
+                JsonObject itemJson = new JsonObject();
+                itemJson.addProperty("item", ((BlockByteItem) item.getItem()).clientId);
+                itemJson.addProperty("count", item.getCount());
+                json.add("item", itemJson);
             }
             PlayerEntity.this.send(new MessageS2C.GUIData(json));
         });
+        for(int i = 0;i < 9;i++){
+            JsonObject json = new JsonObject();
+            json.addProperty("id", "hotbar_" + i);
+            json.addProperty("type", "setElement");
+            json.addProperty("element_type", "slot");
+            json.addProperty("x", (i * 0.13) - 0.7);
+            json.addProperty("y", -0.5);
+            PlayerEntity.this.send(new MessageS2C.GUIData(json));
+        }
+        {
+            JsonObject json = new JsonObject();
+            json.addProperty("id", "hotbar_0");
+            json.addProperty("type", "editElement");
+            json.addProperty("data_type", "color");
+            json.add("color", MessageS2C.GUIData.createColor(1, 0, 0, 1));
+            PlayerEntity.this.send(new MessageS2C.GUIData(json));
+        }
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","cobble")), 3));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","stand")), 3));
     }
@@ -96,14 +114,31 @@ public class PlayerEntity extends Entity{
                     }
                 }
             }
-            if(message instanceof MessageC2S.SelectSlot selectSlot){
-                this.slot = selectSlot.slot;//todo: clamp
-                JsonObject json = new JsonObject();
-                json.addProperty("slot", slot);
-                json.addProperty("type", "selectSlot");
-                send(new MessageS2C.GUIData(json));
+            if(message instanceof MessageC2S.MouseScroll mouseScroll){
+                setSlot((((getSlot()-mouseScroll.y)%9)+9)%9);
             }
             message = this.messages.poll();
+        }
+    }
+    public void setSlot(int slot) {//todo: clamp
+        if(this.slot == slot)
+            return;
+        {
+            JsonObject json = new JsonObject();
+            json.addProperty("id", "hotbar_" + this.slot);
+            json.addProperty("type", "editElement");
+            json.addProperty("data_type", "color");
+            json.add("color", MessageS2C.GUIData.createColor(1, 1, 1, 1));
+            PlayerEntity.this.send(new MessageS2C.GUIData(json));
+        }
+        this.slot = slot;
+        {
+            JsonObject json = new JsonObject();
+            json.addProperty("id", "hotbar_" + slot);
+            json.addProperty("type", "editElement");
+            json.addProperty("data_type", "color");
+            json.add("color", MessageS2C.GUIData.createColor(1, 0, 0, 1));
+            PlayerEntity.this.send(new MessageS2C.GUIData(json));
         }
     }
     public ItemStack getItemInHand(){

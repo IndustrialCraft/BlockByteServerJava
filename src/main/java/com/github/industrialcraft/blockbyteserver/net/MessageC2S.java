@@ -45,10 +45,12 @@ public class MessageC2S {
             this.rotation = stream.readFloat();
         }
     }
-    public static class SelectSlot extends MessageC2S{
-        public final int slot;
-        public SelectSlot(DataInputStream stream) throws IOException {
-            this.slot = stream.readByte();
+    public static class MouseScroll extends MessageC2S{
+        public final int x;
+        public final int y;
+        public MouseScroll(DataInputStream stream) throws IOException {
+            this.x = stream.readInt();
+            this.y = stream.readInt();
         }
     }
     public static MessageC2S fromBytes(byte[] data) throws IOException {
@@ -62,7 +64,7 @@ public class MessageC2S {
             case 2:
                 return new PlayerPosition(stream);
             case 3:
-                return new SelectSlot(stream);
+                return new MouseScroll(stream);
             default:
                 return null;
         }
