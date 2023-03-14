@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
 
 public class BlockRegistry {
     private final HashMap<Identifier, Block> blocks;
@@ -48,6 +49,13 @@ public class BlockRegistry {
         clientIds++;
         blocks.put(id, block);
         return block;
+    }
+    public void loadBlock(Identifier id, Function<Integer,Block> creator){
+        if(blocks.containsKey(id))
+            throw new IllegalStateException("block with id " + id + " is already registered");
+        Block block = creator.apply(clientIds);
+        clientIds++;
+        blocks.put(id, block);
     }
     public Block getBlock(Identifier id){
         return blocks.get(id);

@@ -5,7 +5,7 @@ import com.github.industrialcraft.inventorysystem.ItemOverflowHandler;
 import com.github.industrialcraft.inventorysystem.ItemStack;
 
 public class ListeningInventory extends Inventory {
-    public final InventoryChangeListener changeListener;
+    public InventoryChangeListener changeListener;
     public ListeningInventory(int size, ItemOverflowHandler handler, Object data, InventoryChangeListener changeListener) {
         super(size, handler, data);
         this.changeListener = changeListener;

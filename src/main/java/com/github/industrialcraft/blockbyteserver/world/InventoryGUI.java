@@ -1,0 +1,92 @@
+package com.github.industrialcraft.blockbyteserver.world;
+
+import com.github.industrialcraft.blockbyteserver.content.BlockByteItem;
+import com.github.industrialcraft.blockbyteserver.net.MessageC2S;
+import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
+import com.github.industrialcraft.inventorysystem.Inventory;
+import com.github.industrialcraft.inventorysystem.ItemStack;
+import com.google.gson.JsonObject;
+
+import java.util.HashMap;
+
+public abstract class InventoryGUI extends GUI{
+    protected HashMap<String,Slot> slots;
+    private ItemStack hand;
+    public InventoryGUI(PlayerEntity player) {
+        super(player);
+        this.slots = new HashMap<>();
+        for(int i = 0;i < 9;i++)
+            this.slots.put("hotbar_" + i, new Slot(player.inventory, i));
+        this.hand = null;
+    }
+
+    @Override
+    public void onClick(String id, MessageC2S.GUIClick.EMouseButton button) {
+        Slot slot = slots.get(id);
+        if(slot != null){
+            ItemStack temp = hand;
+            setHand(slot.inventory.getAt(slot.slot));
+            slot.inventory.setAt(slot.slot, temp);
+        }
+    }
+    @Override
+    public boolean tick() {
+        for (var entry : this.slots.entrySet()) {
+            if(entry.getValue().shouldUpdateAndResyncVersion()){
+                var item = entry.getValue().inventory.getAt(entry.getValue().slot);
+                JsonObject json = new JsonObject();
+                json.addProperty("id", entry.getKey());
+                json.addProperty("type", "editElement");
+                json.addProperty("data_type", "item");
+                if(item != null) {
+                    JsonObject itemJson = new JsonObject();
+                    itemJson.addProperty("item", ((BlockByteItem) item.getItem()).clientId);
+                    itemJson.addProperty("count", item.getCount());
+                    json.add("item", itemJson);
+                }
+                player.send(new MessageS2C.GUIData(json));
+            }
+        }
+        return onTick();
+    }
+    public abstract boolean onTick();
+    private void setHand(ItemStack hand){
+        this.hand = hand;
+        {
+            JsonObject json = new JsonObject();
+            json.addProperty("type", "setCursor");
+            json.addProperty("texture", hand==null?"cursor":((BlockByteItem)hand.getItem()).itemRenderData.texture());
+            json.addProperty("width", hand==null?0.05:0.1);
+            json.addProperty("height", hand==null?0.05:0.1);
+            player.send(new MessageS2C.GUIData(json));
+        }
+    }
+    @Override
+    public void onClose() {
+        super.onClose();
+        //todo: drop hand
+        setHand(null);
+    }
+    public static class Slot{
+        public final Inventory inventory;
+        public final int slot;
+        private int lastUpdate;
+        public Slot(Inventory inventory, int slot) {
+            this.inventory = inventory;
+            this.slot = slot;
+            this.lastUpdate = -1;
+        }
+        public boolean shouldUpdateAndResyncVersion(){
+            if(inventory instanceof IInventoryWithSlotVersioning inventoryWithSlotVersioning){
+                int version = inventoryWithSlotVersioning.getVersion(slot);
+                if(version != lastUpdate){
+                    this.lastUpdate = version;
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            return false;
+        }
+    }
+}

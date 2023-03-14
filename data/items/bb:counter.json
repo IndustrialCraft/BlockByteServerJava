@@ -1,0 +1,6 @@
+{
+  "name": "counter",
+  "texture": "grass_side",
+  "stackSize": 1,
+  "place": "bb:counter"
+}

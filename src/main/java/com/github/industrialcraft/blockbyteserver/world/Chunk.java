@@ -42,7 +42,11 @@ public class Chunk {
     }
     public void setBlock(Block block, int x, int y, int z){
         checkOffset(x, y, z);
-        this.blocks[x+(y*16)+z*(16*16)] = block.createBlockInstance(this, x, y, z);
+        int blockOffset = x + (y * 16) + z * (16 * 16);
+        BlockInstance instance = this.blocks[blockOffset];
+        if(instance.isUnique())
+            instance.invalidate();
+        this.blocks[blockOffset] = block.createBlockInstance(this, x, y, z);
         for(PlayerEntity viewer : viewers){
             viewer.send(new MessageS2C.SetBlock((position.x()*16)+x, (position.y()*16)+y, (position.z()*16)+z, block.getClientId()));
         }

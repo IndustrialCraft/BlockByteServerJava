@@ -23,6 +23,7 @@ public class PlayerEntity extends Entity{
     private boolean shifting;
     public final Inventory inventory;
     private int slot;
+    private GUI gui;
     public PlayerEntity(Position position, World world, WebSocket socket) {
         super(position, world);
         this.socket = socket;
@@ -32,6 +33,7 @@ public class PlayerEntity extends Entity{
             world.getOrLoadChunk(chunkPosition).addViewer(this);
         }
         this.shifting = false;
+        this.gui = null;
         this.inventory = new ListeningInventory(9, (inventory1, is) -> {/*todo*/}, this, (slot, item) -> {
             JsonObject json = new JsonObject();
             json.addProperty("id", "hotbar_" + slot);
@@ -70,8 +72,28 @@ public class PlayerEntity extends Entity{
             json.addProperty("height", 0.05);
             PlayerEntity.this.send(new MessageS2C.GUIData(json));
         }
+        {
+            JsonObject json = new JsonObject();
+            json.addProperty("type", "setCursorLock");
+            json.addProperty("lock", true);
+            PlayerEntity.this.send(new MessageS2C.GUIData(json));
+        }
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","cobble")), 3));
-        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","stand")), 3));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","counter")), 3));
+    }
+    public void setGui(GUI newGui){
+        if(this.gui != null)
+            this.gui.close();
+        if(newGui != null) {
+            newGui.onOpen();
+        }
+        {
+            JsonObject json = new JsonObject();
+            json.addProperty("type", "setCursorLock");
+            json.addProperty("lock", newGui == null);
+            PlayerEntity.this.send(new MessageS2C.GUIData(json));
+        }
+        this.gui = newGui;
     }
     public int getSlot() {
         return slot;
@@ -133,7 +155,18 @@ public class PlayerEntity extends Entity{
                     }
                 }
             }
+            if(message instanceof MessageC2S.GUIClick guiClick){
+                if(this.gui != null)
+                    this.gui.onClick(guiClick.id, guiClick.button);
+            }
+            if(message instanceof MessageC2S.GUIClose guiClose){
+                this.setGui(null);
+            }
             message = this.messages.poll();
+        }
+        if(this.gui != null){
+            if(!this.gui.tick())
+                setGui(null);
         }
     }
     public void setSlot(int slot) {//todo: clamp
