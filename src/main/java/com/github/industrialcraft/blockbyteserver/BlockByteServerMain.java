@@ -9,7 +9,6 @@ import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
 import com.github.industrialcraft.blockbyteserver.util.Position;
 import com.github.industrialcraft.blockbyteserver.world.*;
 import com.github.industrialcraft.identifier.Identifier;
-import com.github.industrialcraft.inventorysystem.ItemStack;
 import com.google.gson.JsonObject;
 import org.java_websocket.WebSocket;
 import org.spongepowered.noise.Noise;
@@ -19,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -50,25 +48,17 @@ public class BlockByteServerMain {
             super(player);
             this.block = block;
             this.lastSyncCounter = -1;
-            this.slots.put("gui_item", new Slot(((CounterBlockInstance)block).inventory, 0));
+            this.slots.put("gui_item", new Slot(((CounterBlockInstance)block).inventory, 0, -0.2f, 0));
         }
         @Override
         public void onOpen() {
+            super.onOpen();
             {
                 JsonObject json = new JsonObject();
                 json.addProperty("id", "gui_count");
                 json.addProperty("type", "setElement");
                 json.addProperty("element_type", "text");
                 json.addProperty("x", 0);
-                json.addProperty("y", 0);
-                player.send(new MessageS2C.GUIData(json));
-            }
-            {
-                JsonObject json = new JsonObject();
-                json.addProperty("id", "gui_item");
-                json.addProperty("type", "setElement");
-                json.addProperty("element_type", "slot");
-                json.addProperty("x", -0.2);
                 json.addProperty("y", 0);
                 player.send(new MessageS2C.GUIData(json));
             }

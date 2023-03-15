@@ -21,6 +21,21 @@ public abstract class InventoryGUI extends GUI{
     }
 
     @Override
+    public void onOpen() {
+        for(var entry : slots.entrySet()){
+            if(entry.getValue().eventOnly)
+                continue;
+            JsonObject json = new JsonObject();
+            json.addProperty("id", entry.getKey());
+            json.addProperty("type", "setElement");
+            json.addProperty("element_type", "slot");
+            json.addProperty("x", entry.getValue().x);
+            json.addProperty("y", entry.getValue().y);
+            player.send(new MessageS2C.GUIData(json));
+        }
+    }
+
+    @Override
     public void onClick(String id, MessageC2S.GUIClick.EMouseButton button) {
         Slot slot = slots.get(id);
         if(slot != null){
@@ -70,11 +85,25 @@ public abstract class InventoryGUI extends GUI{
     public static class Slot{
         public final Inventory inventory;
         public final int slot;
+        public final float x;
+        public final float y;
+        public final boolean eventOnly;
         private int lastUpdate;
+        public Slot(Inventory inventory, int slot, float x, float y) {
+            this.inventory = inventory;
+            this.slot = slot;
+            this.x = x;
+            this.y = y;
+            this.lastUpdate = -1;
+            this.eventOnly = false;
+        }
         public Slot(Inventory inventory, int slot) {
             this.inventory = inventory;
             this.slot = slot;
+            this.x = 0;
+            this.y = 0;
             this.lastUpdate = -1;
+            this.eventOnly = true;
         }
         public boolean shouldUpdateAndResyncVersion(){
             if(inventory instanceof IInventoryWithSlotVersioning inventoryWithSlotVersioning){
