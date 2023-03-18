@@ -1,6 +1,8 @@
 package com.github.industrialcraft.blockbyteserver.net;
 
+import com.github.industrialcraft.blockbyteserver.content.BlockRegistry;
 import com.github.industrialcraft.blockbyteserver.content.ItemRenderData;
+import com.github.industrialcraft.identifier.Identifier;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -154,10 +156,12 @@ public abstract class MessageS2C {
         public final List<BlockRenderData> blockRenderData;
         public final List<EntityRenderData> entityRenderData;
         public final List<ItemRenderData> itemRenderData;
-        public InitializeContent(List<BlockRenderData> blockRenderData, List<EntityRenderData> entityRenderData, List<ItemRenderData> itemRenderData) {
+        public final BlockRegistry blockRegistry;
+        public InitializeContent(List<BlockRenderData> blockRenderData, List<EntityRenderData> entityRenderData, List<ItemRenderData> itemRenderData, BlockRegistry blockRegistry) {
             this.blockRenderData = blockRenderData;
             this.entityRenderData = entityRenderData;
             this.itemRenderData = itemRenderData;
+            this.blockRegistry = blockRegistry;
         }
         @Override
         public byte[] toBytes() throws IOException {
@@ -176,7 +180,12 @@ public abstract class MessageS2C {
             stream.writeShort(itemRenderData.size());
             for (ItemRenderData itemData : itemRenderData) {
                 writeString(stream, itemData.name());
-                writeString(stream, itemData.texture());
+                writeString(stream, itemData.type());
+                if(itemData.type().equals("block")){
+                    stream.writeInt(blockRegistry.getBlock(Identifier.parse(itemData.value())).clientId);
+                } else {
+                    writeString(stream, itemData.value());
+                }
             }
             return byteStream.toByteArray();
         }
@@ -200,12 +209,11 @@ public abstract class MessageS2C {
             writeString(stream, json.toString());
             return byteStream.toByteArray();
         }
-        public static JsonArray createColor(float r, float g, float b, float a){
+        public static JsonArray createFloatArray(float... vals){
             var col = new JsonArray();
-            col.add(r);
-            col.add(g);
-            col.add(b);
-            col.add(a);
+            for (float val : vals) {
+                col.add(val);
+            }
             return col;
         }
     }
@@ -214,6 +222,23 @@ public abstract class MessageS2C {
         stream.writeShort(data.length);
         for (byte ch : data) {
             stream.writeByte(ch);
+        }
+    }
+    public static class BlockBreakTimeResponse extends MessageS2C{
+        public final int id;
+        public final float time;
+        public BlockBreakTimeResponse(int id, float time) {
+            this.id = id;
+            this.time = time;
+        }
+        @Override
+        public byte[] toBytes() throws IOException {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(byteStream);
+            stream.writeByte(8);
+            stream.writeInt(id);
+            stream.writeFloat(time);
+            return byteStream.toByteArray();
         }
     }
 }

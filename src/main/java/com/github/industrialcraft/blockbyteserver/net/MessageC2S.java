@@ -8,11 +8,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public class MessageC2S {
-    public static class LeftClickBlock extends MessageC2S{
+    public static class BreakBlock extends MessageC2S{
         public final int x;
         public final int y;
         public final int z;
-        public LeftClickBlock(DataInputStream stream) throws IOException {
+        public BreakBlock(DataInputStream stream) throws IOException {
             this.x = stream.readInt();
             this.y = stream.readInt();
             this.z = stream.readInt();
@@ -90,12 +90,24 @@ public class MessageC2S {
     public static class GUIClose extends MessageC2S{
         public GUIClose(DataInputStream stream){}
     }
+    public static class BreakBlockTimeRequest  extends MessageC2S{
+        public final int id;
+        public final int x;
+        public final int y;
+        public final int z;
+        public BreakBlockTimeRequest(DataInputStream stream) throws IOException {
+            this.id = stream.readInt();
+            this.x = stream.readInt();
+            this.y = stream.readInt();
+            this.z = stream.readInt();
+        }
+    }
     public static MessageC2S fromBytes(byte[] data) throws IOException {
         ByteArrayInputStream byteStream = new ByteArrayInputStream(data);
         DataInputStream stream = new DataInputStream(byteStream);
         switch(stream.readByte()){
             case 0:
-                return new LeftClickBlock(stream);
+                return new BreakBlock(stream);
             case 1:
                 return new RightClickBlock(stream);
             case 2:
@@ -108,6 +120,8 @@ public class MessageC2S {
                 return new GUIClick(stream);
             case 6:
                 return new GUIClose(stream);
+            case 7:
+                return new BreakBlockTimeRequest(stream);
             default:
                 return null;
         }

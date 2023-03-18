@@ -39,7 +39,8 @@ public class ItemRegistry {
     public BlockByteItem loadItem(Identifier id, JsonObject json){
         if(items.containsKey(id))
             throw new IllegalStateException("item with id " + id + " is already registered");
-        ItemRenderData renderData = new ItemRenderData(json.get("name").getAsString(), json.get("texture").getAsString());
+        JsonObject model = json.getAsJsonObject("model");
+        ItemRenderData renderData = new ItemRenderData(json.get("name").getAsString(), model.get("type").getAsString(), model.get("value").getAsString());
         String place = json.get("place").getAsString();
         BlockByteItem item = new BlockByteItem(json.get("stackSize").getAsInt(), renderData, clientIds, place==null?null:Identifier.parse(place));
         clientIds++;

@@ -1,6 +1,6 @@
 {
   "name": "grass block",
-  "texture": "grass",
+  "model": {"type":"block","value":"bb:grass"},
   "stackSize": 10,
   "place": "bb:grass"
 }

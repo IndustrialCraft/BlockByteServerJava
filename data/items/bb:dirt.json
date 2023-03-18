@@ -1,6 +1,6 @@
 {
   "name": "dirt block",
-  "texture": "dirt",
+  "model": {"type":"texture","value":"dirt"},
   "stackSize": 10,
   "place": "bb:dirt"
 }

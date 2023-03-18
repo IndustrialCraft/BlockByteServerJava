@@ -1,6 +1,6 @@
 {
   "name": "stand",
-  "texture": "cobble",
+  "model": {"type":"texture","value":"stand"},
   "stackSize": 1,
   "place": "bb:stand"
 }

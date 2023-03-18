@@ -1,0 +1,6 @@
+{
+  "name": "counter",
+  "model": {"type":"texture","value":"grass_side"},
+  "stackSize": 1,
+  "place": "bb:crusher"
+}

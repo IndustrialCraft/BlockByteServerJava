@@ -67,14 +67,25 @@ public abstract class InventoryGUI extends GUI{
     public abstract boolean onTick();
     private void setHand(ItemStack hand){
         this.hand = hand;
-        {
-            JsonObject json = new JsonObject();
-            json.addProperty("type", "setCursor");
-            json.addProperty("texture", hand==null?"cursor":((BlockByteItem)hand.getItem()).itemRenderData.texture());
-            json.addProperty("width", hand==null?0.05:0.1);
-            json.addProperty("height", hand==null?0.05:0.1);
-            player.send(new MessageS2C.GUIData(json));
+        JsonObject json = new JsonObject();
+        json.addProperty("type", "setElement");
+        json.addProperty("id", "cursor");
+        if(hand == null){
+            json.addProperty("element_type", "image");
+            json.addProperty("texture", "cursor");
+            json.addProperty("w", 0.05);
+            json.addProperty("h", 0.05);
+        } else {
+            json.addProperty("element_type", "slot");
+            json.addProperty("background", false);
+            {
+                JsonObject itemJson = new JsonObject();
+                itemJson.addProperty("item", ((BlockByteItem)hand.getItem()).clientId);
+                itemJson.addProperty("count", hand.getCount());
+                json.add("item", itemJson);
+            }
         }
+        player.send(new MessageS2C.GUIData(json));
     }
     @Override
     public void onClose() {

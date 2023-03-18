@@ -4,6 +4,7 @@ import com.github.industrialcraft.blockbyteserver.content.Block;
 import com.github.industrialcraft.blockbyteserver.content.BlockInstance;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
+import com.github.industrialcraft.blockbyteserver.util.ITicking;
 import com.github.industrialcraft.identifier.Identifier;
 import com.google.common.collect.Sets;
 
@@ -12,6 +13,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.zip.Deflater;
 
@@ -22,6 +24,7 @@ public class Chunk {
     private HashSet<Entity> entities;
     private HashSet<Entity> toAdd;
     private HashSet<PlayerEntity> viewers;
+    private LinkedList<Integer> tickingBlocks;
     public Chunk(World parent, ChunkPosition position) {
         this.parent = parent;
         this.position = position;
@@ -30,6 +33,7 @@ public class Chunk {
         this.toAdd = new HashSet<>();
         this.blocks = new BlockInstance[16*16*16];
         this.parent.chunkGenerator.generateChunk(this.blocks, position, parent, this);
+        this.tickingBlocks = new LinkedList<>();
     }
     public Set<Entity> getEntities(){
         return Collections.unmodifiableSet(entities);
@@ -39,6 +43,7 @@ public class Chunk {
         entities.addAll(toAdd);
         toAdd.clear();
         this.entities.forEach(Entity::tick);
+        this.tickingBlocks.forEach(offset -> ((ITicking)this.blocks[offset]).tick());
     }
     public void setBlock(Block block, int x, int y, int z){
         checkOffset(x, y, z);
@@ -46,7 +51,15 @@ public class Chunk {
         BlockInstance instance = this.blocks[blockOffset];
         if(instance.isUnique())
             instance.invalidate();
-        this.blocks[blockOffset] = block.createBlockInstance(this, x, y, z);
+        BlockInstance newInstance = block.createBlockInstance(this, x, y, z);
+        this.blocks[blockOffset] = newInstance;
+        boolean previousTicking = instance instanceof ITicking;
+        boolean currentTicking = newInstance instanceof ITicking;
+        if(previousTicking && !currentTicking)
+            this.tickingBlocks.removeFirstOccurrence(blockOffset);
+        if(currentTicking && !previousTicking)
+            this.tickingBlocks.add(blockOffset);
+
         for(PlayerEntity viewer : viewers){
             viewer.send(new MessageS2C.SetBlock((position.x()*16)+x, (position.y()*16)+y, (position.z()*16)+z, block.getClientId()));
         }

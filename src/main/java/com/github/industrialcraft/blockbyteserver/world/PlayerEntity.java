@@ -52,7 +52,7 @@ public class PlayerEntity extends Entity{
             json.addProperty("id", "hotbar_" + i);
             json.addProperty("type", "setElement");
             json.addProperty("element_type", "slot");
-            json.addProperty("x", (i * 0.13) - 0.7);
+            json.addProperty("x", (i * 0.13) - (4.5 * 0.13));
             json.addProperty("y", -0.5);
             PlayerEntity.this.send(new MessageS2C.GUIData(json));
         }
@@ -61,15 +61,17 @@ public class PlayerEntity extends Entity{
             json.addProperty("id", "hotbar_0");
             json.addProperty("type", "editElement");
             json.addProperty("data_type", "color");
-            json.add("color", MessageS2C.GUIData.createColor(1, 0, 0, 1));
+            json.add("color", MessageS2C.GUIData.createFloatArray(1, 0, 0, 1));
             PlayerEntity.this.send(new MessageS2C.GUIData(json));
         }
         {
             JsonObject json = new JsonObject();
-            json.addProperty("type", "setCursor");
+            json.addProperty("type", "setElement");
+            json.addProperty("id", "cursor");
+            json.addProperty("element_type", "image");
             json.addProperty("texture", "cursor");
-            json.addProperty("width", 0.05);
-            json.addProperty("height", 0.05);
+            json.addProperty("w", 0.05);
+            json.addProperty("h", 0.05);
             PlayerEntity.this.send(new MessageS2C.GUIData(json));
         }
         {
@@ -79,7 +81,7 @@ public class PlayerEntity extends Entity{
             PlayerEntity.this.send(new MessageS2C.GUIData(json));
         }
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","cobble")), 3));
-        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","counter")), 3));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","crusher")), 3));
     }
     public void setGui(GUI newGui){
         if(this.gui != null)
@@ -110,8 +112,8 @@ public class PlayerEntity extends Entity{
                 this.shifting = playerPosition.shifting;
                 this.rotation = playerPosition.rotation;
             }
-            if(message instanceof MessageC2S.LeftClickBlock leftClickBlock){
-                BlockPosition blockPosition = new BlockPosition(leftClickBlock.x, leftClickBlock.y, leftClickBlock.z);
+            if(message instanceof MessageC2S.BreakBlock breakBlock){
+                BlockPosition blockPosition = new BlockPosition(breakBlock.x, breakBlock.y, breakBlock.z);
                 BlockInstance previousBlock = chunk.parent.getBlock(blockPosition);
                 if(previousBlock.parent != Block.AIR) {
                     if(previousBlock.parent.lootTable != null)
@@ -162,6 +164,9 @@ public class PlayerEntity extends Entity{
             if(message instanceof MessageC2S.GUIClose guiClose){
                 this.setGui(null);
             }
+            if(message instanceof MessageC2S.BreakBlockTimeRequest breakBlockTimeRequest){
+                send(new MessageS2C.BlockBreakTimeResponse(breakBlockTimeRequest.id, 2f));
+            }
             message = this.messages.poll();
         }
         if(this.gui != null){
@@ -177,7 +182,7 @@ public class PlayerEntity extends Entity{
             json.addProperty("id", "hotbar_" + this.slot);
             json.addProperty("type", "editElement");
             json.addProperty("data_type", "color");
-            json.add("color", MessageS2C.GUIData.createColor(1, 1, 1, 1));
+            json.add("color", MessageS2C.GUIData.createFloatArray(1, 1, 1, 1));
             PlayerEntity.this.send(new MessageS2C.GUIData(json));
         }
         this.slot = slot;
@@ -186,7 +191,7 @@ public class PlayerEntity extends Entity{
             json.addProperty("id", "hotbar_" + slot);
             json.addProperty("type", "editElement");
             json.addProperty("data_type", "color");
-            json.add("color", MessageS2C.GUIData.createColor(1, 0, 0, 1));
+            json.add("color", MessageS2C.GUIData.createFloatArray(1, 0, 0, 1));
             PlayerEntity.this.send(new MessageS2C.GUIData(json));
         }
     }
