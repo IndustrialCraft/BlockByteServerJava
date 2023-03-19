@@ -241,4 +241,21 @@ public abstract class MessageS2C {
             return byteStream.toByteArray();
         }
     }
+    public static class EntityAddItem extends MessageS2C{
+        public final int entityId;
+        public final int itemId;
+        public EntityAddItem(int entityId, int itemId) {
+            this.entityId = entityId;
+            this.itemId = itemId;
+        }
+        @Override
+        public byte[] toBytes() throws IOException {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(byteStream);
+            stream.writeByte(9);
+            stream.writeInt(entityId);
+            stream.writeInt(itemId);
+            return byteStream.toByteArray();
+        }
+    }
 }

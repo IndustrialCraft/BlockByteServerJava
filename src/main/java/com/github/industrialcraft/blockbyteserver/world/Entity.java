@@ -28,6 +28,7 @@ public abstract class Entity {
         this.removed = false;
         this.rotation = 0f;
     }
+    public void onSentToPlayer(PlayerEntity player){}
     public void tick(){}
     public AABB getBoundingBox(){
         return null;

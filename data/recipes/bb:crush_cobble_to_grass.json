@@ -1,0 +1,5 @@
+{
+  "type": "bb:crushing",
+  "input": "bb:cobble",
+  "output": "bb:grass"
+}

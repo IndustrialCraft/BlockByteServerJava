@@ -1,6 +1,6 @@
 {
   "name": "stand",
-  "model": {"type":"texture","value":"stand"},
+  "model": {"type":"texture","value":"grass_side"},
   "stackSize": 1,
   "place": "bb:stand"
 }

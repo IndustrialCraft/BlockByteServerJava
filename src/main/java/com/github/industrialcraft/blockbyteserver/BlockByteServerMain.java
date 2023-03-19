@@ -2,14 +2,13 @@ package com.github.industrialcraft.blockbyteserver;
 
 import com.github.industrialcraft.blockbyteserver.content.*;
 import com.github.industrialcraft.blockbyteserver.custom.CrusherMachineBlock;
-import com.github.industrialcraft.blockbyteserver.net.MessageC2S;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.net.WSServer;
-import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
 import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
 import com.github.industrialcraft.blockbyteserver.util.Position;
 import com.github.industrialcraft.blockbyteserver.world.*;
 import com.github.industrialcraft.identifier.Identifier;
+import com.github.industrialcraft.inventorysystem.ItemStack;
 import com.google.gson.JsonObject;
 import org.java_websocket.WebSocket;
 import org.spongepowered.noise.Noise;
@@ -39,7 +38,10 @@ public class BlockByteServerMain {
         });
         ItemRegistry itemRegistry = new ItemRegistry();
         itemRegistry.loadDirectory(new File("data/items"));
-        World world = new World(blockRegistry, itemRegistry, new IChunkGenerator() {
+        RecipeRegistry recipeRegistry = new RecipeRegistry();
+        recipeRegistry.registerCreator(Identifier.of("bb", "crushing"), CrusherMachineBlock.CrusherRecipe::new);
+        recipeRegistry.loadDirectory(new File("data/recipes"));
+        World world = new World(blockRegistry, itemRegistry, recipeRegistry, new IChunkGenerator() {
             @Override
             public void generateChunk(BlockInstance[] blocks, ChunkPosition position, World world, Chunk chunk) {
                 for(int x = 0;x < 16;x++){
@@ -68,6 +70,8 @@ public class BlockByteServerMain {
         new WSServer(4321, sockets::add).start();
         long livingTicks = 0;
         long startTime = System.currentTimeMillis();
+        world.getOrLoadChunk(new Position(0, 40, 0).toBlockPos().toChunkPos());
+        new ItemEntity(new Position(0, 40, 0), world, new ItemStack(itemRegistry.getItem(Identifier.of("bb", "stand")), 1));
         while (true){
             WebSocket connection = sockets.poll();
             if(connection != null){
@@ -80,7 +84,8 @@ public class BlockByteServerMain {
                 List<BlockByteItem> items = itemRegistry.getItems();
                 items.sort(Comparator.comparingInt(BlockByteItem::getClientId));
                 items.forEach(item -> itemRenderData.add(item.itemRenderData));
-                entityRenderData.add(new MessageS2C.InitializeContent.EntityRenderData("player", "player"));
+                entityRenderData.add(new MessageS2C.InitializeContent.EntityRenderData("player.bbmodel", "player"));
+                entityRenderData.add(new MessageS2C.InitializeContent.EntityRenderData("item.bbmodel", ""));
                 try {
                     connection.send(new MessageS2C.InitializeContent(renderData, entityRenderData, itemRenderData, blockRegistry).toBytes());
                 } catch (IOException e) {

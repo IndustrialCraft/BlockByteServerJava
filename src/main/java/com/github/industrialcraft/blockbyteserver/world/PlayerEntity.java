@@ -131,7 +131,8 @@ public class PlayerEntity extends Entity{
                 if(!placeCancelled) {
                     BlockPosition blockPosition = new BlockPosition(rightClickBlock.x + rightClickBlock.face.xOffset, rightClickBlock.y + rightClickBlock.face.yOffset, rightClickBlock.z + rightClickBlock.face.zOffset);
                     for (Entity entity : chunk.getEntities()) {
-                        if (entity.getBoundingBox().getCollisionsOnGrid().contains(blockPosition))
+                        AABB boundingBox = entity.getBoundingBox();
+                        if (boundingBox != null && boundingBox.getCollisionsOnGrid().contains(blockPosition))
                             return;
                     }
                     BlockInstance previousBlock = chunk.parent.getBlock(blockPosition);
@@ -165,7 +166,7 @@ public class PlayerEntity extends Entity{
                 this.setGui(null);
             }
             if(message instanceof MessageC2S.BreakBlockTimeRequest breakBlockTimeRequest){
-                send(new MessageS2C.BlockBreakTimeResponse(breakBlockTimeRequest.id, 2f));
+                send(new MessageS2C.BlockBreakTimeResponse(breakBlockTimeRequest.id, 0.3f));
             }
             message = this.messages.poll();
         }
@@ -246,10 +247,11 @@ public class PlayerEntity extends Entity{
         }
     }
     public HashSet<ChunkPosition> getLoadingChunks(ChunkPosition chunkPosition){
+        int renderDistance = 5;
         HashSet<ChunkPosition> loadedPosition = new HashSet<>();
-        for(int x = -5;x <= 5;x++){
-            for(int y = -5;y <= 5;y++){
-                for(int z = -5;z <= 5;z++){
+        for(int x = -renderDistance;x <= renderDistance;x++){
+            for(int y = -renderDistance;y <= renderDistance;y++){
+                for(int z = -renderDistance;z <= renderDistance;z++){
                     loadedPosition.add(new ChunkPosition(chunkPosition.x() + x, chunkPosition.y() + y, chunkPosition.z() + z));
                 }
             }

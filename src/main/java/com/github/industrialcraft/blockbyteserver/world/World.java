@@ -1,9 +1,6 @@
 package com.github.industrialcraft.blockbyteserver.world;
 
-import com.github.industrialcraft.blockbyteserver.content.BlockRegistry;
-import com.github.industrialcraft.blockbyteserver.content.Block;
-import com.github.industrialcraft.blockbyteserver.content.BlockInstance;
-import com.github.industrialcraft.blockbyteserver.content.ItemRegistry;
+import com.github.industrialcraft.blockbyteserver.content.*;
 import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
 import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
 
@@ -15,10 +12,12 @@ public class World {
     private HashMap<ChunkPosition,Chunk> chunks;
     public final BlockRegistry blockRegistry;
     public final ItemRegistry itemRegistry;
+    public final RecipeRegistry recipeRegistry;
     public final IChunkGenerator chunkGenerator;
-    public World(BlockRegistry blockRegistry, ItemRegistry itemRegistry, IChunkGenerator chunkGenerator) {
+    public World(BlockRegistry blockRegistry, ItemRegistry itemRegistry, RecipeRegistry recipeRegistry, IChunkGenerator chunkGenerator) {
         this.blockRegistry = blockRegistry;
         this.itemRegistry = itemRegistry;
+        this.recipeRegistry = recipeRegistry;
         this.chunkGenerator = chunkGenerator;
         this.chunks = new HashMap<>();
     }

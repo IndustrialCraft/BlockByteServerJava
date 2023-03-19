@@ -5,7 +5,6 @@ import com.github.industrialcraft.blockbyteserver.content.BlockInstance;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
 import com.github.industrialcraft.blockbyteserver.util.ITicking;
-import com.github.industrialcraft.identifier.Identifier;
 import com.google.common.collect.Sets;
 
 import java.io.ByteArrayOutputStream;
@@ -78,13 +77,15 @@ public class Chunk {
     }
     public void announceToViewersExcept(MessageS2C message, PlayerEntity player){
         this.viewers.forEach(playerEntity -> {
-            if(playerEntity != player)
+            if(playerEntity != player) {
                 playerEntity.send(message);
+            }
         });
     }
     public void addEntity(Entity entity){
         this.toAdd.add(entity);
         announceToViewersExcept(new MessageS2C.AddEntity(entity.getClientType(), entity.clientId, entity.position.x(), entity.position.y(), entity.position.z(), entity.rotation), (entity instanceof PlayerEntity player)?player:null);
+        this.viewers.forEach(entity::onSentToPlayer);
     }
     public void transferEntity(Entity entity, Chunk other){
         if(this == other)
@@ -95,6 +96,7 @@ public class Chunk {
         }
         for (PlayerEntity playerEntity : Sets.difference(other.viewers, this.viewers)) {
             playerEntity.send(new MessageS2C.AddEntity(entity.getClientType(), entity.clientId, entity.position.x(), entity.position.y(), entity.position.z(), entity.rotation));
+            entity.onSentToPlayer(playerEntity);
         }
     }
     public void addViewer(PlayerEntity player){
@@ -123,7 +125,10 @@ public class Chunk {
         deflater.finish();
         int bytesCount = deflater.deflate(bytes);
         player.send(new MessageS2C.LoadChunk(position.x(), position.y(), position.z(), bytes, bytesCount));
-        this.entities.forEach(entity -> player.send(new MessageS2C.AddEntity(entity.getClientType(), entity.clientId, entity.position.x(), entity.position.y(), entity.position.z(), entity.rotation)));
+        this.entities.forEach(entity -> {
+            player.send(new MessageS2C.AddEntity(entity.getClientType(), entity.clientId, entity.position.x(), entity.position.y(), entity.position.z(), entity.rotation));
+            entity.onSentToPlayer(player);
+        });
     }
     public void removeViewer(PlayerEntity player){
         this.viewers.remove(player);

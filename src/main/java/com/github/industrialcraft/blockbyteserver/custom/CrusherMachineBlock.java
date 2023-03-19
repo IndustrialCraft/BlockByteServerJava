@@ -2,12 +2,17 @@ package com.github.industrialcraft.blockbyteserver.custom;
 
 import com.github.industrialcraft.blockbyteserver.content.Block;
 import com.github.industrialcraft.blockbyteserver.content.BlockInstance;
+import com.github.industrialcraft.blockbyteserver.content.Recipe;
 import com.github.industrialcraft.blockbyteserver.loot.LootTable;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
 import com.github.industrialcraft.blockbyteserver.util.ITicking;
 import com.github.industrialcraft.blockbyteserver.world.*;
+import com.github.industrialcraft.identifier.Identifier;
+import com.github.industrialcraft.inventorysystem.ItemStack;
 import com.google.gson.JsonObject;
+
+import java.util.List;
 
 public class CrusherMachineBlock extends Block {
     public static final int MAX_PROGRESS = 100;
@@ -16,7 +21,7 @@ public class CrusherMachineBlock extends Block {
     }
     @Override
     public BlockInstance createBlockInstance(Chunk chunk, int x, int y, int z) {
-        return new CrusherMachineBlockInstance(this, x + (chunk.position.x()*16), y + (chunk.position.y()*16), z + (chunk.position.z()*16));
+        return new CrusherMachineBlockInstance(this, x + (chunk.position.x()*16), y + (chunk.position.y()*16), z + (chunk.position.z()*16), chunk.parent);
     }
     @Override
     public boolean onRightClick(World world, BlockPosition blockPosition, BlockInstance instance, PlayerEntity player) {
@@ -27,16 +32,41 @@ public class CrusherMachineBlock extends Block {
         public final int x;
         public final int y;
         public final int z;
+        public final World world;
         public final BasicVersionedInventory inventory;
         public int progress;
-        public CrusherMachineBlockInstance(CrusherMachineBlock parent, int x, int y, int z) {
+        private CrusherRecipe currentRecipe;
+        public CrusherMachineBlockInstance(CrusherMachineBlock parent, int x, int y, int z, World world) {
             super(parent);
             this.x = x;
             this.y = y;
             this.z = z;
-            this.inventory = new BasicVersionedInventory(2, (inventory1, is) -> {}, this);
+            this.world = world;
+            this.inventory = new BasicVersionedInventory(2, (inventory1, is) -> {}, this){
+                @Override
+                public void setAt(int index, ItemStack itemStack) {
+                    super.setAt(index, itemStack);
+                    if(index == 0){
+                        tryStartRecipe();
+                    }
+                }
+            };
         }
-
+        private void tryStartRecipe(){
+            if(inventory == null)
+                return;
+            ItemStack inputSlot = inventory.getAt(0);
+            if(currentRecipe == null && inputSlot != null){
+                List<CrusherRecipe> recipes = world.recipeRegistry.getRecipesForType(Identifier.of("bb", "crushing"));
+                for(CrusherRecipe recipe : recipes){
+                    if(world.itemRegistry.getItem(recipe.input) == inputSlot.getItem()){
+                        inputSlot.removeCount(1);
+                        currentRecipe = recipe;
+                        return;
+                    }
+                }
+            }
+        }
         @Override
         public boolean isUnique() {
             return true;
@@ -44,9 +74,23 @@ public class CrusherMachineBlock extends Block {
 
         @Override
         public void tick() {
-            progress++;
-            if(progress > MAX_PROGRESS)
-                progress = 0;
+            if(currentRecipe != null) {
+                progress++;
+                if (progress > MAX_PROGRESS){
+                    ItemStack is = new ItemStack(world.itemRegistry.getItem(currentRecipe.output), 1);
+                    ItemStack inventoryStack = inventory.getAt(1);
+                    if(inventoryStack == null){
+                        inventory.setAt(1, is);
+                    } else {
+                        if(inventoryStack.stacks(is)){
+                            inventoryStack.addCount(is.getCount());
+                        }
+                    }
+                    progress = 0;
+                    currentRecipe = null;
+                    tryStartRecipe();
+                }
+            }
         }
     }
     public static class CrusherMachineGUI extends InventoryGUI {
@@ -119,6 +163,15 @@ public class CrusherMachineBlock extends Block {
             int yDiff = instance.y - blockPos.y();
             int zDiff = instance.z - blockPos.z();
             return (xDiff*xDiff)+(yDiff*yDiff)+(zDiff*zDiff) < 25;
+        }
+    }
+    public static class CrusherRecipe extends Recipe{
+        public final Identifier input;
+        public final Identifier output;
+        public CrusherRecipe(Identifier id, JsonObject json) {
+            super(id);
+            this.input = Identifier.parse(json.get("input").getAsString());
+            this.output = Identifier.parse(json.get("output").getAsString());
         }
     }
 }
