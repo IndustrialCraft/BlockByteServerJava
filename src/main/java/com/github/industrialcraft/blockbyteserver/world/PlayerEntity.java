@@ -168,6 +168,18 @@ public class PlayerEntity extends Entity{
             if(message instanceof MessageC2S.BreakBlockTimeRequest breakBlockTimeRequest){
                 send(new MessageS2C.BlockBreakTimeResponse(breakBlockTimeRequest.id, 0.3f));
             }
+            if(message instanceof MessageC2S.LeftClickEntity leftClickEntity){
+                Entity entity = chunk.parent.getEntityByClientId(leftClickEntity.id);
+                if(entity != null){
+                    entity.onLeftClick(this);
+                }
+            }
+            if(message instanceof MessageC2S.RightClickEntity rightClickEntity){
+                Entity entity = chunk.parent.getEntityByClientId(rightClickEntity.id);
+                if(entity != null){
+                    entity.onRightClick(this);
+                }
+            }
             message = this.messages.poll();
         }
         if(this.gui != null){

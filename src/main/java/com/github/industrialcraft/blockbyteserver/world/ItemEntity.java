@@ -18,6 +18,14 @@ public class ItemEntity extends Entity{
     }
 
     @Override
+    public void onLeftClick(PlayerEntity player) {
+        if(!isRemoved()){
+            player.inventory.addItem(item);
+            remove();
+        }
+    }
+
+    @Override
     public int getClientType() {
         return 1;
     }

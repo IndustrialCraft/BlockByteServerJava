@@ -21,6 +21,15 @@ public class World {
         this.chunkGenerator = chunkGenerator;
         this.chunks = new HashMap<>();
     }
+    public Entity getEntityByClientId(int clientId){
+        for (Chunk chunk : chunks.values()) {
+            for (Entity entity : chunk.getEntities()) {
+                if(entity.clientId == clientId)
+                    return entity;
+            }
+        }
+        return null;
+    }
     public void tick(){
         List<Chunk> chunksList = new ArrayList<>();
         for (Chunk value : chunks.values()) {

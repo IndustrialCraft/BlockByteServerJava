@@ -71,7 +71,7 @@ public class BlockByteServerMain {
         long livingTicks = 0;
         long startTime = System.currentTimeMillis();
         world.getOrLoadChunk(new Position(0, 40, 0).toBlockPos().toChunkPos());
-        new ItemEntity(new Position(0, 40, 0), world, new ItemStack(itemRegistry.getItem(Identifier.of("bb", "stand")), 1));
+        new ItemEntity(new Position(0, 40, 0), world, new ItemStack(itemRegistry.getItem(Identifier.of("bb", "grass")), 1));
         while (true){
             WebSocket connection = sockets.poll();
             if(connection != null){
@@ -84,8 +84,8 @@ public class BlockByteServerMain {
                 List<BlockByteItem> items = itemRegistry.getItems();
                 items.sort(Comparator.comparingInt(BlockByteItem::getClientId));
                 items.forEach(item -> itemRenderData.add(item.itemRenderData));
-                entityRenderData.add(new MessageS2C.InitializeContent.EntityRenderData("player.bbmodel", "player"));
-                entityRenderData.add(new MessageS2C.InitializeContent.EntityRenderData("item.bbmodel", ""));
+                entityRenderData.add(new MessageS2C.InitializeContent.EntityRenderData("player.bbmodel", "player", 0.6f, 2.7f, 0.6f));
+                entityRenderData.add(new MessageS2C.InitializeContent.EntityRenderData("item.bbmodel", "", 0.5f, 0.5f, 0.5f));
                 try {
                     connection.send(new MessageS2C.InitializeContent(renderData, entityRenderData, itemRenderData, blockRegistry).toBytes());
                 } catch (IOException e) {

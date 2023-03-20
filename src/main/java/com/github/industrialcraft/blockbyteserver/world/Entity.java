@@ -45,6 +45,12 @@ public abstract class Entity {
             this.chunk.announceToViewersExcept(new MessageS2C.MoveEntity(clientId, position.x(), position.y(), position.z(), rotation), null);
         }
     }
+    public void onLeftClick(PlayerEntity player){
+
+    }
+    public void onRightClick(PlayerEntity player){
+
+    }
     public void teleport(Position position){
         teleport(position, chunk.parent);
     }
@@ -58,7 +64,10 @@ public abstract class Entity {
         return removed;
     }
     public void remove(){
-        this.removed = true;
+        if(!this.removed) {
+            this.removed = true;
+            chunk.announceToViewersExcept(new MessageS2C.DeleteEntity(clientId), null);
+        }
     }
     public abstract int getClientType();
     @Override

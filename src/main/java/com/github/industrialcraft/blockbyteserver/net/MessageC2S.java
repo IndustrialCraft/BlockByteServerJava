@@ -102,6 +102,18 @@ public class MessageC2S {
             this.z = stream.readInt();
         }
     }
+    public static class LeftClickEntity  extends MessageC2S{
+        public final int id;
+        public LeftClickEntity(DataInputStream stream) throws IOException {
+            this.id = stream.readInt();
+        }
+    }
+    public static class RightClickEntity  extends MessageC2S{
+        public final int id;
+        public RightClickEntity(DataInputStream stream) throws IOException {
+            this.id = stream.readInt();
+        }
+    }
     public static MessageC2S fromBytes(byte[] data) throws IOException {
         ByteArrayInputStream byteStream = new ByteArrayInputStream(data);
         DataInputStream stream = new DataInputStream(byteStream);
@@ -122,6 +134,10 @@ public class MessageC2S {
                 return new GUIClose(stream);
             case 7:
                 return new BreakBlockTimeRequest(stream);
+            case 8:
+                return new LeftClickEntity(stream);
+            case 9:
+                return new RightClickEntity(stream);
             default:
                 return null;
         }

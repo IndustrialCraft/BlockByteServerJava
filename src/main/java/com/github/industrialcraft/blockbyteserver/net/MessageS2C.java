@@ -176,6 +176,9 @@ public abstract class MessageS2C {
             for (EntityRenderData entityData : entityRenderData) {
                 writeString(stream, entityData.model);
                 writeString(stream, entityData.texture);
+                stream.writeFloat(entityData.hitboxW);
+                stream.writeFloat(entityData.hitboxH);
+                stream.writeFloat(entityData.hitboxD);
             }
             stream.writeShort(itemRenderData.size());
             for (ItemRenderData itemData : itemRenderData) {
@@ -192,7 +195,7 @@ public abstract class MessageS2C {
         public record BlockRenderData(JsonObject json){
 
         }
-        public record EntityRenderData(String model, String texture){
+        public record EntityRenderData(String model, String texture, float hitboxW, float hitboxH, float hitboxD){
 
         }
     }
