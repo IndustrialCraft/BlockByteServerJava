@@ -38,7 +38,20 @@ public class Chunk {
         return Collections.unmodifiableSet(entities);
     }
     public void tick(){
-        this.entities.removeIf(entity -> entity.isRemoved() || entity.chunk != this);
+        this.entities.removeIf(entity -> {
+            if(entity instanceof PlayerEntity player){
+                if(entity.isRemoved())
+                    for (ChunkPosition loadingChunk : player.getLoadingChunks(player.chunk.position)) {
+                        Chunk chunk = parent.getChunk(loadingChunk);
+                        chunk.removeViewer(player);
+                    }
+            }
+            return entity.isRemoved() || entity.chunk != this;
+        });
+        for (Entity entity : toAdd) {
+            announceToViewersExcept(new MessageS2C.AddEntity(entity.getClientType(), entity.clientId, entity.position.x(), entity.position.y(), entity.position.z(), entity.rotation), (entity instanceof PlayerEntity player)?player:null);
+            this.viewers.forEach(entity::onSentToPlayer);
+        }
         entities.addAll(toAdd);
         toAdd.clear();
         this.entities.forEach(Entity::tick);
@@ -84,8 +97,6 @@ public class Chunk {
     }
     public void addEntity(Entity entity){
         this.toAdd.add(entity);
-        announceToViewersExcept(new MessageS2C.AddEntity(entity.getClientType(), entity.clientId, entity.position.x(), entity.position.y(), entity.position.z(), entity.rotation), (entity instanceof PlayerEntity player)?player:null);
-        this.viewers.forEach(entity::onSentToPlayer);
     }
     public void transferEntity(Entity entity, Chunk other){
         if(this == other)

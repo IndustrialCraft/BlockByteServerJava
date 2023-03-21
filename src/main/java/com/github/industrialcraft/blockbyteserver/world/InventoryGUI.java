@@ -38,9 +38,23 @@ public abstract class InventoryGUI extends GUI{
     @Override
     public void onClick(String id, MessageC2S.GUIClick.EMouseButton button) {
         Slot slot = slots.get(id);
-        if(slot != null){
+        if(slot != null) {
+            ItemStack slotItem = slot.inventory.getAt(slot.slot);
+            if (slotItem != null && hand != null && slotItem.stacks(hand)) {
+                int neededInSlot = slotItem.getItem().getStackSize() - slotItem.getCount();
+                if(neededInSlot > 0){
+                    int supplied = Math.min(neededInSlot, hand.getCount());
+                    slotItem.addCount(supplied);
+                    slot.inventory.setAt(slot.slot, slotItem);//update
+                    hand.removeCount(supplied);
+                    if(hand.getCount() == 0)
+                        hand = null;
+                    setHand(hand);
+                    return;
+                }
+            }
             ItemStack temp = hand;
-            setHand(slot.inventory.getAt(slot.slot));
+            setHand(slotItem);
             slot.inventory.setAt(slot.slot, temp);
         }
     }

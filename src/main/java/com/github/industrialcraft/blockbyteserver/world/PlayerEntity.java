@@ -34,7 +34,9 @@ public class PlayerEntity extends Entity{
         }
         this.shifting = false;
         this.gui = null;
-        this.inventory = new ListeningInventory(9, (inventory1, is) -> {/*todo*/}, this, (slot, item) -> {
+        this.inventory = new ListeningInventory(9, (inventory1, is) -> {
+            new ItemEntity(getPosition(), chunk.parent, is);
+        }, this, (slot, item) -> {
             JsonObject json = new JsonObject();
             json.addProperty("id", "hotbar_" + slot);
             json.addProperty("type", "editElement");
@@ -132,7 +134,7 @@ public class PlayerEntity extends Entity{
                     BlockPosition blockPosition = new BlockPosition(rightClickBlock.x + rightClickBlock.face.xOffset, rightClickBlock.y + rightClickBlock.face.yOffset, rightClickBlock.z + rightClickBlock.face.zOffset);
                     for (Entity entity : chunk.getEntities()) {
                         AABB boundingBox = entity.getBoundingBox();
-                        if (boundingBox != null && boundingBox.getCollisionsOnGrid().contains(blockPosition))
+                        if (boundingBox != null && boundingBox.getCollisionsOnGrid(getPosition().x(), getPosition().y(), getPosition().z()).contains(blockPosition))
                             return;
                     }
                     BlockInstance previousBlock = chunk.parent.getBlock(blockPosition);
@@ -155,6 +157,17 @@ public class PlayerEntity extends Entity{
                     int slot = keyboard.key - 49;
                     if (slot >= 0 && slot <= 8) {
                         setSlot(slot);
+                    }
+                    System.out.println(keyboard.key);
+                    if(keyboard.key == 113){
+                        ItemStack handItem = getItemInHand();
+                        if(handItem != null) {
+                            ItemStack toDrop = handItem.clone(1);
+                            handItem.removeCount(1);
+                            updateHand();
+                            float power = 0.7f;
+                            new ItemEntity(getPosition().add(0, 1.75f, 0), chunk.parent, toDrop).addVelocity((float) Math.sin(Math.toRadians(rotation)) * power, 0, (float) Math.cos(Math.toRadians(rotation)) * power);
+                        }
                     }
                 }
             }
@@ -216,7 +229,7 @@ public class PlayerEntity extends Entity{
     }
     @Override
     public AABB getBoundingBox() {
-        return new AABB(position.x() - 0.3f, position.y(), position.z() - 0.3f, 0.6f, 1.75f-(shifting?0.5f:0f), 0.6f);
+        return new AABB(0.6f, 1.75f-(shifting?0.5f:0f), 0.6f);
     }
 
     @Override
@@ -255,7 +268,7 @@ public class PlayerEntity extends Entity{
         try {
             socket.send(message.toBytes());
         } catch (Exception e){
-            System.out.println("closed");
+            System.out.println("tried to send " + message + " to disconnected player");
         }
     }
     public HashSet<ChunkPosition> getLoadingChunks(ChunkPosition chunkPosition){
