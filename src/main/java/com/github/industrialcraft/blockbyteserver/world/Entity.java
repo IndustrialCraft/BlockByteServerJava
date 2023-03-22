@@ -3,6 +3,7 @@ package com.github.industrialcraft.blockbyteserver.world;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.AABB;
 import com.github.industrialcraft.blockbyteserver.util.Position;
+import com.github.industrialcraft.identifier.Identifier;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -17,6 +18,7 @@ public abstract class Entity {
     protected float rotation;
     protected Chunk chunk;
     private boolean removed;
+    private int clientType;
     public Entity(Position position, World world) {
         this.clientId = ID_GENERATOR.incrementAndGet();
         this.id = UUID.randomUUID();
@@ -27,7 +29,9 @@ public abstract class Entity {
         this.chunk.addEntity(this);
         this.removed = false;
         this.rotation = 0f;
+        this.clientType = world.entityRegistry.getByIdentifier(getIdentifier()).clientId();
     }
+    public abstract Identifier getIdentifier();
     public void onSentToPlayer(PlayerEntity player){}
     public void tick(){}
     public AABB getBoundingBox(){
@@ -69,7 +73,9 @@ public abstract class Entity {
             chunk.announceToViewersExcept(new MessageS2C.DeleteEntity(clientId), null);
         }
     }
-    public abstract int getClientType();
+    public int getClientType(){
+        return clientType;
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

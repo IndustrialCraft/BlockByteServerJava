@@ -2,6 +2,7 @@ package com.github.industrialcraft.blockbyteserver.custom;
 
 import com.github.industrialcraft.blockbyteserver.content.Block;
 import com.github.industrialcraft.blockbyteserver.content.BlockInstance;
+import com.github.industrialcraft.blockbyteserver.content.BlockRegistry;
 import com.github.industrialcraft.blockbyteserver.content.Recipe;
 import com.github.industrialcraft.blockbyteserver.loot.LootTable;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public class CrusherMachineBlock extends Block {
     public static final int MAX_PROGRESS = 100;
-    public CrusherMachineBlock(MessageS2C.InitializeContent.BlockRenderData renderData, int clientId, LootTable lootTable) {
+    public CrusherMachineBlock(BlockRegistry.BlockRenderData renderData, int clientId, LootTable lootTable) {
         super(renderData, clientId, lootTable);
     }
     @Override

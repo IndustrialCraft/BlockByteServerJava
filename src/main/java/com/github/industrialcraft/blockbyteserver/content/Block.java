@@ -10,11 +10,11 @@ import com.github.industrialcraft.blockbyteserver.world.World;
 public class Block {
     public static Block AIR = new Block(null, 0, null);
 
-    public final MessageS2C.InitializeContent.BlockRenderData renderData;
+    public final BlockRegistry.BlockRenderData renderData;
     public final int clientId;
     public final LootTable lootTable;
     private final BlockInstance instance;
-    public Block(MessageS2C.InitializeContent.BlockRenderData renderData, int clientId, LootTable lootTable) {
+    public Block(BlockRegistry.BlockRenderData renderData, int clientId, LootTable lootTable) {
         this.renderData = renderData;
         this.clientId = clientId;
         this.lootTable = lootTable;

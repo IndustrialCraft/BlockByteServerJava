@@ -9,6 +9,9 @@ import com.github.industrialcraft.blockbyteserver.util.Position;
 import com.github.industrialcraft.blockbyteserver.world.*;
 import com.github.industrialcraft.identifier.Identifier;
 import com.github.industrialcraft.inventorysystem.ItemStack;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.java_websocket.WebSocket;
 import org.spongepowered.noise.Noise;
@@ -16,9 +19,7 @@ import org.spongepowered.noise.NoiseQuality;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.nio.file.Files;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class BlockByteServerMain {
@@ -34,14 +35,17 @@ public class BlockByteServerMain {
             blockRenderData.addProperty("right", "grass_side");
             blockRenderData.addProperty("up", "grass_side");
             blockRenderData.addProperty("down", "grass_side");
-            return new CrusherMachineBlock(new MessageS2C.InitializeContent.BlockRenderData(blockRenderData), clientId, null);
+            return new CrusherMachineBlock(new BlockRegistry.BlockRenderData(blockRenderData), clientId, null);
         });
         ItemRegistry itemRegistry = new ItemRegistry();
         itemRegistry.loadDirectory(new File("data/items"));
         RecipeRegistry recipeRegistry = new RecipeRegistry();
         recipeRegistry.registerCreator(Identifier.of("bb", "crushing"), CrusherMachineBlock.CrusherRecipe::new);
         recipeRegistry.loadDirectory(new File("data/recipes"));
-        World world = new World(blockRegistry, itemRegistry, recipeRegistry, new IChunkGenerator() {
+        EntityRegistry entityRegistry = new EntityRegistry();
+        entityRegistry.register(Identifier.of("bb", "player"), "player.bbmodel", "player", 0.6f, 1.7f, 0.6f);
+        entityRegistry.register(Identifier.of("bb", "item"), "item.bbmodel", "", 0.5f, 0.5f, 0.5f);
+        World world = new World(blockRegistry, itemRegistry, recipeRegistry, entityRegistry, new IChunkGenerator() {
             @Override
             public void generateChunk(BlockInstance[] blocks, ChunkPosition position, World world, Chunk chunk) {
                 for(int x = 0;x < 16;x++){
@@ -66,6 +70,12 @@ public class BlockByteServerMain {
                 }
             }
         });
+        try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            Files.writeString(new File("content.json").toPath(), gson.toJson(exportContent(blockRegistry, itemRegistry, entityRegistry)));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         ConcurrentLinkedQueue<WebSocket> sockets = new ConcurrentLinkedQueue<>();
         new WSServer(4321, sockets::add).start();
         long livingTicks = 0;
@@ -75,22 +85,6 @@ public class BlockByteServerMain {
         while (true){
             WebSocket connection = sockets.poll();
             if(connection != null){
-                ArrayList<MessageS2C.InitializeContent.BlockRenderData> renderData = new ArrayList<>();
-                List<Block> blocks = blockRegistry.getBlocks();
-                blocks.sort(Comparator.comparingInt(Block::getClientId));
-                blocks.forEach(block -> renderData.add(block.renderData));
-                ArrayList<MessageS2C.InitializeContent.EntityRenderData> entityRenderData = new ArrayList<>();
-                ArrayList<ItemRenderData> itemRenderData = new ArrayList<>();
-                List<BlockByteItem> items = itemRegistry.getItems();
-                items.sort(Comparator.comparingInt(BlockByteItem::getClientId));
-                items.forEach(item -> itemRenderData.add(item.itemRenderData));
-                entityRenderData.add(new MessageS2C.InitializeContent.EntityRenderData("player.bbmodel", "player", 0.6f, 2.7f, 0.6f));
-                entityRenderData.add(new MessageS2C.InitializeContent.EntityRenderData("item.bbmodel", "", 0.5f, 0.5f, 0.5f));
-                try {
-                    connection.send(new MessageS2C.InitializeContent(renderData, entityRenderData, itemRenderData, blockRegistry).toBytes());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
                 Position spawnPos = new Position(0, 50, 0);
                 world.getOrLoadChunk(spawnPos.toBlockPos().toChunkPos());
                 PlayerEntity playerEntity = new PlayerEntity(spawnPos, world, connection);
@@ -102,5 +96,43 @@ public class BlockByteServerMain {
             }
             livingTicks++;
         }
+    }
+    public static JsonObject exportContent(BlockRegistry blockRegistry, ItemRegistry itemRegistry, EntityRegistry entityRegistry){
+        JsonObject content = new JsonObject();
+        JsonArray blocks = new JsonArray();
+        for (Block block : blockRegistry.getBlocks()) {
+            JsonObject blockData = new JsonObject();
+            blockData.addProperty("id", block.clientId);
+            blockData.add("model", block.renderData.json());
+            blocks.add(blockData);
+        }
+        content.add("blocks", blocks);
+        JsonArray items = new JsonArray();
+        for (BlockByteItem item : itemRegistry.getItems()) {
+            JsonObject itemData = new JsonObject();
+            itemData.addProperty("id", item.clientId);
+            itemData.addProperty("name", item.itemRenderData.name());
+            itemData.addProperty("modelType", item.itemRenderData.type());
+            if(item.itemRenderData.type().equals("block")){
+                itemData.addProperty("modelValue", blockRegistry.getBlock(Identifier.parse(item.itemRenderData.value())).clientId);
+            } else {
+                itemData.addProperty("modelValue", item.itemRenderData.value());
+            }
+            items.add(itemData);
+        }
+        content.add("items", items);
+        JsonArray entities = new JsonArray();
+        for (EntityRegistry.EntityRenderData entityRenderData : entityRegistry.getEntities()) {
+            JsonObject entityData = new JsonObject();
+            entityData.addProperty("id", entityRenderData.clientId());
+            entityData.addProperty("model", entityRenderData.model());
+            entityData.addProperty("texture", entityRenderData.texture());
+            entityData.addProperty("hitboxW", entityRenderData.hitboxW());
+            entityData.addProperty("hitboxH", entityRenderData.hitboxH());
+            entityData.addProperty("hitboxD", entityRenderData.hitboxD());
+            entities.add(entityData);
+        }
+        content.add("entities", entities);
+        return content;
     }
 }

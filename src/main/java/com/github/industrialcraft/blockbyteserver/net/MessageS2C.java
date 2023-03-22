@@ -152,53 +152,6 @@ public abstract class MessageS2C {
             return byteStream.toByteArray();
         }
     }
-    public static class InitializeContent extends MessageS2C{
-        public final List<BlockRenderData> blockRenderData;
-        public final List<EntityRenderData> entityRenderData;
-        public final List<ItemRenderData> itemRenderData;
-        public final BlockRegistry blockRegistry;
-        public InitializeContent(List<BlockRenderData> blockRenderData, List<EntityRenderData> entityRenderData, List<ItemRenderData> itemRenderData, BlockRegistry blockRegistry) {
-            this.blockRenderData = blockRenderData;
-            this.entityRenderData = entityRenderData;
-            this.itemRenderData = itemRenderData;
-            this.blockRegistry = blockRegistry;
-        }
-        @Override
-        public byte[] toBytes() throws IOException {
-            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-            DataOutputStream stream = new DataOutputStream(byteStream);
-            stream.writeByte(6);
-            stream.writeShort(blockRenderData.size());
-            for (BlockRenderData blockData : blockRenderData) {
-                writeString(stream, blockData.json.toString());
-            }
-            stream.writeShort(entityRenderData.size());
-            for (EntityRenderData entityData : entityRenderData) {
-                writeString(stream, entityData.model);
-                writeString(stream, entityData.texture);
-                stream.writeFloat(entityData.hitboxW);
-                stream.writeFloat(entityData.hitboxH);
-                stream.writeFloat(entityData.hitboxD);
-            }
-            stream.writeShort(itemRenderData.size());
-            for (ItemRenderData itemData : itemRenderData) {
-                writeString(stream, itemData.name());
-                writeString(stream, itemData.type());
-                if(itemData.type().equals("block")){
-                    stream.writeInt(blockRegistry.getBlock(Identifier.parse(itemData.value())).clientId);
-                } else {
-                    writeString(stream, itemData.value());
-                }
-            }
-            return byteStream.toByteArray();
-        }
-        public record BlockRenderData(JsonObject json){
-
-        }
-        public record EntityRenderData(String model, String texture, float hitboxW, float hitboxH, float hitboxD){
-
-        }
-    }
     public static class GUIData extends MessageS2C{
         public final JsonObject json;
         public GUIData(JsonObject json) {
@@ -208,7 +161,7 @@ public abstract class MessageS2C {
         public byte[] toBytes() throws IOException {
             ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(byteStream);
-            stream.writeByte(7);
+            stream.writeByte(6);
             writeString(stream, json.toString());
             return byteStream.toByteArray();
         }
@@ -238,7 +191,7 @@ public abstract class MessageS2C {
         public byte[] toBytes() throws IOException {
             ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(byteStream);
-            stream.writeByte(8);
+            stream.writeByte(7);
             stream.writeInt(id);
             stream.writeFloat(time);
             return byteStream.toByteArray();
@@ -255,7 +208,7 @@ public abstract class MessageS2C {
         public byte[] toBytes() throws IOException {
             ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(byteStream);
-            stream.writeByte(9);
+            stream.writeByte(8);
             stream.writeInt(entityId);
             stream.writeInt(itemId);
             return byteStream.toByteArray();

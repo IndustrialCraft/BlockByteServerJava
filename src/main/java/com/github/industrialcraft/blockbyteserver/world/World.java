@@ -13,11 +13,13 @@ public class World {
     public final BlockRegistry blockRegistry;
     public final ItemRegistry itemRegistry;
     public final RecipeRegistry recipeRegistry;
+    public final EntityRegistry entityRegistry;
     public final IChunkGenerator chunkGenerator;
-    public World(BlockRegistry blockRegistry, ItemRegistry itemRegistry, RecipeRegistry recipeRegistry, IChunkGenerator chunkGenerator) {
+    public World(BlockRegistry blockRegistry, ItemRegistry itemRegistry, RecipeRegistry recipeRegistry, EntityRegistry entityRegistry, IChunkGenerator chunkGenerator) {
         this.blockRegistry = blockRegistry;
         this.itemRegistry = itemRegistry;
         this.recipeRegistry = recipeRegistry;
+        this.entityRegistry = entityRegistry;
         this.chunkGenerator = chunkGenerator;
         this.chunks = new HashMap<>();
     }

@@ -43,7 +43,7 @@ public class BlockRegistry {
         if(blocks.containsKey(id))
             throw new IllegalStateException("block with id " + id + " is already registered");
         JsonObject model = json.getAsJsonObject("model");
-        MessageS2C.InitializeContent.BlockRenderData renderData = new MessageS2C.InitializeContent.BlockRenderData(model);
+        BlockRenderData renderData = new BlockRenderData(model);
         JsonObject lootTableJson = json.getAsJsonObject("loot");
         Block block = new Block(renderData, clientIds, lootTableJson==null?null:new LootTable(lootTableJson));
         clientIds++;
@@ -60,4 +60,5 @@ public class BlockRegistry {
     public Block getBlock(Identifier id){
         return blocks.get(id);
     }
+    public record BlockRenderData(JsonObject json){}
 }

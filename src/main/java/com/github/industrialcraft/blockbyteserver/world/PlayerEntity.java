@@ -105,6 +105,12 @@ public class PlayerEntity extends Entity{
     public boolean isShifting() {
         return shifting;
     }
+
+    @Override
+    public Identifier getIdentifier() {
+        return Identifier.of("bb", "player");
+    }
+
     @Override
     public void tick() {
         MessageC2S message = this.messages.poll();
@@ -286,11 +292,6 @@ public class PlayerEntity extends Entity{
     @Override
     public void remove() {
         throw new IllegalStateException("cannot remove player");
-    }
-
-    @Override
-    public int getClientType() {
-        return 0;
     }
 
     @Override

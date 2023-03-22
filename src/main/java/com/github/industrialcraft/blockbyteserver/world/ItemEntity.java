@@ -4,6 +4,7 @@ import com.github.industrialcraft.blockbyteserver.content.BlockByteItem;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.AABB;
 import com.github.industrialcraft.blockbyteserver.util.Position;
+import com.github.industrialcraft.identifier.Identifier;
 import com.github.industrialcraft.inventorysystem.ItemStack;
 
 public class ItemEntity extends PhysicsEntity{
@@ -32,7 +33,7 @@ public class ItemEntity extends PhysicsEntity{
     }
 
     @Override
-    public int getClientType() {
-        return 1;
+    public Identifier getIdentifier() {
+        return Identifier.of("bb", "item");
     }
 }
