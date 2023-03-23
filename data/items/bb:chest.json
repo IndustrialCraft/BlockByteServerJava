@@ -1,0 +1,6 @@
+{
+  "name": "chest",
+  "model": {"type":"texture","value":"chest_front"},
+  "stackSize": 1,
+  "place": "bb:chest"
+}

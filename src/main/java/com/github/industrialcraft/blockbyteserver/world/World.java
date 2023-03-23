@@ -39,14 +39,14 @@ public class World {
         }
         chunksList.forEach(Chunk::tick);
     }
-    public void setBlock(BlockPosition blockPosition, Block block){
+    public void setBlock(BlockPosition blockPosition, AbstractBlock block, Object data){
         ChunkPosition chunkPosition = blockPosition.toChunkPos();
         Chunk chunk = getChunk(chunkPosition);
         if(chunk == null)
             throw new IllegalStateException("Attempting to set block in unloaded chunk");
-        chunk.setBlock(block, blockPosition.getChunkXOffset(), blockPosition.getChunkYOffset(), blockPosition.getChunkZOffset());
+        chunk.setBlock(block, blockPosition.getChunkXOffset(), blockPosition.getChunkYOffset(), blockPosition.getChunkZOffset(), data);
     }
-    public BlockInstance getBlock(BlockPosition blockPosition){
+    public AbstractBlockInstance getBlock(BlockPosition blockPosition){
         ChunkPosition chunkPosition = blockPosition.toChunkPos();
         Chunk chunk = getChunk(chunkPosition);
         if(chunk == null)

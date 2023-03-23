@@ -1,6 +1,6 @@
 package com.github.industrialcraft.blockbyteserver.net;
 
-import com.github.industrialcraft.blockbyteserver.util.Face;
+import com.github.industrialcraft.blockbyteserver.util.EFace;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -22,13 +22,13 @@ public class MessageC2S {
         public final int x;
         public final int y;
         public final int z;
-        public final Face face;
+        public final EFace face;
         public final boolean shifting;
         public RightClickBlock(DataInputStream stream) throws IOException {
             this.x = stream.readInt();
             this.y = stream.readInt();
             this.z = stream.readInt();
-            this.face = Face.fromId(stream.readByte());
+            this.face = EFace.fromId(stream.readByte());
             this.shifting = stream.readBoolean();
         }
     }

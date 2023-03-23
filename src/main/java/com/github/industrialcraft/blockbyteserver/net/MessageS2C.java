@@ -1,14 +1,11 @@
 package com.github.industrialcraft.blockbyteserver.net;
 
-import com.github.industrialcraft.blockbyteserver.content.BlockRegistry;
-import com.github.industrialcraft.blockbyteserver.content.ItemRenderData;
-import com.github.industrialcraft.identifier.Identifier;
+import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 public abstract class MessageS2C {
     public abstract byte[] toBytes() throws IOException;
@@ -199,9 +196,11 @@ public abstract class MessageS2C {
     }
     public static class EntityAddItem extends MessageS2C{
         public final int entityId;
+        public final int itemIndex;
         public final int itemId;
-        public EntityAddItem(int entityId, int itemId) {
+        public EntityAddItem(int entityId, int itemIndex, int itemId) {
             this.entityId = entityId;
+            this.itemIndex = itemIndex;
             this.itemId = itemId;
         }
         @Override
@@ -210,6 +209,29 @@ public abstract class MessageS2C {
             DataOutputStream stream = new DataOutputStream(byteStream);
             stream.writeByte(8);
             stream.writeInt(entityId);
+            stream.writeInt(itemIndex);
+            stream.writeInt(itemId);
+            return byteStream.toByteArray();
+        }
+    }
+    public static class BlockAddItem extends MessageS2C{
+        public final BlockPosition position;
+        public final int itemIndex;
+        public final int itemId;
+        public BlockAddItem(BlockPosition position, int itemIndex, int itemId) {
+            this.position = position;
+            this.itemIndex = itemIndex;
+            this.itemId = itemId;
+        }
+        @Override
+        public byte[] toBytes() throws IOException {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(byteStream);
+            stream.writeByte(9);
+            stream.writeInt(position.x());
+            stream.writeInt(position.y());
+            stream.writeInt(position.z());
+            stream.writeInt(itemIndex);
             stream.writeInt(itemId);
             return byteStream.toByteArray();
         }

@@ -1,8 +1,8 @@
 package com.github.industrialcraft.blockbyteserver;
 
 import com.github.industrialcraft.blockbyteserver.content.*;
+import com.github.industrialcraft.blockbyteserver.custom.ChestBlock;
 import com.github.industrialcraft.blockbyteserver.custom.CrusherMachineBlock;
-import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.net.WSServer;
 import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
 import com.github.industrialcraft.blockbyteserver.util.Position;
@@ -37,6 +37,41 @@ public class BlockByteServerMain {
             blockRenderData.addProperty("down", "grass_side");
             return new CrusherMachineBlock(new BlockRegistry.BlockRenderData(blockRenderData), clientId, null);
         });
+        blockRegistry.loadBlock(Identifier.of("bb", "chest"), clientId -> {
+            JsonObject northBlockRenderData = new JsonObject();
+            northBlockRenderData.addProperty("type", "cube");
+            northBlockRenderData.addProperty("north", "chest_front");
+            northBlockRenderData.addProperty("south", "chest_side");
+            northBlockRenderData.addProperty("left", "chest_side");
+            northBlockRenderData.addProperty("right", "chest_side");
+            northBlockRenderData.addProperty("up", "chest_base");
+            northBlockRenderData.addProperty("down", "chest_base");
+            JsonObject southBlockRenderData = new JsonObject();
+            southBlockRenderData.addProperty("type", "cube");
+            southBlockRenderData.addProperty("north", "chest_side");
+            southBlockRenderData.addProperty("south", "chest_front");
+            southBlockRenderData.addProperty("left", "chest_side");
+            southBlockRenderData.addProperty("right", "chest_side");
+            southBlockRenderData.addProperty("up", "chest_base");
+            southBlockRenderData.addProperty("down", "chest_base");
+            JsonObject leftBlockRenderData = new JsonObject();
+            leftBlockRenderData.addProperty("type", "cube");
+            leftBlockRenderData.addProperty("north", "chest_side");
+            leftBlockRenderData.addProperty("south", "chest_side");
+            leftBlockRenderData.addProperty("left", "chest_front");
+            leftBlockRenderData.addProperty("right", "chest_side");
+            leftBlockRenderData.addProperty("up", "chest_base");
+            leftBlockRenderData.addProperty("down", "chest_base");
+            JsonObject rightBlockRenderData = new JsonObject();
+            rightBlockRenderData.addProperty("type", "cube");
+            rightBlockRenderData.addProperty("north", "chest_side");
+            rightBlockRenderData.addProperty("south", "chest_side");
+            rightBlockRenderData.addProperty("left", "chest_side");
+            rightBlockRenderData.addProperty("right", "chest_front");
+            rightBlockRenderData.addProperty("up", "chest_base");
+            rightBlockRenderData.addProperty("down", "chest_base");
+            return new ChestBlock(clientId, new BlockRegistry.BlockRenderData(northBlockRenderData), new BlockRegistry.BlockRenderData(southBlockRenderData), new BlockRegistry.BlockRenderData(leftBlockRenderData), new BlockRegistry.BlockRenderData(rightBlockRenderData));
+        });
         ItemRegistry itemRegistry = new ItemRegistry();
         itemRegistry.loadDirectory(new File("data/items"));
         RecipeRegistry recipeRegistry = new RecipeRegistry();
@@ -47,14 +82,14 @@ public class BlockByteServerMain {
         entityRegistry.register(Identifier.of("bb", "item"), "item.bbmodel", "", 0.5f, 0.5f, 0.5f);
         World world = new World(blockRegistry, itemRegistry, recipeRegistry, entityRegistry, new IChunkGenerator() {
             @Override
-            public void generateChunk(BlockInstance[] blocks, ChunkPosition position, World world, Chunk chunk) {
+            public void generateChunk(AbstractBlockInstance[] blocks, ChunkPosition position, World world, Chunk chunk) {
                 for(int x = 0;x < 16;x++){
                     for(int z = 0;z < 16;z++){
                         //System.out.println(((position.x()*16)+x) + ":" + ((position.z()*16)+z) + ":" + noise.evaluateNoise((position.x()*16)+x, (position.z()*16)+z, 10));
                         float scale = 0.05f;
                         int height = (int) (Noise.gradientCoherentNoise3D((((position.x()*16)+x)*scale),(((position.z()*16)+z)*scale), 0, 4321, NoiseQuality.FAST) * 30);
                         for(int y = 0;y < 16;y++){
-                            Block block;
+                            AbstractBlock block;
                             if(y+(position.y()*16) < height+20-5){
                                 block = world.blockRegistry.getBlock(Identifier.of("bb", "cobble"));
                             } else if(y+(position.y()*16) < height+20-1){
@@ -62,9 +97,9 @@ public class BlockByteServerMain {
                             } else if(y+(position.y()*16) < height+20){
                                 block = world.blockRegistry.getBlock(Identifier.of("bb", "grass"));
                             } else {
-                                block = Block.AIR;
+                                block = SimpleBlock.AIR;
                             }
-                            blocks[x+(y*16)+z*(16*16)] = block.createBlockInstance(chunk, x, y, z);
+                            blocks[x+(y*16)+z*(16*16)] = block.createBlockInstance(chunk, x, y, z, null);
                         }
                     }
                 }
@@ -100,13 +135,7 @@ public class BlockByteServerMain {
     public static JsonObject exportContent(BlockRegistry blockRegistry, ItemRegistry itemRegistry, EntityRegistry entityRegistry){
         JsonObject content = new JsonObject();
         JsonArray blocks = new JsonArray();
-        for (Block block : blockRegistry.getBlocks()) {
-            JsonObject blockData = new JsonObject();
-            blockData.addProperty("id", block.clientId);
-            blockData.add("model", block.renderData.json());
-            blocks.add(blockData);
-        }
-        content.add("blocks", blocks);
+        content.add("blocks", blockRegistry.getBlocksRenderData());
         JsonArray items = new JsonArray();
         for (BlockByteItem item : itemRegistry.getItems()) {
             JsonObject itemData = new JsonObject();
@@ -114,7 +143,7 @@ public class BlockByteServerMain {
             itemData.addProperty("name", item.itemRenderData.name());
             itemData.addProperty("modelType", item.itemRenderData.type());
             if(item.itemRenderData.type().equals("block")){
-                itemData.addProperty("modelValue", blockRegistry.getBlock(Identifier.parse(item.itemRenderData.value())).clientId);
+                itemData.addProperty("modelValue", blockRegistry.getBlock(Identifier.parse(item.itemRenderData.value())).getDefaultClientId());
             } else {
                 itemData.addProperty("modelValue", item.itemRenderData.value());
             }

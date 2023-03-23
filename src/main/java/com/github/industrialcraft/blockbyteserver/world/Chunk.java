@@ -1,7 +1,9 @@
 package com.github.industrialcraft.blockbyteserver.world;
 
-import com.github.industrialcraft.blockbyteserver.content.Block;
-import com.github.industrialcraft.blockbyteserver.content.BlockInstance;
+import com.github.industrialcraft.blockbyteserver.content.AbstractBlock;
+import com.github.industrialcraft.blockbyteserver.content.AbstractBlockInstance;
+import com.github.industrialcraft.blockbyteserver.content.SimpleBlock;
+import com.github.industrialcraft.blockbyteserver.content.SimpleBlockInstance;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
 import com.github.industrialcraft.blockbyteserver.util.ITicking;
@@ -19,7 +21,7 @@ import java.util.zip.Deflater;
 public class Chunk {
     public final World parent;
     public final ChunkPosition position;
-    private BlockInstance[] blocks;
+    private AbstractBlockInstance[] blocks;
     private HashSet<Entity> entities;
     private HashSet<Entity> toAdd;
     private HashSet<PlayerEntity> viewers;
@@ -30,7 +32,7 @@ public class Chunk {
         this.entities = new HashSet<>();
         this.viewers = new HashSet<>();
         this.toAdd = new HashSet<>();
-        this.blocks = new BlockInstance[16*16*16];
+        this.blocks = new AbstractBlockInstance[16*16*16];
         this.parent.chunkGenerator.generateChunk(this.blocks, position, parent, this);
         this.tickingBlocks = new LinkedList<>();
     }
@@ -57,13 +59,13 @@ public class Chunk {
         this.entities.forEach(Entity::tick);
         this.tickingBlocks.forEach(offset -> ((ITicking)this.blocks[offset]).tick());
     }
-    public void setBlock(Block block, int x, int y, int z){
+    public void setBlock(AbstractBlock block, int x, int y, int z, Object data){
         checkOffset(x, y, z);
         int blockOffset = x + (y * 16) + z * (16 * 16);
-        BlockInstance instance = this.blocks[blockOffset];
+        AbstractBlockInstance instance = this.blocks[blockOffset];
         if(instance.isUnique())
             instance.invalidate();
-        BlockInstance newInstance = block.createBlockInstance(this, x, y, z);
+        AbstractBlockInstance newInstance = block.createBlockInstance(this, x, y, z, data);
         this.blocks[blockOffset] = newInstance;
         boolean previousTicking = instance instanceof ITicking;
         boolean currentTicking = newInstance instanceof ITicking;
@@ -73,10 +75,10 @@ public class Chunk {
             this.tickingBlocks.add(blockOffset);
 
         for(PlayerEntity viewer : viewers){
-            viewer.send(new MessageS2C.SetBlock((position.x()*16)+x, (position.y()*16)+y, (position.z()*16)+z, block.getClientId()));
+            viewer.send(new MessageS2C.SetBlock((position.x()*16)+x, (position.y()*16)+y, (position.z()*16)+z, newInstance.getClientId()));
         }
     }
-    public BlockInstance getBlock(int x, int y, int z){
+    public AbstractBlockInstance getBlock(int x, int y, int z){
         checkOffset(x, y, z);
         return this.blocks[x+(y*16)+z*(16*16)];
     }
@@ -118,7 +120,7 @@ public class Chunk {
             for(int y = 0;y < 16;y++){
                 for(int z = 0;z < 16;z++){
                     try {
-                        stream.writeInt(getBlock(x, y, z).parent.getClientId());
+                        stream.writeInt(getBlock(x, y, z).getClientId());
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -143,7 +145,9 @@ public class Chunk {
     }
     public void removeViewer(PlayerEntity player){
         this.viewers.remove(player);
-        player.send(new MessageS2C.UnloadChunk(position.x(), position.y(), position.z()));
-        this.entities.forEach(entity -> player.send(new MessageS2C.DeleteEntity(entity.clientId)));
+        if(!player.isRemoved()) {
+            player.send(new MessageS2C.UnloadChunk(position.x(), position.y(), position.z()));
+            this.entities.forEach(entity -> player.send(new MessageS2C.DeleteEntity(entity.clientId)));
+        }
     }
 }

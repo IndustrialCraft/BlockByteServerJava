@@ -1,8 +1,9 @@
 package com.github.industrialcraft.blockbyteserver.world;
 
-import com.github.industrialcraft.blockbyteserver.content.Block;
+import com.github.industrialcraft.blockbyteserver.content.AbstractBlockInstance;
+import com.github.industrialcraft.blockbyteserver.content.SimpleBlock;
 import com.github.industrialcraft.blockbyteserver.content.BlockByteItem;
-import com.github.industrialcraft.blockbyteserver.content.BlockInstance;
+import com.github.industrialcraft.blockbyteserver.content.SimpleBlockInstance;
 import com.github.industrialcraft.blockbyteserver.net.MessageC2S;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.*;
@@ -84,6 +85,12 @@ public class PlayerEntity extends Entity{
         }
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","cobble")), 3));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","crusher")), 3));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
     }
     public void setGui(GUI newGui){
         if(this.gui != null)
@@ -122,18 +129,18 @@ public class PlayerEntity extends Entity{
             }
             if(message instanceof MessageC2S.BreakBlock breakBlock){
                 BlockPosition blockPosition = new BlockPosition(breakBlock.x, breakBlock.y, breakBlock.z);
-                BlockInstance previousBlock = chunk.parent.getBlock(blockPosition);
-                if(previousBlock.parent != Block.AIR) {
-                    if(previousBlock.parent.lootTable != null)
-                        previousBlock.parent.lootTable.addToInventory(this.inventory, chunk.parent.itemRegistry);
-                    chunk.parent.setBlock(blockPosition, Block.AIR);
+                AbstractBlockInstance previousBlock = chunk.parent.getBlock(blockPosition);
+                if(previousBlock.parent != SimpleBlock.AIR) {
+                    if(previousBlock.parent.getLootTable() != null)
+                        previousBlock.parent.getLootTable().addToInventory(this.inventory, chunk.parent.itemRegistry);
+                    chunk.parent.setBlock(blockPosition, SimpleBlock.AIR, null);
                 }
             }
             if(message instanceof MessageC2S.RightClickBlock rightClickBlock){
                 boolean placeCancelled = false;
                 if(!isShifting()){
                     BlockPosition rightClickedPosition = new BlockPosition(rightClickBlock.x, rightClickBlock.y, rightClickBlock.z);
-                    BlockInstance rightClicked = chunk.parent.getBlock(rightClickedPosition);
+                    AbstractBlockInstance rightClicked = chunk.parent.getBlock(rightClickedPosition);
                     placeCancelled = rightClicked.parent.onRightClick(chunk.parent, rightClickedPosition, rightClicked, this);
                 }
                 if(!placeCancelled) {
@@ -143,12 +150,12 @@ public class PlayerEntity extends Entity{
                         if (boundingBox != null && boundingBox.getCollisionsOnGrid(getPosition().x(), getPosition().y(), getPosition().z()).contains(blockPosition))
                             return;
                     }
-                    BlockInstance previousBlock = chunk.parent.getBlock(blockPosition);
+                    AbstractBlockInstance previousBlock = chunk.parent.getBlock(blockPosition);
                     ItemStack hand = getItemInHand();
                     if(hand != null) {
                         BlockByteItem item = (BlockByteItem) hand.getItem();
-                        if (previousBlock.parent == Block.AIR && item.place != null) {
-                            chunk.parent.setBlock(blockPosition, chunk.parent.blockRegistry.getBlock(item.place));
+                        if (previousBlock.parent == SimpleBlock.AIR && item.place != null) {
+                            chunk.parent.setBlock(blockPosition, chunk.parent.blockRegistry.getBlock(item.place), this);
                             hand.removeCount(1);
                             updateHand();
                         }
@@ -164,7 +171,6 @@ public class PlayerEntity extends Entity{
                     if (slot >= 0 && slot <= 8) {
                         setSlot(slot);
                     }
-                    System.out.println(keyboard.key);
                     if(keyboard.key == 113){
                         ItemStack handItem = getItemInHand();
                         if(handItem != null) {
@@ -296,8 +302,6 @@ public class PlayerEntity extends Entity{
 
     @Override
     public boolean isRemoved() {
-        if(!this.socket.isOpen())
-            System.out.println("disconnected");
         return !this.socket.isOpen();
     }
 }

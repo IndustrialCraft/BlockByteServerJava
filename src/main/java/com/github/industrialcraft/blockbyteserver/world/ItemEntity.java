@@ -16,7 +16,7 @@ public class ItemEntity extends PhysicsEntity{
 
     @Override
     public void onSentToPlayer(PlayerEntity player) {
-        player.send(new MessageS2C.EntityAddItem(clientId, ((BlockByteItem)item.getItem()).clientId));
+        player.send(new MessageS2C.EntityAddItem(clientId, 0, ((BlockByteItem)item.getItem()).clientId));
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.github.industrialcraft.blockbyteserver.world;
 
-import com.github.industrialcraft.blockbyteserver.content.Block;
+import com.github.industrialcraft.blockbyteserver.content.SimpleBlock;
 import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
 import com.github.industrialcraft.blockbyteserver.util.Position;
 
@@ -41,7 +41,7 @@ public abstract class PhysicsEntity extends Entity{
     private boolean collidesAt(float x, float y, float z){
         var bb = getBoundingBox().getCollisionsOnGrid(x, y, z);
         for (BlockPosition blockPosition : bb) {
-            if(chunk.parent.getBlock(blockPosition) != Block.AIR.createBlockInstance(null, 0, 0, 0)){
+            if(chunk.parent.getBlock(blockPosition) != SimpleBlock.AIR.createBlockInstance(null, 0, 0, 0, null)){
                 return true;
             }
         }

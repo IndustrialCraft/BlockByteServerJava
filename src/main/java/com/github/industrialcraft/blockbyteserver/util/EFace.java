@@ -1,6 +1,6 @@
 package com.github.industrialcraft.blockbyteserver.util;
 
-public enum Face {
+public enum EFace {
     Front(0, 0, 0, -1),
     Back(1, 0, 0, 1),
     Up(2, 0, 1, 0),
@@ -11,14 +11,14 @@ public enum Face {
     public final int xOffset;
     public final int yOffset;
     public final int zOffset;
-    Face(int id, int xOffset, int yOffset, int zOffset) {
+    EFace(int id, int xOffset, int yOffset, int zOffset) {
         this.id = (byte) id;
         this.xOffset = xOffset;
         this.yOffset = yOffset;
         this.zOffset = zOffset;
     }
-    public static Face fromId(byte id){
-        for (Face face : values()) {
+    public static EFace fromId(byte id){
+        for (EFace face : values()) {
             if(face.id == id)
                 return face;
         }

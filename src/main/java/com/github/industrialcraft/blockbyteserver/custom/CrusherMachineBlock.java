@@ -1,9 +1,6 @@
 package com.github.industrialcraft.blockbyteserver.custom;
 
-import com.github.industrialcraft.blockbyteserver.content.Block;
-import com.github.industrialcraft.blockbyteserver.content.BlockInstance;
-import com.github.industrialcraft.blockbyteserver.content.BlockRegistry;
-import com.github.industrialcraft.blockbyteserver.content.Recipe;
+import com.github.industrialcraft.blockbyteserver.content.*;
 import com.github.industrialcraft.blockbyteserver.loot.LootTable;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
@@ -14,22 +11,23 @@ import com.github.industrialcraft.inventorysystem.ItemStack;
 import com.google.gson.JsonObject;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class CrusherMachineBlock extends Block {
+public class CrusherMachineBlock extends SimpleBlock {
     public static final int MAX_PROGRESS = 100;
-    public CrusherMachineBlock(BlockRegistry.BlockRenderData renderData, int clientId, LootTable lootTable) {
+    public CrusherMachineBlock(BlockRegistry.BlockRenderData renderData, AtomicInteger clientId, LootTable lootTable) {
         super(renderData, clientId, lootTable);
     }
     @Override
-    public BlockInstance createBlockInstance(Chunk chunk, int x, int y, int z) {
+    public SimpleBlockInstance createBlockInstance(Chunk chunk, int x, int y, int z, Object data) {
         return new CrusherMachineBlockInstance(this, x + (chunk.position.x()*16), y + (chunk.position.y()*16), z + (chunk.position.z()*16), chunk.parent);
     }
     @Override
-    public boolean onRightClick(World world, BlockPosition blockPosition, BlockInstance instance, PlayerEntity player) {
+    public boolean onRightClick(World world, BlockPosition blockPosition, AbstractBlockInstance instance, PlayerEntity player) {
         player.setGui(new CrusherMachineGUI(player, instance));
         return true;
     }
-    public static class CrusherMachineBlockInstance extends BlockInstance<CrusherMachineBlock> implements ITicking {
+    public static class CrusherMachineBlockInstance extends SimpleBlockInstance<CrusherMachineBlock> implements ITicking {
         public final int x;
         public final int y;
         public final int z;
@@ -95,9 +93,9 @@ public class CrusherMachineBlock extends Block {
         }
     }
     public static class CrusherMachineGUI extends InventoryGUI {
-        public final BlockInstance<CrusherMachineBlock> block;
+        public final AbstractBlockInstance<CrusherMachineBlock> block;
         private int lastSyncedProgress;
-        public CrusherMachineGUI(PlayerEntity player, BlockInstance<CrusherMachineBlock> block) {
+        public CrusherMachineGUI(PlayerEntity player, AbstractBlockInstance<CrusherMachineBlock> block) {
             super(player);
             this.block = block;
             this.slots.put("gui_input", new Slot(((CrusherMachineBlockInstance)block).inventory, 0, -0.2f, 0));
