@@ -2,8 +2,6 @@ package com.github.industrialcraft.blockbyteserver.world;
 
 import com.github.industrialcraft.blockbyteserver.content.AbstractBlock;
 import com.github.industrialcraft.blockbyteserver.content.AbstractBlockInstance;
-import com.github.industrialcraft.blockbyteserver.content.SimpleBlock;
-import com.github.industrialcraft.blockbyteserver.content.SimpleBlockInstance;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
 import com.github.industrialcraft.blockbyteserver.util.ITicking;
@@ -34,6 +32,7 @@ public class Chunk {
         this.toAdd = new HashSet<>();
         this.blocks = new AbstractBlockInstance[16*16*16];
         this.parent.chunkGenerator.generateChunk(this.blocks, position, parent, this);
+        //todo: add ITicking generated blocks to tickingBlocks list
         this.tickingBlocks = new LinkedList<>();
     }
     public Set<Entity> getEntities(){
@@ -63,8 +62,7 @@ public class Chunk {
         checkOffset(x, y, z);
         int blockOffset = x + (y * 16) + z * (16 * 16);
         AbstractBlockInstance instance = this.blocks[blockOffset];
-        if(instance.isUnique())
-            instance.invalidate();
+        instance.onDestroy();
         AbstractBlockInstance newInstance = block.createBlockInstance(this, x, y, z, data);
         this.blocks[blockOffset] = newInstance;
         boolean previousTicking = instance instanceof ITicking;

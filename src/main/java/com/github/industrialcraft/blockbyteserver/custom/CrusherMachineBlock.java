@@ -4,9 +4,12 @@ import com.github.industrialcraft.blockbyteserver.content.*;
 import com.github.industrialcraft.blockbyteserver.loot.LootTable;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
+import com.github.industrialcraft.blockbyteserver.util.EFace;
+import com.github.industrialcraft.blockbyteserver.util.IInventoryBlock;
 import com.github.industrialcraft.blockbyteserver.util.ITicking;
 import com.github.industrialcraft.blockbyteserver.world.*;
 import com.github.industrialcraft.identifier.Identifier;
+import com.github.industrialcraft.inventorysystem.Inventory;
 import com.github.industrialcraft.inventorysystem.ItemStack;
 import com.google.gson.JsonObject;
 
@@ -27,34 +30,36 @@ public class CrusherMachineBlock extends SimpleBlock {
         player.setGui(new CrusherMachineGUI(player, instance));
         return true;
     }
-    public static class CrusherMachineBlockInstance extends SimpleBlockInstance<CrusherMachineBlock> implements ITicking {
+    public static class CrusherMachineBlockInstance extends SimpleBlockInstance<CrusherMachineBlock> implements ITicking, IInventoryBlock {
         public final int x;
         public final int y;
         public final int z;
         public final World world;
-        public final BasicVersionedInventory inventory;
+        public final BasicVersionedInventory inputInventory;
+        public final BasicVersionedInventory outputInventory;
         public int progress;
         private CrusherRecipe currentRecipe;
+        private boolean isValid;
         public CrusherMachineBlockInstance(CrusherMachineBlock parent, int x, int y, int z, World world) {
             super(parent);
             this.x = x;
             this.y = y;
             this.z = z;
             this.world = world;
-            this.inventory = new BasicVersionedInventory(2, (inventory1, is) -> {}, this){
+            this.inputInventory = new BasicVersionedInventory(1, (inventory1, is) -> {}, this){
                 @Override
                 public void setAt(int index, ItemStack itemStack) {
                     super.setAt(index, itemStack);
-                    if(index == 0){
-                        tryStartRecipe();
-                    }
+                    tryStartRecipe();
                 }
             };
+            this.outputInventory = new BasicVersionedInventory(1, (inventory1, is) -> {}, this);
+            this.isValid = true;
         }
         private void tryStartRecipe(){
-            if(inventory == null)
+            if(inputInventory == null)
                 return;
-            ItemStack inputSlot = inventory.getAt(0);
+            ItemStack inputSlot = inputInventory.getAt(0);
             if(currentRecipe == null && inputSlot != null){
                 List<CrusherRecipe> recipes = world.recipeRegistry.getRecipesForType(Identifier.of("bb", "crushing"));
                 for(CrusherRecipe recipe : recipes){
@@ -67,8 +72,12 @@ public class CrusherMachineBlock extends SimpleBlock {
             }
         }
         @Override
-        public boolean isUnique() {
-            return true;
+        public void onDestroy() {
+            this.isValid = false;
+        }
+        @Override
+        public boolean isValid() {
+            return isValid;
         }
 
         @Override
@@ -77,12 +86,13 @@ public class CrusherMachineBlock extends SimpleBlock {
                 progress++;
                 if (progress > MAX_PROGRESS){
                     ItemStack is = new ItemStack(world.itemRegistry.getItem(currentRecipe.output), 1);
-                    ItemStack inventoryStack = inventory.getAt(1);
+                    ItemStack inventoryStack = outputInventory.getAt(0);
                     if(inventoryStack == null){
-                        inventory.setAt(1, is);
+                        outputInventory.setAt(0, is);
                     } else {
                         if(inventoryStack.stacks(is)){
                             inventoryStack.addCount(is.getCount());
+                            outputInventory.setAt(0, inventoryStack);
                         }
                     }
                     progress = 0;
@@ -91,6 +101,15 @@ public class CrusherMachineBlock extends SimpleBlock {
                 }
             }
         }
+
+        @Override
+        public Inventory getInput(EFace face) {
+            return inputInventory;
+        }
+        @Override
+        public Inventory getOutput(EFace face) {
+            return outputInventory;
+        }
     }
     public static class CrusherMachineGUI extends InventoryGUI {
         public final AbstractBlockInstance<CrusherMachineBlock> block;
@@ -98,8 +117,8 @@ public class CrusherMachineBlock extends SimpleBlock {
         public CrusherMachineGUI(PlayerEntity player, AbstractBlockInstance<CrusherMachineBlock> block) {
             super(player);
             this.block = block;
-            this.slots.put("gui_input", new Slot(((CrusherMachineBlockInstance)block).inventory, 0, -0.2f, 0));
-            this.slots.put("gui_output", new Slot(((CrusherMachineBlockInstance)block).inventory, 1, 0.2f, 0));
+            this.slots.put("gui_input", new Slot(((CrusherMachineBlockInstance)block).inputInventory, 0, -0.2f, 0));
+            this.slots.put("gui_output", new Slot(((CrusherMachineBlockInstance)block).outputInventory, 0, 0.2f, 0));
             this.lastSyncedProgress = -1;
         }
         @Override

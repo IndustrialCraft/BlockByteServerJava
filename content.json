@@ -109,41 +109,103 @@
         "up": "chest_base",
         "down": "chest_base"
       }
+    },
+    {
+      "id": 10,
+      "model": {
+        "type": "static",
+        "model": "",
+        "texture": "",
+        "north": false,
+        "south": false,
+        "left": false,
+        "right": false,
+        "up": false,
+        "down": false
+      }
+    },
+    {
+      "id": 11,
+      "model": {
+        "type": "static",
+        "model": "",
+        "texture": "",
+        "north": false,
+        "south": false,
+        "left": false,
+        "right": false,
+        "up": false,
+        "down": false
+      }
+    },
+    {
+      "id": 12,
+      "model": {
+        "type": "static",
+        "model": "",
+        "texture": "",
+        "north": false,
+        "south": false,
+        "left": false,
+        "right": false,
+        "up": false,
+        "down": false
+      }
+    },
+    {
+      "id": 13,
+      "model": {
+        "type": "static",
+        "model": "",
+        "texture": "",
+        "north": false,
+        "south": false,
+        "left": false,
+        "right": false,
+        "up": false,
+        "down": false
+      }
     }
   ],
   "items": [
     {
-      "id": 1,
+      "id": 2,
       "name": "counter",
       "modelType": "texture",
       "modelValue": "grass_side"
     },
     {
       "id": 0,
+      "name": "chest",
+      "modelType": "texture",
+      "modelValue": "cobble"
+    },
+    {
+      "id": 1,
       "name": "grass block",
       "modelType": "block",
       "modelValue": 1
     },
     {
-      "id": 4,
+      "id": 5,
       "name": "chest",
       "modelType": "texture",
       "modelValue": "chest_front"
     },
     {
-      "id": 2,
+      "id": 3,
       "name": "dirt block",
       "modelType": "texture",
       "modelValue": "dirt"
     },
     {
-      "id": 5,
+      "id": 6,
       "name": "stand",
       "modelType": "texture",
       "modelValue": "grass_side"
     },
     {
-      "id": 3,
+      "id": 4,
       "name": "cobblestone",
       "modelType": "block",
       "modelValue": 3

@@ -2,6 +2,7 @@ package com.github.industrialcraft.blockbyteserver;
 
 import com.github.industrialcraft.blockbyteserver.content.*;
 import com.github.industrialcraft.blockbyteserver.custom.ChestBlock;
+import com.github.industrialcraft.blockbyteserver.custom.ConveyorBlock;
 import com.github.industrialcraft.blockbyteserver.custom.CrusherMachineBlock;
 import com.github.industrialcraft.blockbyteserver.net.WSServer;
 import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
@@ -71,6 +72,20 @@ public class BlockByteServerMain {
             rightBlockRenderData.addProperty("up", "chest_base");
             rightBlockRenderData.addProperty("down", "chest_base");
             return new ChestBlock(clientId, new BlockRegistry.BlockRenderData(northBlockRenderData), new BlockRegistry.BlockRenderData(southBlockRenderData), new BlockRegistry.BlockRenderData(leftBlockRenderData), new BlockRegistry.BlockRenderData(rightBlockRenderData));
+        });
+        blockRegistry.loadBlock(Identifier.of("bb", "conveyor"), clientId -> {
+            JsonObject blockRenderData = new JsonObject();
+            blockRenderData.addProperty("type", "static");
+            blockRenderData.addProperty("model", "");
+            blockRenderData.addProperty("texture", "");
+            blockRenderData.addProperty("north", false);
+            blockRenderData.addProperty("south", false);
+            blockRenderData.addProperty("left", false);
+            blockRenderData.addProperty("right", false);
+            blockRenderData.addProperty("up", false);
+            blockRenderData.addProperty("down", false);
+            var renderData = new BlockRegistry.BlockRenderData(blockRenderData);
+            return new ConveyorBlock(clientId, renderData, renderData, renderData, renderData);
         });
         ItemRegistry itemRegistry = new ItemRegistry();
         itemRegistry.loadDirectory(new File("data/items"));

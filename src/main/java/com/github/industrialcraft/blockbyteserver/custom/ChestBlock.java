@@ -3,8 +3,11 @@ package com.github.industrialcraft.blockbyteserver.custom;
 import com.github.industrialcraft.blockbyteserver.content.*;
 import com.github.industrialcraft.blockbyteserver.loot.LootTable;
 import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
+import com.github.industrialcraft.blockbyteserver.util.EFace;
 import com.github.industrialcraft.blockbyteserver.util.EHorizontalFace;
+import com.github.industrialcraft.blockbyteserver.util.IInventoryBlock;
 import com.github.industrialcraft.blockbyteserver.world.*;
+import com.github.industrialcraft.inventorysystem.Inventory;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -61,7 +64,7 @@ public class ChestBlock extends AbstractBlock {
     public int getDefaultClientId() {
         return this.clientId;
     }
-    public static class ChestBlockInstance extends AbstractBlockInstance<ChestBlock> {
+    public static class ChestBlockInstance extends AbstractBlockInstance<ChestBlock> implements IInventoryBlock{
         public final int x;
         public final int y;
         public final int z;
@@ -82,16 +85,21 @@ public class ChestBlock extends AbstractBlock {
             return parent.clientId+face.id;
         }
         @Override
-        public void invalidate() {
+        public void onDestroy() {
             this.isValid = false;
         }
         @Override
         public boolean isValid() {
             return isValid;
         }
+
         @Override
-        public boolean isUnique() {
-            return true;
+        public Inventory getInput(EFace face) {
+            return inventory;
+        }
+        @Override
+        public Inventory getOutput(EFace face) {
+            return inventory;
         }
     }
     public static class ChestGUI extends InventoryGUI {

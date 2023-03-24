@@ -6,7 +6,6 @@ public abstract class AbstractBlockInstance<T extends AbstractBlock> {
         this.parent = parent;
     }
     public abstract int getClientId();
-    public abstract void invalidate();
+    public abstract void onDestroy();
     public abstract boolean isValid();
-    public abstract boolean isUnique();
 }

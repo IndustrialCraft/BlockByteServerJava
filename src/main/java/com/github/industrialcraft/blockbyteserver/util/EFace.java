@@ -24,4 +24,14 @@ public enum EFace {
         }
         return null;
     }
+    public EFace opposite(){
+        return switch (this){
+            case Up -> Down;
+            case Down -> Up;
+            case Back -> Front;
+            case Front -> Back;
+            case Left -> Right;
+            case Right -> Left;
+        };
+    }
 }
