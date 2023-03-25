@@ -12,10 +12,11 @@ public class BasicVersionedInventory extends Inventory implements IInventoryWith
         this.versions = new int[size];
     }
     @Override
-    public void setAt(int index, ItemStack itemStack) {
-        super.setAt(index, itemStack);
+    public ItemStack setAt(int index, ItemStack itemStack) {
+        itemStack = super.setAt(index, itemStack);
         if(this.versions != null)
             versions[index]++;
+        return itemStack;
     }
     @Override
     public int getVersion(int slot) {

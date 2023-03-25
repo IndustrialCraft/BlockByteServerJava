@@ -2,16 +2,18 @@ package com.github.industrialcraft.blockbyteserver.custom;
 
 import com.github.industrialcraft.blockbyteserver.content.AbstractBlock;
 import com.github.industrialcraft.blockbyteserver.content.AbstractBlockInstance;
+import com.github.industrialcraft.blockbyteserver.content.BlockByteItem;
 import com.github.industrialcraft.blockbyteserver.content.BlockRegistry;
 import com.github.industrialcraft.blockbyteserver.loot.LootTable;
+import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.*;
 import com.github.industrialcraft.blockbyteserver.world.*;
-import com.github.industrialcraft.identifier.Identifier;
 import com.github.industrialcraft.inventorysystem.Inventory;
 import com.github.industrialcraft.inventorysystem.ItemStack;
 
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ConveyorBlock extends AbstractBlock {
@@ -46,7 +48,7 @@ public class ConveyorBlock extends AbstractBlock {
                 }
             }
         }
-        return new ConveyorBlockInstance(this, x + (chunk.position.x()*16), y + (chunk.position.y()*16), z + (chunk.position.z()*16), face.opposite(), chunk.parent);
+        return new ConveyorBlockInstance(this, x + (chunk.position.x()*16), y + (chunk.position.y()*16), z + (chunk.position.z()*16), face.opposite(), chunk);
     }
     @Override
     public LootTable getLootTable() {
@@ -69,19 +71,46 @@ public class ConveyorBlock extends AbstractBlock {
         private boolean isValid;
         public final EHorizontalFace face;
         private int transferDelay;
-        public final World world;
-        public ConveyorBlockInstance(ConveyorBlock parent, int x, int y, int z, EHorizontalFace face, World world) {
+        public final Chunk chunk;
+        public ConveyorBlockInstance(ConveyorBlock parent, int x, int y, int z, EHorizontalFace face, Chunk chunk) {
             super(parent);
             this.x = x;
             this.y = y;
             this.z = z;
             this.face = face;
-            this.world = world;
-            this.inputInventory = new Inventory(1, (inventory1, is) -> System.out.println("dropped"), this);
-            this.outputInventory = new Inventory(1, (inventory1, is) -> {}, this);
+            this.chunk = chunk;
+            this.inputInventory = new Inventory(1, (inventory1, is) -> {}, this){
+                @Override
+                public ItemStack setAt(int index, ItemStack itemStack) {
+                    itemStack = super.setAt(index, itemStack);
+                    MessageS2C message;
+                    if(itemStack != null){
+                        var point = getInputPoint();
+                        message = new MessageS2C.BlockAddItem(x, y, z, point.x(), 0, point.y(), 0, ((BlockByteItem)itemStack.getItem()).getClientId());
+                    } else {
+                        message = new MessageS2C.BlockRemoveItem(x, y, z, 0);
+                    }
+                    chunk.announceToViewersExcept(message, null);
+                    return itemStack;
+                }
+            };
+            this.outputInventory = new Inventory(1, (inventory1, is) -> {}, this){
+                @Override
+                public ItemStack setAt(int index, ItemStack itemStack) {
+                    itemStack = super.setAt(index, itemStack);
+                    MessageS2C message;
+                    if(itemStack != null){
+                        var point = getOutputPoint();
+                        message = new MessageS2C.BlockAddItem(x, y, z, point.x(), 0, point.y(), 1, ((BlockByteItem)itemStack.getItem()).getClientId());
+                    } else {
+                        message = new MessageS2C.BlockRemoveItem(x, y, z, 1);
+                    }
+                    chunk.announceToViewersExcept(message, null);
+                    return itemStack;
+                }
+            };
             this.isValid = true;
             this.transferDelay = -1;
-            this.inputInventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","cobble")), 1));
         }
         @Override
         public int getClientId() {
@@ -95,28 +124,50 @@ public class ConveyorBlock extends AbstractBlock {
         public boolean isValid() {
             return isValid;
         }
+        public Point2D getInputPoint(){
+            return new Point2D(0.25f + (face.xOffset/2f) - (face.xOffset*(transferDelay/20f)), 0.25f + (face.zOffset/2f) - (face.zOffset*(transferDelay/20f)));
+        }
+        public Point2D getOutputPoint(){
+            return new Point2D(0.25f + (face.xOffset/2f), 0.25f + (face.zOffset/2f));
+        }
+        @Override
+        public void onSentToPlayer(PlayerEntity player) {
+            ItemStack inputItem = inputInventory.getAt(0);
+            if(inputItem != null) {
+                var point = getInputPoint();
+                player.send(new MessageS2C.BlockAddItem(x, y, z, point.x(), 0, point.y(), 0, ((BlockByteItem) inputItem.getItem()).getClientId()));
+            }
+            ItemStack outputItem = outputInventory.getAt(0);
+            if(outputItem != null){
+                var point = getOutputPoint();
+                player.send(new MessageS2C.BlockAddItem(x, y, z, point.x(), 0, point.y(), 1, ((BlockByteItem)outputItem.getItem()).getClientId()));
+            }
+        }
         @Override
         public void tick() {
             if(outputInventory.getAt(0) != null){
                 BlockPosition targetPosition = new BlockPosition(x+face.xOffset, y, z+face.zOffset);
-                AbstractBlockInstance block = world.getBlock(targetPosition);
+                AbstractBlockInstance block = chunk.parent.getBlock(targetPosition);
                 if(block instanceof IInventoryBlock inventoryBlock){
                     Inventory input = inventoryBlock.getInput(face.fullFace.opposite());
                     if(input != null){
-                        input.addItem(outputInventory.getAt(0));
-                        outputInventory.setAt(0, null);
+                        ItemStack item = outputInventory.getAt(0);
+                        if(input.getRemainingSpaceFor(item) >= 1) {
+                            input.addItem(item);
+                            outputInventory.setAt(0, null);
+                        }
                     }
                 }
             }
             if(inputInventory.getAt(0) == null){
                 BlockPosition targetPosition = new BlockPosition(x-face.xOffset, y, z-face.zOffset);
-                AbstractBlockInstance block = world.getBlock(targetPosition);
+                AbstractBlockInstance block = chunk.parent.getBlock(targetPosition);
                 if(block instanceof IInventoryBlock inventoryBlock){
                     Inventory output = inventoryBlock.getOutput(face.fullFace);
                     if(output != null){
-                        if(output.getAt(0) != null){
-                            inputInventory.setAt(0, output.getAt(0));
-                            output.setAt(0, null);
+                        List<ItemStack> removed = output.removeItems(item -> true, 1);
+                        if(removed != null){
+                            inputInventory.setAt(0, removed.get(0));
                         }
                     }
                 }
@@ -130,6 +181,10 @@ public class ConveyorBlock extends AbstractBlock {
             }
             if(transferDelay >= 0){
                 transferDelay--;
+                if(transferDelay >= 0) {
+                    var point = getInputPoint();
+                    chunk.announceToViewersExcept(new MessageS2C.BlockMoveItem(x, y, z, point.x(), 0, point.y(), 0), null);
+                }
             }
         }
         @Override

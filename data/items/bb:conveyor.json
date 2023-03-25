@@ -1,6 +1,6 @@
 {
   "name": "chest",
   "model": {"type":"texture","value":"cobble"},
-  "stackSize": 1,
+  "stackSize": 20,
   "place": "bb:conveyor"
 }

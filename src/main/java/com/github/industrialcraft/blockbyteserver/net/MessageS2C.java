@@ -1,6 +1,5 @@
 package com.github.industrialcraft.blockbyteserver.net;
 
-import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -215,11 +214,21 @@ public abstract class MessageS2C {
         }
     }
     public static class BlockAddItem extends MessageS2C{
-        public final BlockPosition position;
+        public final int x;
+        public final int y;
+        public final int z;
+        public final float xOffset;
+        public final float yOffset;
+        public final float zOffset;
         public final int itemIndex;
         public final int itemId;
-        public BlockAddItem(BlockPosition position, int itemIndex, int itemId) {
-            this.position = position;
+        public BlockAddItem(int x, int y, int z, float xOffset, float yOffset, float zOffset, int itemIndex, int itemId) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.xOffset = xOffset;
+            this.yOffset = yOffset;
+            this.zOffset = zOffset;
             this.itemIndex = itemIndex;
             this.itemId = itemId;
         }
@@ -228,11 +237,69 @@ public abstract class MessageS2C {
             ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(byteStream);
             stream.writeByte(9);
-            stream.writeInt(position.x());
-            stream.writeInt(position.y());
-            stream.writeInt(position.z());
+            stream.writeInt(x);
+            stream.writeInt(y);
+            stream.writeInt(z);
+            stream.writeFloat(xOffset);
+            stream.writeFloat(yOffset);
+            stream.writeFloat(zOffset);
             stream.writeInt(itemIndex);
             stream.writeInt(itemId);
+            return byteStream.toByteArray();
+        }
+    }
+    public static class BlockRemoveItem extends MessageS2C{
+        public final int x;
+        public final int y;
+        public final int z;
+        public final int itemIndex;
+        public BlockRemoveItem(int x, int y, int z, int itemIndex) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.itemIndex = itemIndex;
+        }
+        @Override
+        public byte[] toBytes() throws IOException {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(byteStream);
+            stream.writeByte(10);
+            stream.writeInt(x);
+            stream.writeInt(y);
+            stream.writeInt(z);
+            stream.writeInt(itemIndex);
+            return byteStream.toByteArray();
+        }
+    }
+    public static class BlockMoveItem extends MessageS2C{
+        public final int x;
+        public final int y;
+        public final int z;
+        public final float xOffset;
+        public final float yOffset;
+        public final float zOffset;
+        public final int itemIndex;
+        public BlockMoveItem(int x, int y, int z, float xOffset, float yOffset, float zOffset, int itemIndex) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.xOffset = xOffset;
+            this.yOffset = yOffset;
+            this.zOffset = zOffset;
+            this.itemIndex = itemIndex;
+        }
+        @Override
+        public byte[] toBytes() throws IOException {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(byteStream);
+            stream.writeByte(11);
+            stream.writeInt(x);
+            stream.writeInt(y);
+            stream.writeInt(z);
+            stream.writeFloat(xOffset);
+            stream.writeFloat(yOffset);
+            stream.writeFloat(zOffset);
+            stream.writeInt(itemIndex);
             return byteStream.toByteArray();
         }
     }

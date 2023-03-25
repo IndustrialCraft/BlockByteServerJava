@@ -74,6 +74,7 @@ public class Chunk {
 
         for(PlayerEntity viewer : viewers){
             viewer.send(new MessageS2C.SetBlock((position.x()*16)+x, (position.y()*16)+y, (position.z()*16)+z, newInstance.getClientId()));
+            newInstance.onSentToPlayer(viewer);
         }
     }
     public AbstractBlockInstance getBlock(int x, int y, int z){
@@ -118,7 +119,9 @@ public class Chunk {
             for(int y = 0;y < 16;y++){
                 for(int z = 0;z < 16;z++){
                     try {
-                        stream.writeInt(getBlock(x, y, z).getClientId());
+                        AbstractBlockInstance block = getBlock(x, y, z);
+                        block.onSentToPlayer(player);
+                        stream.writeInt(block.getClientId());
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

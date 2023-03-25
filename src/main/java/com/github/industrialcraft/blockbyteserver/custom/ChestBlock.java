@@ -94,6 +94,9 @@ public class ChestBlock extends AbstractBlock {
         }
 
         @Override
+        public void onSentToPlayer(PlayerEntity player) {}
+
+        @Override
         public Inventory getInput(EFace face) {
             return inventory;
         }

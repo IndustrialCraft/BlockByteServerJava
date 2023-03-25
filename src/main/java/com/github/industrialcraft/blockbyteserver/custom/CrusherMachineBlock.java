@@ -48,9 +48,10 @@ public class CrusherMachineBlock extends SimpleBlock {
             this.world = world;
             this.inputInventory = new BasicVersionedInventory(1, (inventory1, is) -> {}, this){
                 @Override
-                public void setAt(int index, ItemStack itemStack) {
-                    super.setAt(index, itemStack);
+                public ItemStack setAt(int index, ItemStack itemStack) {
+                    itemStack = super.setAt(index, itemStack);
                     tryStartRecipe();
+                    return itemStack;
                 }
             };
             this.outputInventory = new BasicVersionedInventory(1, (inventory1, is) -> {}, this);
@@ -79,6 +80,9 @@ public class CrusherMachineBlock extends SimpleBlock {
         public boolean isValid() {
             return isValid;
         }
+
+        @Override
+        public void onSentToPlayer(PlayerEntity player) {}
 
         @Override
         public void tick() {

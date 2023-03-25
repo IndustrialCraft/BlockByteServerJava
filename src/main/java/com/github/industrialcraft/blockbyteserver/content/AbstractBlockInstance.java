@@ -1,5 +1,7 @@
 package com.github.industrialcraft.blockbyteserver.content;
 
+import com.github.industrialcraft.blockbyteserver.world.PlayerEntity;
+
 public abstract class AbstractBlockInstance<T extends AbstractBlock> {
     public final T parent;
     public AbstractBlockInstance(T parent) {
@@ -8,4 +10,5 @@ public abstract class AbstractBlockInstance<T extends AbstractBlock> {
     public abstract int getClientId();
     public abstract void onDestroy();
     public abstract boolean isValid();
+    public abstract void onSentToPlayer(PlayerEntity player);
 }

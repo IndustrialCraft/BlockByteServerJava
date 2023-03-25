@@ -11,10 +11,11 @@ public class ListeningInventory extends Inventory {
         this.changeListener = changeListener;
     }
     @Override
-    public void setAt(int index, ItemStack itemStack) {
-        super.setAt(index, itemStack);
+    public ItemStack setAt(int index, ItemStack itemStack) {
+        itemStack = super.setAt(index, itemStack);
         if(this.changeListener != null)
             this.changeListener.onChange(index, itemStack);
+        return itemStack;
     }
     public void updateSlot(int index){
         if(this.changeListener != null)
