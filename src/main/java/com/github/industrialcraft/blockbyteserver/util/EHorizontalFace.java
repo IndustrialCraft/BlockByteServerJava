@@ -23,4 +23,12 @@ public enum EHorizontalFace {
             case RIGHT -> LEFT;
         };
     }
+    public static EHorizontalFace fromId(byte id){
+        for(EHorizontalFace face : values()){
+            if(face.id == id){
+                return face;
+            }
+        }
+        return null;
+    }
 }

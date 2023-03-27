@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class BlockByteServerMain {
     public static void main(String[] args) {
+        new File("world").mkdir();
         BlockRegistry blockRegistry = new BlockRegistry();
         blockRegistry.loadDirectory(new File("data/blocks"));
         blockRegistry.loadBlock(Identifier.of("bb", "crusher"), clientId -> {

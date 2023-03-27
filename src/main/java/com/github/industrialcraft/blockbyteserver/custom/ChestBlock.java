@@ -39,6 +39,7 @@ public class ChestBlock extends AbstractBlock {
         if(data instanceof DataInputStream stream){
             try {
                 inventoryContent = InventorySERDE.deserialize(stream, chunk.parent.itemRegistry);
+                face = EHorizontalFace.fromId(stream.readByte());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -131,6 +132,7 @@ public class ChestBlock extends AbstractBlock {
         @Override
         public void serialize(DataOutputStream stream) throws IOException {
             InventorySERDE.serialize(stream, inventory.saveContent());
+            stream.writeByte(face.id);
         }
     }
     public static class ChestGUI extends InventoryGUI {

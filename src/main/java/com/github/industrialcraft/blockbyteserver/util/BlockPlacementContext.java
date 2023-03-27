@@ -14,7 +14,7 @@ public class BlockPlacementContext {
         this.clickedBlock = clickedBlock;
         this.clickedFace = clickedFace;
         var playerPos = placer.getPosition().toBlockPos();
-        boolean frontBack = Math.abs(playerPos.z() - targetBlock.x()) > Math.abs(playerPos.x() - targetBlock.z());
+        boolean frontBack = Math.abs(playerPos.z() - targetBlock.z()) > Math.abs(playerPos.x() - targetBlock.x());
         if (frontBack) {
             if (playerPos.z() - targetBlock.z() < 0) {
                 face = EHorizontalFace.FRONT;
