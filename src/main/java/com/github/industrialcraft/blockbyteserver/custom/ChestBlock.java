@@ -32,22 +32,8 @@ public class ChestBlock extends AbstractBlock {
     @Override
     public AbstractBlockInstance<ChestBlock> createBlockInstance(Chunk chunk, int x, int y, int z, Object data) {
         EHorizontalFace face = EHorizontalFace.FRONT;
-        if(data instanceof PlayerEntity player){
-            var playerPos = player.getPosition().toBlockPos();
-            boolean frontBack = Math.abs(playerPos.z()-z) > Math.abs(playerPos.x()-x);
-            if(frontBack){
-                if(playerPos.z()-z < 0){
-                    face = EHorizontalFace.FRONT;
-                } else {
-                    face = EHorizontalFace.BACK;
-                }
-            } else {
-                if(playerPos.x()-x < 0){
-                    face = EHorizontalFace.LEFT;
-                } else {
-                    face = EHorizontalFace.RIGHT;
-                }
-            }
+        if(data instanceof BlockPlacementContext placementContext){
+            face = placementContext.face;
         }
         InventoryContent inventoryContent = null;
         if(data instanceof DataInputStream stream){

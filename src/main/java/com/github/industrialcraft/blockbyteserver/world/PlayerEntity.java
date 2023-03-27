@@ -88,6 +88,8 @@ public class PlayerEntity extends Entity{
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","conveyor")), 1));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","conveyor")), 1));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","conveyor")), 1));
@@ -138,8 +140,8 @@ public class PlayerEntity extends Entity{
             }
             if(message instanceof MessageC2S.RightClickBlock rightClickBlock){
                 boolean placeCancelled = false;
+                BlockPosition rightClickedPosition = new BlockPosition(rightClickBlock.x, rightClickBlock.y, rightClickBlock.z);
                 if(!isShifting()){
-                    BlockPosition rightClickedPosition = new BlockPosition(rightClickBlock.x, rightClickBlock.y, rightClickBlock.z);
                     AbstractBlockInstance rightClicked = chunk.parent.getBlock(rightClickedPosition);
                     placeCancelled = rightClicked.parent.onRightClick(chunk.parent, rightClickedPosition, rightClicked, this);
                 }
@@ -155,7 +157,7 @@ public class PlayerEntity extends Entity{
                     if(hand != null) {
                         BlockByteItem item = (BlockByteItem) hand.getItem();
                         if (previousBlock.parent == SimpleBlock.AIR && item.place != null) {
-                            chunk.parent.setBlock(blockPosition, chunk.parent.blockRegistry.getBlock(item.place), this);
+                            chunk.parent.setBlock(blockPosition, chunk.parent.blockRegistry.getBlock(item.place), new BlockPlacementContext(this, blockPosition, rightClickedPosition, rightClickBlock.face));
                             hand.removeCount(1);
                             updateHand();
                         }
