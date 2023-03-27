@@ -14,7 +14,8 @@ public abstract class GUI {
     }
     public abstract void onOpen();
     public abstract boolean tick();
-    public abstract void onClick(String id, MessageC2S.GUIClick.EMouseButton button);
+    public abstract void onClick(String id, MessageC2S.GUIClick.EMouseButton button, boolean shifting);
+    public abstract void onScroll(String id, int x, int y, boolean shifting);
     public void close(){
         if(!closed){
             onClose();

@@ -6,6 +6,7 @@ import com.github.industrialcraft.blockbyteserver.custom.ConveyorBlock;
 import com.github.industrialcraft.blockbyteserver.custom.CrusherMachineBlock;
 import com.github.industrialcraft.blockbyteserver.net.WSServer;
 import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
+import com.github.industrialcraft.blockbyteserver.util.ISerializable;
 import com.github.industrialcraft.blockbyteserver.util.Position;
 import com.github.industrialcraft.blockbyteserver.world.*;
 import com.github.industrialcraft.identifier.Identifier;
@@ -18,9 +19,10 @@ import org.java_websocket.WebSocket;
 import org.spongepowered.noise.Noise;
 import org.spongepowered.noise.NoiseQuality;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class BlockByteServerMain {
@@ -98,26 +100,102 @@ public class BlockByteServerMain {
         World world = new World(blockRegistry, itemRegistry, recipeRegistry, entityRegistry, new IChunkGenerator() {
             @Override
             public void generateChunk(AbstractBlockInstance[] blocks, ChunkPosition position, World world, Chunk chunk) {
-                for(int x = 0;x < 16;x++){
-                    for(int z = 0;z < 16;z++){
+                for (int x = 0; x < 16; x++) {
+                    for (int z = 0; z < 16; z++) {
                         //System.out.println(((position.x()*16)+x) + ":" + ((position.z()*16)+z) + ":" + noise.evaluateNoise((position.x()*16)+x, (position.z()*16)+z, 10));
                         float scale = 0.05f;
-                        int height = (int) (Noise.gradientCoherentNoise3D((((position.x()*16)+x)*scale),(((position.z()*16)+z)*scale), 0, 4321, NoiseQuality.FAST) * 30);
-                        for(int y = 0;y < 16;y++){
+                        int height = (int) (Noise.gradientCoherentNoise3D((((position.x() * 16) + x) * scale), (((position.z() * 16) + z) * scale), 0, 4321, NoiseQuality.FAST) * 30);
+                        for (int y = 0; y < 16; y++) {
                             AbstractBlock block;
-                            if(y+(position.y()*16) < height+20-5){
+                            if (y + (position.y() * 16) < height + 20 - 5) {
                                 block = world.blockRegistry.getBlock(Identifier.of("bb", "cobble"));
-                            } else if(y+(position.y()*16) < height+20-1){
+                            } else if (y + (position.y() * 16) < height + 20 - 1) {
                                 block = world.blockRegistry.getBlock(Identifier.of("bb", "dirt"));
-                            } else if(y+(position.y()*16) < height+20){
+                            } else if (y + (position.y() * 16) < height + 20) {
                                 block = world.blockRegistry.getBlock(Identifier.of("bb", "grass"));
                             } else {
                                 block = SimpleBlock.AIR;
                             }
-                            blocks[x+(y*16)+z*(16*16)] = block.createBlockInstance(chunk, x, y, z, null);
+                            blocks[x + (y * 16) + z * (16 * 16)] = block.createBlockInstance(chunk, x, y, z, null);
                         }
                     }
                 }
+            }
+        }, new IWorldSERDE() {
+            @Override
+            public void save(Chunk chunk) {
+                try {
+                    FileOutputStream fstream = new FileOutputStream("world/chunk" + chunk.position.x() + "," + chunk.position.y() + "," + chunk.position.z());
+                    DataOutputStream stream = new DataOutputStream(fstream);
+                    int idGenerator = -1;
+                    HashMap<Identifier,Integer> idMap = new HashMap<>();
+                    ByteArrayOutputStream blocksRaw = new ByteArrayOutputStream();
+                    DataOutputStream blocks = new DataOutputStream(blocksRaw);
+                    for(int i = 0;i < 4096;i++){
+                        AbstractBlockInstance instance = chunk.getUnsafeBlocks()[i];
+                        Identifier id = instance.parent.getIdentifier();
+                        Integer saveId = idMap.get(id);
+                        int blockId;
+                        if(saveId == null){
+                            idGenerator++;
+                            idMap.put(id, idGenerator);
+                            blockId = idGenerator;
+                        } else {
+                            blockId = saveId;
+                        }
+                        blocks.writeInt(blockId);
+                        if(instance instanceof ISerializable serializable){
+                            ByteArrayOutputStream blockData = new ByteArrayOutputStream();
+                            serializable.serialize(new DataOutputStream(blockData));
+                            byte[] blockByteData = blockData.toByteArray();
+                            blocks.writeInt(blockByteData.length);
+                            blocks.write(blockByteData);
+                        }
+                    }
+                    stream.writeInt(idMap.size());
+                    for (Map.Entry<Identifier, Integer> entry : idMap.entrySet()) {
+                        stream.writeInt(entry.getValue());
+                        stream.writeUTF(entry.getKey().toString());
+                    }
+                    stream.write(blocksRaw.toByteArray());
+                    stream.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            @Override
+            public void load(Chunk chunk, AbstractBlockInstance[] blocks) {
+                try {
+                    FileInputStream fstream = new FileInputStream("world/chunk" + chunk.position.x() + "," + chunk.position.y() + "," + chunk.position.z());
+                    BufferedInputStream bstream = new BufferedInputStream(fstream);
+                    DataInputStream stream = new DataInputStream(bstream);
+                    HashMap<Integer,Identifier> idMap = new HashMap<>();
+                    int size = stream.readInt();
+                    for(int i = 0;i < size;i++){
+                        idMap.put(stream.readInt(), Identifier.parse(stream.readUTF()));
+                    }
+                    for(int z = 0;z < 16;z++) {
+                        for (int y = 0; y < 16; y++) {
+                            for (int x = 0; x < 16; x++) {
+                                Identifier blockId = idMap.get(stream.readInt());
+                                AbstractBlock block = chunk.parent.blockRegistry.getBlock(blockId);
+                                Object data = null;
+                                if(block.isSerializable()){
+                                    int length = stream.readInt();
+                                    ByteArrayInputStream blockData = new ByteArrayInputStream(stream.readNBytes(length));
+                                    data = new DataInputStream(blockData);
+                                }
+                                blocks[x + (y * 16) + z * (16 * 16)] = block.createBlockInstance(chunk, x, y, z, data);
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            @Override
+            public boolean isChunkSaved(World world, ChunkPosition position) {
+                return new File("world/chunk" + position.x() + "," + position.y() + "," + position.z()).exists();
             }
         });
         try {
@@ -130,8 +208,6 @@ public class BlockByteServerMain {
         new WSServer(4321, sockets::add).start();
         long livingTicks = 0;
         long startTime = System.currentTimeMillis();
-        world.getOrLoadChunk(new Position(0, 40, 0).toBlockPos().toChunkPos());
-        new ItemEntity(new Position(0, 40, 0), world, new ItemStack(itemRegistry.getItem(Identifier.of("bb", "grass")), 1));
         while (true){
             WebSocket connection = sockets.poll();
             if(connection != null){

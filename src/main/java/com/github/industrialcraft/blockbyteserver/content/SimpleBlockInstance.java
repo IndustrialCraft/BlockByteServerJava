@@ -1,5 +1,6 @@
 package com.github.industrialcraft.blockbyteserver.content;
 
+import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
 import com.github.industrialcraft.blockbyteserver.world.PlayerEntity;
 
 public class SimpleBlockInstance<T extends SimpleBlock> extends AbstractBlockInstance<T>{
@@ -21,4 +22,6 @@ public class SimpleBlockInstance<T extends SimpleBlock> extends AbstractBlockIns
 
     @Override
     public void onSentToPlayer(PlayerEntity player) {}
+    @Override
+    public void onNeighborUpdate(BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance) {}
 }

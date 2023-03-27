@@ -15,12 +15,14 @@ public class World {
     public final RecipeRegistry recipeRegistry;
     public final EntityRegistry entityRegistry;
     public final IChunkGenerator chunkGenerator;
-    public World(BlockRegistry blockRegistry, ItemRegistry itemRegistry, RecipeRegistry recipeRegistry, EntityRegistry entityRegistry, IChunkGenerator chunkGenerator) {
+    public final IWorldSERDE worldSERDE;
+    public World(BlockRegistry blockRegistry, ItemRegistry itemRegistry, RecipeRegistry recipeRegistry, EntityRegistry entityRegistry, IChunkGenerator chunkGenerator, IWorldSERDE worldSERDE) {
         this.blockRegistry = blockRegistry;
         this.itemRegistry = itemRegistry;
         this.recipeRegistry = recipeRegistry;
         this.entityRegistry = entityRegistry;
         this.chunkGenerator = chunkGenerator;
+        this.worldSERDE = worldSERDE;
         this.chunks = new HashMap<>();
     }
     public Entity getEntityByClientId(int clientId){
@@ -33,11 +35,14 @@ public class World {
         return null;
     }
     public void tick(){
-        List<Chunk> chunksList = new ArrayList<>();
-        for (Chunk value : chunks.values()) {
-            chunksList.add(value);
-        }
+        List<Chunk> chunksList = new ArrayList<>(chunks.values());
         chunksList.forEach(Chunk::tick);
+        for (Chunk chunk : chunksList) {
+            if(chunk.shouldUnload()){
+                worldSERDE.save(chunk);
+            }
+        }
+        chunks.entrySet().removeIf(entry -> entry.getValue().shouldUnload());
     }
     public void setBlock(BlockPosition blockPosition, AbstractBlock block, Object data){
         ChunkPosition chunkPosition = blockPosition.toChunkPos();

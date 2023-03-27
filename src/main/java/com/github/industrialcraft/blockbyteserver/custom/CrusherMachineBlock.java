@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CrusherMachineBlock extends SimpleBlock {
     public static final int MAX_PROGRESS = 100;
     public CrusherMachineBlock(BlockRegistry.BlockRenderData renderData, AtomicInteger clientId, LootTable lootTable) {
-        super(renderData, clientId, lootTable);
+        super(renderData, clientId, lootTable, Identifier.of("bb","crusher"));
     }
     @Override
     public SimpleBlockInstance createBlockInstance(Chunk chunk, int x, int y, int z, Object data) {
@@ -85,6 +85,9 @@ public class CrusherMachineBlock extends SimpleBlock {
         public void onSentToPlayer(PlayerEntity player) {}
 
         @Override
+        public void onNeighborUpdate(BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance) {}
+
+        @Override
         public void tick() {
             if(currentRecipe != null) {
                 progress++;
@@ -119,10 +122,10 @@ public class CrusherMachineBlock extends SimpleBlock {
         public final AbstractBlockInstance<CrusherMachineBlock> block;
         private int lastSyncedProgress;
         public CrusherMachineGUI(PlayerEntity player, AbstractBlockInstance<CrusherMachineBlock> block) {
-            super(player);
+            super(player, ((CrusherMachineBlockInstance)block).inputInventory);
             this.block = block;
-            this.slots.put("gui_input", new Slot(((CrusherMachineBlockInstance)block).inputInventory, 0, -0.2f, 0));
-            this.slots.put("gui_output", new Slot(((CrusherMachineBlockInstance)block).outputInventory, 0, 0.2f, 0));
+            this.slots.put("gui_input", new Slot(((CrusherMachineBlockInstance)block).inputInventory, 0, -0.2f, 0, player.inventory, false));
+            this.slots.put("gui_output", new Slot(((CrusherMachineBlockInstance)block).outputInventory, 0, 0.2f, 0, player.inventory, true));
             this.lastSyncedProgress = -1;
         }
         @Override

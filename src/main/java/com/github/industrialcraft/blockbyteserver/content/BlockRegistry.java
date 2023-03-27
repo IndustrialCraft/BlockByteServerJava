@@ -3,16 +3,13 @@ package com.github.industrialcraft.blockbyteserver.content;
 import com.github.industrialcraft.blockbyteserver.loot.LootTable;
 import com.github.industrialcraft.identifier.Identifier;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -23,6 +20,7 @@ public class BlockRegistry {
     public BlockRegistry() {
         this.blocks = new HashMap<>();
         this.clientIds = new AtomicInteger(1);
+        blocks.put(Identifier.of("bb","air"), SimpleBlock.AIR);
     }
     public JsonArray getBlocksRenderData(){
         JsonArray blocks = new JsonArray();
@@ -59,7 +57,7 @@ public class BlockRegistry {
         JsonObject model = json.getAsJsonObject("model");
         BlockRenderData renderData = new BlockRenderData(model);
         JsonObject lootTableJson = json.getAsJsonObject("loot");
-        SimpleBlock block = new SimpleBlock(renderData, clientIds, lootTableJson==null?null:new LootTable(lootTableJson));
+        SimpleBlock block = new SimpleBlock(renderData, clientIds, lootTableJson==null?null:new LootTable(lootTableJson), id);
         blocks.put(id, block);
         return block;
     }

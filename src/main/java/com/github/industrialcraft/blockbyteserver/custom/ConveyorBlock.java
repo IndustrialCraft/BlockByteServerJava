@@ -8,6 +8,7 @@ import com.github.industrialcraft.blockbyteserver.loot.LootTable;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.*;
 import com.github.industrialcraft.blockbyteserver.world.*;
+import com.github.industrialcraft.identifier.Identifier;
 import com.github.industrialcraft.inventorysystem.Inventory;
 import com.github.industrialcraft.inventorysystem.ItemStack;
 
@@ -62,6 +63,12 @@ public class ConveyorBlock extends AbstractBlock {
     public int getDefaultClientId() {
         return this.clientId;
     }
+
+    @Override
+    public Identifier getIdentifier() {
+        return Identifier.of("bb","conveyor");
+    }
+
     public static class ConveyorBlockInstance extends AbstractBlockInstance<ConveyorBlock> implements ITicking, IInventoryBlock {
         public final int x;
         public final int y;
@@ -143,6 +150,8 @@ public class ConveyorBlock extends AbstractBlock {
                 player.send(new MessageS2C.BlockAddItem(x, y, z, point.x(), 0, point.y(), 1, ((BlockByteItem)outputItem.getItem()).getClientId()));
             }
         }
+        @Override
+        public void onNeighborUpdate(BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance) {}
         @Override
         public void tick() {
             if(outputInventory.getAt(0) != null){

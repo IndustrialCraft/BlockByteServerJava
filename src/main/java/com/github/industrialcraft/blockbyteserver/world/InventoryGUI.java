@@ -12,11 +12,11 @@ import java.util.HashMap;
 public abstract class InventoryGUI extends GUI{
     protected HashMap<String,Slot> slots;
     private ItemStack hand;
-    public InventoryGUI(PlayerEntity player) {
+    public InventoryGUI(PlayerEntity player, Inventory transferInventory) {
         super(player);
         this.slots = new HashMap<>();
         for(int i = 0;i < 9;i++)
-            this.slots.put("hotbar_" + i, new Slot(player.inventory, i));
+            this.slots.put("hotbar_" + i, new Slot(player.inventory, i, transferInventory, false));
         this.hand = null;
     }
 
@@ -36,28 +36,71 @@ public abstract class InventoryGUI extends GUI{
     }
 
     @Override
-    public void onClick(String id, MessageC2S.GUIClick.EMouseButton button) {
+    public void onClick(String id, MessageC2S.GUIClick.EMouseButton button, boolean shifting) {
         Slot slot = slots.get(id);
         if(slot != null) {
             ItemStack slotItem = slot.inventory.getAt(slot.slot);
-            if (slotItem != null && hand != null && slotItem.stacks(hand)) {
-                int neededInSlot = slotItem.getItem().getStackSize() - slotItem.getCount();
-                if(neededInSlot > 0){
-                    int supplied = Math.min(neededInSlot, hand.getCount());
-                    slotItem.addCount(supplied);
+            if(shifting){
+                if(slot.transferInventory != null && slotItem != null) {
+                    int space = Math.min(slotItem.getCount(), slot.transferInventory.getRemainingSpaceFor(slotItem));
+                    slot.transferInventory.addItem(slotItem.clone(space));
+                    slotItem.removeCount(space);
                     slot.inventory.setAt(slot.slot, slotItem);//update
-                    hand.removeCount(supplied);
-                    if(hand.getCount() == 0)
-                        hand = null;
-                    setHand(hand);
-                    return;
                 }
+            } else {
+                if (slotItem != null && hand != null && slotItem.stacks(hand)) {
+                    int neededInSlot = slotItem.getItem().getStackSize() - slotItem.getCount();
+                    if (neededInSlot > 0) {
+                        int supplied = Math.min(neededInSlot, hand.getCount());
+                        slotItem.addCount(supplied);
+                        slot.inventory.setAt(slot.slot, slotItem);//update
+                        hand.removeCount(supplied);
+                        if (hand.getCount() == 0)
+                            hand = null;
+                        setHand(hand);
+                        return;
+                    }
+                }
+                ItemStack temp = hand;
+                setHand(slotItem);
+                slot.inventory.setAt(slot.slot, temp);
             }
-            ItemStack temp = hand;
-            setHand(slotItem);
-            slot.inventory.setAt(slot.slot, temp);
         }
     }
+
+    @Override
+    public void onScroll(String id, int x, int y, boolean shifting) {
+        Slot slot = slots.get(id);
+        if(slot != null) {
+            if(y > 0){
+                ItemStack to = transferOne(hand, slot.inventory.getAt(slot.slot));
+                setHand(hand);
+                slot.inventory.setAt(slot.slot, to);
+            }
+            if(y < 0){
+                ItemStack to = transferOne(slot.inventory.getAt(slot.slot), hand);
+                setHand(to);
+                slot.inventory.setAt(slot.slot, slot.inventory.getAt(slot.slot));
+            }
+        }
+    }
+    private ItemStack transferOne(ItemStack from, ItemStack to){
+        if(from == null)
+            return to;
+        if(from.getCount() > 0){
+            if(to == null){
+                to = from.clone(1);
+                from.removeCount(1);
+            } else {
+                if(from.stacks(to) && to.getItem().getStackSize()-to.getCount() > 0){
+                    to.addCount(1);
+                    from.removeCount(1);
+                }
+            }
+        }
+        return to;
+    }
+
     @Override
     public boolean tick() {
         for (var entry : this.slots.entrySet()) {
@@ -80,6 +123,8 @@ public abstract class InventoryGUI extends GUI{
     }
     public abstract boolean onTick();
     private void setHand(ItemStack hand){
+        if(hand != null && hand.getCount() <= 0)
+            hand = null;
         this.hand = hand;
         JsonObject json = new JsonObject();
         json.addProperty("type", "setElement");
@@ -113,18 +158,24 @@ public abstract class InventoryGUI extends GUI{
         public final float x;
         public final float y;
         public final boolean eventOnly;
+        public final Inventory transferInventory;
+        public final boolean outputOnly;
         private int lastUpdate;
-        public Slot(Inventory inventory, int slot, float x, float y) {
+        public Slot(Inventory inventory, int slot, float x, float y, Inventory transferInventory, boolean outputOnly) {
             this.inventory = inventory;
             this.slot = slot;
             this.x = x;
             this.y = y;
+            this.transferInventory = transferInventory;
+            this.outputOnly = outputOnly;
             this.lastUpdate = -1;
             this.eventOnly = false;
         }
-        public Slot(Inventory inventory, int slot) {
+        public Slot(Inventory inventory, int slot, Inventory transferInventory, boolean outputOnly) {
             this.inventory = inventory;
             this.slot = slot;
+            this.transferInventory = transferInventory;
+            this.outputOnly = outputOnly;
             this.x = 0;
             this.y = 0;
             this.lastUpdate = -1;

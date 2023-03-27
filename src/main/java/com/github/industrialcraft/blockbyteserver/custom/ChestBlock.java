@@ -2,15 +2,19 @@ package com.github.industrialcraft.blockbyteserver.custom;
 
 import com.github.industrialcraft.blockbyteserver.content.*;
 import com.github.industrialcraft.blockbyteserver.loot.LootTable;
-import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
-import com.github.industrialcraft.blockbyteserver.util.EFace;
-import com.github.industrialcraft.blockbyteserver.util.EHorizontalFace;
-import com.github.industrialcraft.blockbyteserver.util.IInventoryBlock;
+import com.github.industrialcraft.blockbyteserver.util.*;
 import com.github.industrialcraft.blockbyteserver.world.*;
+import com.github.industrialcraft.identifier.Identifier;
 import com.github.industrialcraft.inventorysystem.Inventory;
+import com.github.industrialcraft.inventorysystem.InventoryContent;
+import com.github.industrialcraft.inventorysystem.ItemStack;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChestBlock extends AbstractBlock {
@@ -45,7 +49,15 @@ public class ChestBlock extends AbstractBlock {
                 }
             }
         }
-        return new ChestBlockInstance(this, x + (chunk.position.x()*16), y + (chunk.position.y()*16), z + (chunk.position.z()*16), face);
+        InventoryContent inventoryContent = null;
+        if(data instanceof DataInputStream stream){
+            try {
+                inventoryContent = InventorySERDE.deserialize(stream, chunk.parent.itemRegistry);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return new ChestBlockInstance(this, x + (chunk.position.x()*16), y + (chunk.position.y()*16), z + (chunk.position.z()*16), chunk.parent, face, inventoryContent);
     }
     @Override
     public boolean onRightClick(World world, BlockPosition blockPosition, AbstractBlockInstance instance, PlayerEntity player) {
@@ -64,20 +76,34 @@ public class ChestBlock extends AbstractBlock {
     public int getDefaultClientId() {
         return this.clientId;
     }
-    public static class ChestBlockInstance extends AbstractBlockInstance<ChestBlock> implements IInventoryBlock{
+
+    @Override
+    public Identifier getIdentifier() {
+        return Identifier.of("bb","chest");
+    }
+    @Override
+    public boolean isSerializable() {
+        return true;
+    }
+
+    public static class ChestBlockInstance extends AbstractBlockInstance<ChestBlock> implements IInventoryBlock, ISerializable{
         public final int x;
         public final int y;
         public final int z;
+        public final World world;
         public final BasicVersionedInventory inventory;
         private boolean isValid;
         public final EHorizontalFace face;
-        public ChestBlockInstance(ChestBlock parent, int x, int y, int z, EHorizontalFace face) {
+        public ChestBlockInstance(ChestBlock parent, int x, int y, int z, World world, EHorizontalFace face, InventoryContent inventoryContent) {
             super(parent);
             this.x = x;
             this.y = y;
             this.z = z;
+            this.world = world;
             this.face = face;
             this.inventory = new BasicVersionedInventory(9, (inventory1, is) -> {}, this);
+            if(inventoryContent != null)
+                this.inventory.loadContent(inventoryContent);
             this.isValid = true;
         }
         @Override
@@ -86,6 +112,12 @@ public class ChestBlock extends AbstractBlock {
         }
         @Override
         public void onDestroy() {
+            for (ItemStack stack : inventory.saveContent().stacks) {
+                if(stack != null){
+                    var random = ThreadLocalRandom.current();
+                    new ItemEntity(new Position(x+0.5f, y+0.5f, z+0.5f), world, stack).addVelocity((random.nextFloat()-.5f)/2, random.nextFloat()/4, (random.nextFloat()-.5f)/2);
+                }
+            }
             this.isValid = false;
         }
         @Override
@@ -104,16 +136,26 @@ public class ChestBlock extends AbstractBlock {
         public Inventory getOutput(EFace face) {
             return inventory;
         }
+
+        @Override
+        public void onNeighborUpdate(BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance) {
+            System.out.println("neighbor update from " + position);
+        }
+
+        @Override
+        public void serialize(DataOutputStream stream) throws IOException {
+            InventorySERDE.serialize(stream, inventory.saveContent());
+        }
     }
     public static class ChestGUI extends InventoryGUI {
         public final AbstractBlockInstance<ChestBlock> block;
         public ChestGUI(PlayerEntity player, AbstractBlockInstance<ChestBlock> block) {
-            super(player);
+            super(player, ((ChestBlockInstance)block).inventory);
             this.block = block;
             for(int i = 0;i < 9;i++){
                 int x = i%3;
                 int y = i/3;
-                this.slots.put("gui_slot_"+i, new Slot(((ChestBlockInstance)block).inventory, i, -.19f + (x*0.14f), .09f - (y*0.14f)));
+                this.slots.put("gui_slot_"+i, new Slot(((ChestBlockInstance)block).inventory, i, -.19f + (x*0.14f), .09f - (y*0.14f), player.inventory, false));
             }
         }
         @Override

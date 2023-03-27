@@ -5,6 +5,7 @@ import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
 import com.github.industrialcraft.blockbyteserver.world.Chunk;
 import com.github.industrialcraft.blockbyteserver.world.PlayerEntity;
 import com.github.industrialcraft.blockbyteserver.world.World;
+import com.github.industrialcraft.identifier.Identifier;
 
 import java.util.HashMap;
 
@@ -16,4 +17,6 @@ public abstract class AbstractBlock {
     public abstract LootTable getLootTable();
     public abstract void registerRenderData(HashMap<Integer, BlockRegistry.BlockRenderData> renderData);
     public abstract int getDefaultClientId();
+    public abstract Identifier getIdentifier();
+    public boolean isSerializable(){return false;}
 }

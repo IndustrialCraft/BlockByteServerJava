@@ -42,7 +42,7 @@ public class ItemRegistry {
         JsonObject model = json.getAsJsonObject("model");
         ItemRenderData renderData = new ItemRenderData(json.get("name").getAsString(), model.get("type").getAsString(), model.get("value").getAsString());
         String place = json.get("place").getAsString();
-        BlockByteItem item = new BlockByteItem(json.get("stackSize").getAsInt(), renderData, clientIds, place==null?null:Identifier.parse(place));
+        BlockByteItem item = new BlockByteItem(id, json.get("stackSize").getAsInt(), renderData, clientIds, place==null?null:Identifier.parse(place));
         clientIds++;
         items.put(id, item);
         return item;

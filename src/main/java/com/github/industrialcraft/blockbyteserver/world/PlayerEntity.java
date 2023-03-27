@@ -185,7 +185,11 @@ public class PlayerEntity extends Entity{
             }
             if(message instanceof MessageC2S.GUIClick guiClick){
                 if(this.gui != null)
-                    this.gui.onClick(guiClick.id, guiClick.button);
+                    this.gui.onClick(guiClick.id, guiClick.button, guiClick.shifting);
+            }
+            if(message instanceof MessageC2S.GuiScroll guiScroll){
+                if(this.gui != null)
+                    this.gui.onScroll(guiScroll.id, guiScroll.x, guiScroll.y, guiScroll.shifting);
             }
             if(message instanceof MessageC2S.GUIClose guiClose){
                 this.setGui(null);

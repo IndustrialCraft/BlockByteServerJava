@@ -3,7 +3,9 @@ package com.github.industrialcraft.blockbyteserver.world;
 import com.github.industrialcraft.blockbyteserver.content.AbstractBlock;
 import com.github.industrialcraft.blockbyteserver.content.AbstractBlockInstance;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
+import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
 import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
+import com.github.industrialcraft.blockbyteserver.util.EFace;
 import com.github.industrialcraft.blockbyteserver.util.ITicking;
 import com.google.common.collect.Sets;
 
@@ -17,6 +19,8 @@ import java.util.Set;
 import java.util.zip.Deflater;
 
 public class Chunk {
+    private static final int UNLOAD_TIME = 20;
+
     public final World parent;
     public final ChunkPosition position;
     private AbstractBlockInstance[] blocks;
@@ -24,6 +28,7 @@ public class Chunk {
     private HashSet<Entity> toAdd;
     private HashSet<PlayerEntity> viewers;
     private LinkedList<Integer> tickingBlocks;
+    private int unloadTimer;
     public Chunk(World parent, ChunkPosition position) {
         this.parent = parent;
         this.position = position;
@@ -31,9 +36,17 @@ public class Chunk {
         this.viewers = new HashSet<>();
         this.toAdd = new HashSet<>();
         this.blocks = new AbstractBlockInstance[16*16*16];
-        this.parent.chunkGenerator.generateChunk(this.blocks, position, parent, this);
+        if(this.parent.worldSERDE.isChunkSaved(parent, position)){
+            this.parent.worldSERDE.load(this, blocks);
+        } else {
+            this.parent.chunkGenerator.generateChunk(this.blocks, position, parent, this);
+        }
         //todo: add ITicking generated blocks to tickingBlocks list
         this.tickingBlocks = new LinkedList<>();
+        this.unloadTimer = UNLOAD_TIME;
+    }
+    public AbstractBlockInstance[] getUnsafeBlocks() {
+        return blocks;
     }
     public Set<Entity> getEntities(){
         return Collections.unmodifiableSet(entities);
@@ -57,6 +70,13 @@ public class Chunk {
         toAdd.clear();
         this.entities.forEach(Entity::tick);
         this.tickingBlocks.forEach(offset -> ((ITicking)this.blocks[offset]).tick());
+        unloadTimer--;
+        if(viewers.size() > 0){
+            unloadTimer = UNLOAD_TIME;
+        }
+    }
+    public boolean shouldUnload(){
+        return unloadTimer<=0;
     }
     public void setBlock(AbstractBlock block, int x, int y, int z, Object data){
         checkOffset(x, y, z);
@@ -71,6 +91,11 @@ public class Chunk {
             this.tickingBlocks.removeFirstOccurrence(blockOffset);
         if(currentTicking && !previousTicking)
             this.tickingBlocks.add(blockOffset);
+
+        BlockPosition blockPosition = new BlockPosition(x, y, z);
+        for(EFace face : EFace.values()){
+            parent.getBlock(new BlockPosition((x + (position.x()*16)) + face.xOffset, (y + (position.y()*16)) + face.yOffset, (z + (position.z() * 16)) + face.zOffset)).onNeighborUpdate(blockPosition, instance, newInstance);
+        }
 
         for(PlayerEntity viewer : viewers){
             viewer.send(new MessageS2C.SetBlock((position.x()*16)+x, (position.y()*16)+y, (position.z()*16)+z, newInstance.getClientId()));

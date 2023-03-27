@@ -67,9 +67,11 @@ public class MessageC2S {
     public static class GUIClick extends MessageC2S{
         public final String id;
         public final EMouseButton button;
+        public final boolean shifting;
         public GUIClick(DataInputStream stream) throws IOException {
             this.id = readString(stream);
             this.button = EMouseButton.fromId(stream.readByte());
+            this.shifting = stream.readBoolean();
         }
         public enum EMouseButton{
             LEFT(0),
@@ -114,6 +116,18 @@ public class MessageC2S {
             this.id = stream.readInt();
         }
     }
+    public static class GuiScroll extends MessageC2S{
+        public final String id;
+        public final int x;
+        public final int y;
+        public final boolean shifting;
+        public GuiScroll(DataInputStream stream) throws IOException {
+            this.id = readString(stream);;
+            this.x = stream.readInt();
+            this.y = stream.readInt();
+            this.shifting = stream.readBoolean();
+        }
+    }
     public static MessageC2S fromBytes(byte[] data) throws IOException {
         ByteArrayInputStream byteStream = new ByteArrayInputStream(data);
         DataInputStream stream = new DataInputStream(byteStream);
@@ -138,6 +152,8 @@ public class MessageC2S {
                 return new LeftClickEntity(stream);
             case 9:
                 return new RightClickEntity(stream);
+            case 10:
+                return new GuiScroll(stream);
             default:
                 return null;
         }
