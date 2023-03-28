@@ -85,7 +85,7 @@ public class CrusherMachineBlock extends SimpleBlock {
         public void onSentToPlayer(PlayerEntity player) {}
 
         @Override
-        public void onNeighborUpdate(BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance) {}
+        public void onNeighborUpdate(BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {}
 
         @Override
         public void tick() {

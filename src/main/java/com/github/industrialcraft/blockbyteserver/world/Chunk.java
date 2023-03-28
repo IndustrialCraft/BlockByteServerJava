@@ -41,9 +41,22 @@ public class Chunk {
         } else {
             this.parent.chunkGenerator.generateChunk(this.blocks, position, parent, this);
         }
-        //todo: add ITicking generated blocks to tickingBlocks list
         this.tickingBlocks = new LinkedList<>();
         this.unloadTimer = UNLOAD_TIME;
+    }
+    public void load(){
+        for(int x = 0;x < 16;x++){
+            for(int y = 0;y < 16;y++){
+                for(int z = 0;z < 16;z++){
+                    int blockOffset = x + (y * 16) + z * (16 * 16);
+                    AbstractBlockInstance block = blocks[blockOffset];
+                    if(block instanceof ITicking){
+                        tickingBlocks.add(blockOffset);
+                    }
+                    block.postSet(this, x, y, z);
+                }
+            }
+        }
     }
     public AbstractBlockInstance[] getUnsafeBlocks() {
         return blocks;
@@ -94,8 +107,10 @@ public class Chunk {
 
         BlockPosition blockPosition = new BlockPosition(x, y, z);
         for(EFace face : EFace.values()){
-            parent.getBlock(new BlockPosition((x + (position.x()*16)) + face.xOffset, (y + (position.y()*16)) + face.yOffset, (z + (position.z() * 16)) + face.zOffset)).onNeighborUpdate(blockPosition, instance, newInstance);
+            parent.getBlock(new BlockPosition((x + (position.x()*16)) + face.xOffset, (y + (position.y()*16)) + face.yOffset, (z + (position.z() * 16)) + face.zOffset)).onNeighborUpdate(blockPosition, instance, newInstance, face.opposite());
         }
+
+        newInstance.postSet(this, x, y, z);
 
         for(PlayerEntity viewer : viewers){
             viewer.send(new MessageS2C.SetBlock((position.x()*16)+x, (position.y()*16)+y, (position.z()*16)+z, newInstance.getClientId()));

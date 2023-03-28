@@ -66,6 +66,7 @@ public class World {
         if(chunk == null){
             chunk = new Chunk(this, position);
             chunks.put(position, chunk);
+            chunk.load();
         }
         return chunk;
     }

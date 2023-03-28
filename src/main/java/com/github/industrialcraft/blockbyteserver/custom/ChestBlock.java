@@ -125,8 +125,13 @@ public class ChestBlock extends AbstractBlock {
         }
 
         @Override
-        public void onNeighborUpdate(BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance) {
+        public void onNeighborUpdate(BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {
             System.out.println("neighbor update from " + position);
+        }
+
+        @Override
+        public void postSet(Chunk chunk, int x, int y, int z) {
+
         }
 
         @Override

@@ -87,12 +87,10 @@ public class PlayerEntity extends Entity{
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","crusher")), 3));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
-        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
-        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
-        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","conveyor")), 1));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","conveyor")), 1));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","conveyor")), 1));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","cable")), 100));
     }
     public void setGui(GUI newGui){
         if(this.gui != null)

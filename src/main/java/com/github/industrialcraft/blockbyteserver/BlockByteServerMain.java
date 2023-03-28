@@ -1,6 +1,7 @@
 package com.github.industrialcraft.blockbyteserver;
 
 import com.github.industrialcraft.blockbyteserver.content.*;
+import com.github.industrialcraft.blockbyteserver.custom.CableBlock;
 import com.github.industrialcraft.blockbyteserver.custom.ChestBlock;
 import com.github.industrialcraft.blockbyteserver.custom.ConveyorBlock;
 import com.github.industrialcraft.blockbyteserver.custom.CrusherMachineBlock;
@@ -76,6 +77,7 @@ public class BlockByteServerMain {
             rightBlockRenderData.addProperty("down", "chest_base");
             return new ChestBlock(clientId, new BlockRegistry.BlockRenderData(northBlockRenderData), new BlockRegistry.BlockRenderData(southBlockRenderData), new BlockRegistry.BlockRenderData(leftBlockRenderData), new BlockRegistry.BlockRenderData(rightBlockRenderData));
         });
+        blockRegistry.loadBlock(Identifier.of("bb", "cable"), CableBlock::new);
         blockRegistry.loadBlock(Identifier.of("bb", "conveyor"), clientId -> {
             JsonObject blockRenderData = new JsonObject();
             blockRenderData.addProperty("type", "static");
