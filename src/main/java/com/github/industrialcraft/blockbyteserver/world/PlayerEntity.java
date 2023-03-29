@@ -18,13 +18,14 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class PlayerEntity extends Entity{
+public class PlayerEntity extends Entity implements IHealthEntity{
     public final WebSocket socket;
     private final ConcurrentLinkedQueue<MessageC2S> messages;
     private boolean shifting;
     public final Inventory inventory;
     private int slot;
     private GUI gui;
+    private float health;
     public PlayerEntity(Position position, World world, WebSocket socket) {
         super(position, world);
         this.socket = socket;
@@ -67,6 +68,32 @@ public class PlayerEntity extends Entity{
             json.add("color", MessageS2C.GUIData.createFloatArray(1, 0, 0, 1));
             PlayerEntity.this.send(new MessageS2C.GUIData(json));
         }
+        {
+            JsonObject json = new JsonObject();
+            json.addProperty("type", "setElement");
+            json.addProperty("id", "health_background");
+            json.addProperty("element_type", "image");
+            json.addProperty("texture", "health_bar_background");
+            json.addProperty("w", 0.50);
+            json.addProperty("h", 0.04);
+            json.addProperty("x", - (4.5 * 0.13));
+            json.addProperty("y", -0.36);
+            PlayerEntity.this.send(new MessageS2C.GUIData(json));
+        }
+        {
+            JsonObject json = new JsonObject();
+            json.addProperty("type", "setElement");
+            json.addProperty("id", "health");
+            json.addProperty("element_type", "image");
+            json.addProperty("texture", "health_bar");
+            json.addProperty("w", 0.50);
+            json.addProperty("h", 0.04);
+            json.addProperty("x", - (4.5 * 0.13));
+            json.addProperty("y", -0.36);
+            json.addProperty("z", 1);
+            PlayerEntity.this.send(new MessageS2C.GUIData(json));
+        }
+        this.health = getMaxHealth();
         {
             JsonObject json = new JsonObject();
             json.addProperty("type", "setElement");
@@ -299,6 +326,45 @@ public class PlayerEntity extends Entity{
         }
         return loadedPosition;
     }
+
+    public void setHealth(float health){
+        health = Math.min(Math.max(health, 0), getMaxHealth());
+        float healthbar = health/getMaxHealth();
+        {
+            JsonObject json = new JsonObject();
+            json.addProperty("type", "editElement");
+            json.addProperty("id", "health");
+            json.addProperty("data_type", "slice");
+            json.add("slice", MessageS2C.GUIData.createFloatArray(0, 0, healthbar, 1));
+            send(new MessageS2C.GUIData(json));
+        }
+        {
+            JsonObject json = new JsonObject();
+            json.addProperty("id", "health");
+            json.addProperty("type", "editElement");
+            json.addProperty("data_type", "dimension");
+            json.add("dimension", MessageS2C.GUIData.createFloatArray(healthbar * 0.5f, 0.04f));
+            send(new MessageS2C.GUIData(json));
+        }
+        this.health = health;
+    }
+    @Override
+    public float getHealth() {
+        return health;
+    }
+    @Override
+    public void damage(float amount) {
+        setHealth(getHealth()-amount);
+    }
+    @Override
+    public void heal(float amount) {
+        setHealth(getHealth()+amount);
+    }
+    @Override
+    public float getMaxHealth() {
+        return 100;
+    }
+
     @Override
     public void remove() {
         throw new IllegalStateException("cannot remove player");
