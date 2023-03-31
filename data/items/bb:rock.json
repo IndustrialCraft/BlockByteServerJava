@@ -1,6 +1,6 @@
 {
-  "name": "cable",
-  "model": {"type":"texture","value":"grass_side"},
-  "stackSize": 100,
-  "place": "bb:cable"
+  "name": "rock",
+  "model": {"type":"texture","value":"rock"},
+  "stackSize": 5,
+  "place": "bb:rock"
 }

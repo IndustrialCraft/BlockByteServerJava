@@ -135,11 +135,18 @@ public class BlockByteServerMain {
                 int treeX = random.nextInt(16);
                 int treeZ = random.nextInt(16);
                 int height = (int) (Noise.gradientCoherentNoise3D((((position.x() * 16) + treeX) * scale), (((position.z() * 16) + treeZ) * scale), 0, 4321, NoiseQuality.FAST) * 30) + 20;
-                if(height/16 != chunk.position.y())
-                    return;
-                for(int y = 0;y < 5;y++)
-                    chunk.parent.setBlock(new BlockPosition(position.x()*16 + treeX, height+y, position.z()*16 + treeZ), blockRegistry.getBlock(Identifier.of("bb", "log")), null);
+                if(height/16 == chunk.position.y()) {
+                    for (int y = 0; y < 5; y++)
+                        chunk.parent.setBlock(new BlockPosition(position.x() * 16 + treeX, height + y, position.z() * 16 + treeZ), blockRegistry.getBlock(Identifier.of("bb", "log")), null);
+                }
+                int rockX = random.nextInt(16);
+                int rockZ = random.nextInt(16);
+                int rockHeight = (int) (Noise.gradientCoherentNoise3D((((position.x() * 16) + rockX) * scale), (((position.z() * 16) + rockZ) * scale), 0, 4321, NoiseQuality.FAST) * 30) + 20;
+                if(rockHeight/16 == chunk.position.y()) {
+                    chunk.parent.setBlock(new BlockPosition(position.x() * 16 + rockX, rockHeight, position.z() * 16 + rockZ), blockRegistry.getBlock(Identifier.of("bb", "rock")), null);
+                }
             }
+
         }, new IWorldSERDE() {
             @Override
             public void save(Chunk chunk) {
