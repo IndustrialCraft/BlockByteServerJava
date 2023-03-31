@@ -170,8 +170,10 @@ public class PlayerEntity extends Entity implements IHealthEntity{
                 BlockPosition blockPosition = new BlockPosition(breakBlock.x, breakBlock.y, breakBlock.z);
                 AbstractBlockInstance previousBlock = chunk.parent.getBlock(blockPosition);
                 if(previousBlock.parent != SimpleBlock.AIR) {
-                    if(previousBlock.parent.getLootTable() != null)
-                        previousBlock.parent.getLootTable().addToInventory(this.inventory, chunk.parent.itemRegistry);
+                    if(previousBlock.parent.getLootTable() != null) {
+                        var items = previousBlock.parent.getLootTable().toItems(chunk.parent.itemRegistry);
+                        ItemScatterer.scatter(items, chunk.parent, new Position(blockPosition.x() + 0.25f, blockPosition.y() + 0.25f, blockPosition.z() + 0.25f), 0.25f);
+                    }
                     chunk.parent.setBlock(blockPosition, SimpleBlock.AIR, null);
                 }
             }

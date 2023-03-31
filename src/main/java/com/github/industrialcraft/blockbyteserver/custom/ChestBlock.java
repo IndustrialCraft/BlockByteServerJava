@@ -14,6 +14,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -99,12 +100,7 @@ public class ChestBlock extends AbstractBlock {
         }
         @Override
         public void onDestroy() {
-            for (ItemStack stack : inventory.saveContent().stacks) {
-                if(stack != null){
-                    var random = ThreadLocalRandom.current();
-                    new ItemEntity(new Position(x+0.5f, y+0.5f, z+0.5f), world, stack).addVelocity((random.nextFloat()-.5f)/2, random.nextFloat()/4, (random.nextFloat()-.5f)/2);
-                }
-            }
+            ItemScatterer.scatter(List.of(inventory.saveContent().stacks), world, new Position(x + 0.25f, y + 0.25f, z + 0.25f), 0.5f);
             this.isValid = false;
         }
         @Override

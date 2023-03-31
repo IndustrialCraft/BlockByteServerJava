@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "static",
+    "model": "stand",
+    "texture": "cobble",
+    "up": true,
+    "down": true,
+    "left": false,
+    "right": false,
+    "north": false,
+    "south": false
+  },
+  "loot": {"item":"bb:stand","count": 1}
+}

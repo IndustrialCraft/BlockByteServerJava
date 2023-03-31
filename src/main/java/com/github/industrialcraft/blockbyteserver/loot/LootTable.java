@@ -7,6 +7,9 @@ import com.github.industrialcraft.inventorysystem.Inventory;
 import com.github.industrialcraft.inventorysystem.ItemStack;
 import com.google.gson.JsonObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LootTable {
     public final Identifier item;
     public final int count;
@@ -16,5 +19,10 @@ public class LootTable {
     }
     public void addToInventory(Inventory inventory, ItemRegistry itemRegistry){
         inventory.addItem(new ItemStack(itemRegistry.getItem(item), count));
+    }
+    public List<ItemStack> toItems(ItemRegistry itemRegistry){
+        ArrayList<ItemStack> items = new ArrayList<>();
+        items.add(new ItemStack(itemRegistry.getItem(item), count));
+        return items;
     }
 }
