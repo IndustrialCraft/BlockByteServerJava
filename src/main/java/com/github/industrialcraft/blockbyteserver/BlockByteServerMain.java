@@ -6,6 +6,7 @@ import com.github.industrialcraft.blockbyteserver.custom.ChestBlock;
 import com.github.industrialcraft.blockbyteserver.custom.ConveyorBlock;
 import com.github.industrialcraft.blockbyteserver.custom.CrusherMachineBlock;
 import com.github.industrialcraft.blockbyteserver.net.WSServer;
+import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
 import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
 import com.github.industrialcraft.blockbyteserver.util.ISerializable;
 import com.github.industrialcraft.blockbyteserver.util.Position;

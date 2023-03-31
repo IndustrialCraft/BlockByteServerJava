@@ -12,10 +12,13 @@ import com.github.industrialcraft.inventorysystem.Inventory;
 import com.github.industrialcraft.inventorysystem.ItemStack;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
+import mikera.vectorz.Vector2;
+import mikera.vectorz.Vector3;
 import org.java_websocket.WebSocket;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class PlayerEntity extends Entity implements IHealthEntity{
@@ -143,6 +146,15 @@ public class PlayerEntity extends Entity implements IHealthEntity{
     @Override
     public Identifier getIdentifier() {
         return Identifier.of("bb", "player");
+    }
+
+    @Override
+    public void onLeftClick(PlayerEntity player) {
+        damage(5);
+        Vector2 vec = new Vector2(position.x()-player.position.x(), position.z()-player.position.z());
+        vec.normalise();
+        vec.multiply(0.3);
+        send(new MessageS2C.Knockback((float) vec.x, 0.2f, (float) vec.y, false));
     }
 
     @Override

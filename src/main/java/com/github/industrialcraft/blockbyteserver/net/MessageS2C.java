@@ -303,4 +303,27 @@ public abstract class MessageS2C {
             return byteStream.toByteArray();
         }
     }
+    public static class Knockback extends MessageS2C{
+        public final float x;
+        public final float y;
+        public final float z;
+        public final boolean set;
+        public Knockback(float x, float y, float z, boolean set) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.set = set;
+        }
+        @Override
+        public byte[] toBytes() throws IOException {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(byteStream);
+            stream.writeByte(12);
+            stream.writeFloat(x);
+            stream.writeFloat(y);
+            stream.writeFloat(z);
+            stream.writeBoolean(set);
+            return byteStream.toByteArray();
+        }
+    }
 }
