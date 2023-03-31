@@ -25,6 +25,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class BlockByteServerMain {
@@ -130,11 +131,14 @@ public class BlockByteServerMain {
                 System.out.println("chunk populated");
                 var position = chunk.position;
                 float scale = 0.05f;
-                int height = (int) (Noise.gradientCoherentNoise3D((((position.x() * 16) + 1) * scale), (((position.z() * 16) + 1) * scale), 0, 4321, NoiseQuality.FAST) * 30) + 20;
+                Random random = new Random(position.x() + position.y()*10 + position.z()*100);
+                int treeX = random.nextInt(16);
+                int treeZ = random.nextInt(16);
+                int height = (int) (Noise.gradientCoherentNoise3D((((position.x() * 16) + treeX) * scale), (((position.z() * 16) + treeZ) * scale), 0, 4321, NoiseQuality.FAST) * 30) + 20;
                 if(height/16 != chunk.position.y())
                     return;
-                for(int y = 0;y < 7;y++)
-                    chunk.parent.setBlock(new BlockPosition(position.x()*16, height+y, position.z()*16), blockRegistry.getBlock(Identifier.of("bb", "stand")), null);
+                for(int y = 0;y < 5;y++)
+                    chunk.parent.setBlock(new BlockPosition(position.x()*16 + treeX, height+y, position.z()*16 + treeZ), blockRegistry.getBlock(Identifier.of("bb", "log")), null);
             }
         }, new IWorldSERDE() {
             @Override

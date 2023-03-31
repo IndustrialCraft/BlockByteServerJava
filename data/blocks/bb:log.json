@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "cube",
+    "north": "log",
+    "south": "log",
+    "left": "log",
+    "right": "log",
+    "up": "log",
+    "down": "log"
+  },
+  "loot": {"item":"bb:log","count": 1}
+}

@@ -1,0 +1,11 @@
+{
+  "model": {
+    "type": "cube",
+    "north": "leave",
+    "south": "leave",
+    "left": "leave",
+    "right": "leave",
+    "up": "leave",
+    "down": "leave"
+  }
+}

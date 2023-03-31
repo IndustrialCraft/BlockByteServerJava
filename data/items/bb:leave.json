@@ -1,0 +1,6 @@
+{
+  "name": "leave",
+  "model": {"type":"block","value":"bb:leave"},
+  "stackSize": 100,
+  "place": "bb:leave"
+}

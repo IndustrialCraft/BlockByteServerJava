@@ -1,0 +1,6 @@
+{
+  "name": "log",
+  "model": {"type":"block","value":"bb:log"},
+  "stackSize": 100,
+  "place": "bb:log"
+}
