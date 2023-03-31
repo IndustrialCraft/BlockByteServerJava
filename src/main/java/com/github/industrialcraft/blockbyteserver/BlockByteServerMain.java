@@ -125,12 +125,24 @@ public class BlockByteServerMain {
                     }
                 }
             }
+            @Override
+            public void populate(Chunk chunk) {
+                System.out.println("chunk populated");
+                var position = chunk.position;
+                float scale = 0.05f;
+                int height = (int) (Noise.gradientCoherentNoise3D((((position.x() * 16) + 1) * scale), (((position.z() * 16) + 1) * scale), 0, 4321, NoiseQuality.FAST) * 30) + 20;
+                if(height/16 != chunk.position.y())
+                    return;
+                for(int y = 0;y < 7;y++)
+                    chunk.parent.setBlock(new BlockPosition(position.x()*16, height+y, position.z()*16), blockRegistry.getBlock(Identifier.of("bb", "stand")), null);
+            }
         }, new IWorldSERDE() {
             @Override
             public void save(Chunk chunk) {
                 try {
                     FileOutputStream fstream = new FileOutputStream("world/chunk" + chunk.position.x() + "," + chunk.position.y() + "," + chunk.position.z());
                     DataOutputStream stream = new DataOutputStream(fstream);
+                    stream.writeBoolean(chunk.isPopulated());
                     int idGenerator = -1;
                     HashMap<Identifier,Integer> idMap = new HashMap<>();
                     ByteArrayOutputStream blocksRaw = new ByteArrayOutputStream();
@@ -168,11 +180,12 @@ public class BlockByteServerMain {
                 }
             }
             @Override
-            public void load(Chunk chunk, AbstractBlockInstance[] blocks) {
+            public boolean load(Chunk chunk, AbstractBlockInstance[] blocks) {
                 try {
                     FileInputStream fstream = new FileInputStream("world/chunk" + chunk.position.x() + "," + chunk.position.y() + "," + chunk.position.z());
                     BufferedInputStream bstream = new BufferedInputStream(fstream);
                     DataInputStream stream = new DataInputStream(bstream);
+                    boolean populated = stream.readBoolean();
                     HashMap<Integer,Identifier> idMap = new HashMap<>();
                     int size = stream.readInt();
                     for(int i = 0;i < size;i++){
@@ -193,6 +206,7 @@ public class BlockByteServerMain {
                             }
                         }
                     }
+                    return populated;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

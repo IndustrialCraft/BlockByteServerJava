@@ -1,6 +1,8 @@
 package com.github.industrialcraft.blockbyteserver.custom;
 
-import com.github.industrialcraft.blockbyteserver.content.*;
+import com.github.industrialcraft.blockbyteserver.content.AbstractBlock;
+import com.github.industrialcraft.blockbyteserver.content.AbstractBlockInstance;
+import com.github.industrialcraft.blockbyteserver.content.BlockRegistry;
 import com.github.industrialcraft.blockbyteserver.loot.LootTable;
 import com.github.industrialcraft.blockbyteserver.util.*;
 import com.github.industrialcraft.blockbyteserver.world.*;

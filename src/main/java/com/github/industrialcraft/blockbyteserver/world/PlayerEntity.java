@@ -293,7 +293,7 @@ public class PlayerEntity extends Entity implements IHealthEntity{
         this.position = position;
         if(this.chunk != newChunk){
             HashSet<ChunkPosition> previousLoadingChunks = getLoadingChunks(chunk.position);
-            HashSet<ChunkPosition> currentLoadingChunks = getLoadingChunks(newChunk.position);
+            HashSet<ChunkPosition> currentLoadingChunks = getLoadingChunks(newChunk.position);//fixme: world change
             this.chunk.transferEntity(this, newChunk);
             if(this.chunk.parent == world) {
                 for (ChunkPosition chunkPosition : Sets.difference(previousLoadingChunks, currentLoadingChunks)) {

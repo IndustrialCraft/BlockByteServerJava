@@ -29,6 +29,7 @@ public class Chunk {
     private HashSet<PlayerEntity> viewers;
     private LinkedList<Integer> tickingBlocks;
     private int unloadTimer;
+    private boolean populated;
     public Chunk(World parent, ChunkPosition position) {
         this.parent = parent;
         this.position = position;
@@ -37,12 +38,16 @@ public class Chunk {
         this.toAdd = new HashSet<>();
         this.blocks = new AbstractBlockInstance[16*16*16];
         if(this.parent.worldSERDE.isChunkSaved(parent, position)){
-            this.parent.worldSERDE.load(this, blocks);
+            this.populated = this.parent.worldSERDE.load(this, blocks);
         } else {
             this.parent.chunkGenerator.generateChunk(this.blocks, position, parent, this);
+            this.populated = false;
         }
         this.tickingBlocks = new LinkedList<>();
         this.unloadTimer = UNLOAD_TIME;
+    }
+    public boolean isPopulated() {
+        return populated;
     }
     public void load(){
         for(int x = 0;x < 16;x++){
@@ -75,6 +80,12 @@ public class Chunk {
             }
             return entity.isRemoved() || entity.chunk != this;
         });
+        if(!populated){
+            if(areAllNeighborChunksLoaded()){
+                parent.chunkGenerator.populate(this);
+                this.populated = true;
+            }
+        }
         for (Entity entity : toAdd) {
             announceToViewersExcept(new MessageS2C.AddEntity(entity.getClientType(), entity.clientId, entity.position.x(), entity.position.y(), entity.position.z(), entity.rotation), (entity instanceof PlayerEntity player)?player:null);
             this.viewers.forEach(entity::onSentToPlayer);
@@ -88,8 +99,19 @@ public class Chunk {
             unloadTimer = UNLOAD_TIME;
         }
     }
+    private boolean areAllNeighborChunksLoaded(){
+        for(int x = -1;x <= 1;x++){
+            for(int y = -1;y <= 1;y++){
+                for(int z = -1;z <= 1;z++){
+                    if(parent.getChunk(new ChunkPosition(position.x()+x, position.y()+y, position.z()+z)) == null)
+                        return false;
+                }
+            }
+        }
+        return true;
+    }
     public boolean shouldUnload(){
-        return unloadTimer<=0;
+        return unloadTimer<=0 && viewers.size() == 0;
     }
     public void setBlock(AbstractBlock block, int x, int y, int z, Object data){
         checkOffset(x, y, z);
