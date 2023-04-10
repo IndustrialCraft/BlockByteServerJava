@@ -1,0 +1,24 @@
+{
+  "top": "bb:sand",
+  "middle": "bb:sand",
+  "bottom": "bb:sandstone",
+  "height": {
+    "value": 0.5,
+    "relevance": 1
+  },
+  "temperature": {
+    "value": 1,
+    "relevance": 1
+  },
+  "moisture": {
+    "value": -1,
+    "relevance": 1
+  },
+  "structures": [
+    {
+      "structure": "cactus",
+      "chance": 0.05,
+      "replace": true
+    }
+  ]
+}

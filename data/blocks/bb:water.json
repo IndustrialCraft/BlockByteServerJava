@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "cube",
+    "north": "water",
+    "south": "water",
+    "left": "water",
+    "right": "water",
+    "up": "water",
+    "down": "water",
+    "transparent": true,
+    "fluid": true,
+    "render_data": 1
+  }
+}

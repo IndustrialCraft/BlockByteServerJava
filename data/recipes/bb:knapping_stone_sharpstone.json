@@ -1,0 +1,12 @@
+{
+    "type": "bb:knapping",
+    "item": "bb:rock",
+    "pattern": [
+        false,false,true,false,false,
+        false,true,true,true,false,
+        true,true,true,true,true,
+        true,true,true,true,true,
+        true,true,true,true,true
+    ],
+    "output": "bb:sharpstone"
+}

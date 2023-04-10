@@ -1,0 +1,6 @@
+{
+  "name": "sandstone",
+  "model": {"type":"block","value":"bb:sandstone"},
+  "stackSize": 10,
+  "place": "bb:sandstone"
+}

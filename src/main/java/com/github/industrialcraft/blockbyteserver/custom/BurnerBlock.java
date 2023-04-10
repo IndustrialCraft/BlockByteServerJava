@@ -16,13 +16,14 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ChestBlock extends AbstractBlock {
+public class BurnerBlock extends AbstractBlock {
     public final int clientId;
     public final EnumMap<EHorizontalFace, BlockRegistry.BlockRenderData> renderData;
-    public ChestBlock(AtomicInteger clientId, BlockRegistry.BlockRenderData northRenderData, BlockRegistry.BlockRenderData southRenderData, BlockRegistry.BlockRenderData leftRenderData, BlockRegistry.BlockRenderData rightRenderData) {
+    public BurnerBlock(AtomicInteger clientId, BlockRegistry.BlockRenderData northRenderData, BlockRegistry.BlockRenderData southRenderData, BlockRegistry.BlockRenderData leftRenderData, BlockRegistry.BlockRenderData rightRenderData) {
         this.renderData = new EnumMap<>(EHorizontalFace.class);
         this.renderData.put(EHorizontalFace.FRONT, northRenderData);
         this.renderData.put(EHorizontalFace.BACK, southRenderData);
@@ -32,7 +33,7 @@ public class ChestBlock extends AbstractBlock {
         clientId.addAndGet(4);
     }
     @Override
-    public AbstractBlockInstance<ChestBlock> createBlockInstance(Chunk chunk, int x, int y, int z, Object data) {
+    public AbstractBlockInstance<BurnerBlock> createBlockInstance(Chunk chunk, int x, int y, int z, Object data) {
         EHorizontalFace face = EHorizontalFace.FRONT;
         if(data instanceof BlockPlacementContext placementContext){
             face = placementContext.face;
@@ -54,10 +55,6 @@ public class ChestBlock extends AbstractBlock {
         return true;
     }
     @Override
-    public LootTable getLootTable() {
-        return null;
-    }
-    @Override
     public void registerRenderData(HashMap<Integer, BlockRegistry.BlockRenderData> renderData) {
         this.renderData.forEach((face, blockRenderData) -> renderData.put(clientId+face.id, blockRenderData));
     }
@@ -75,7 +72,7 @@ public class ChestBlock extends AbstractBlock {
         return true;
     }
 
-    public static class ChestBlockInstance extends AbstractBlockInstance<ChestBlock> implements IInventoryBlock, ISerializable{
+    public static class ChestBlockInstance extends AbstractBlockInstance<BurnerBlock> implements IInventoryBlock, ISerializable{
         public final int x;
         public final int y;
         public final int z;
@@ -83,7 +80,7 @@ public class ChestBlock extends AbstractBlock {
         public final BasicVersionedInventory inventory;
         private boolean isValid;
         public final EHorizontalFace face;
-        public ChestBlockInstance(ChestBlock parent, int x, int y, int z, World world, EHorizontalFace face, InventoryContent inventoryContent) {
+        public ChestBlockInstance(BurnerBlock parent, int x, int y, int z, World world, EHorizontalFace face, InventoryContent inventoryContent) {
             super(parent);
             this.x = x;
             this.y = y;
@@ -141,10 +138,20 @@ public class ChestBlock extends AbstractBlock {
             InventorySERDE.serialize(stream, inventory.saveContent());
             stream.writeByte(face.id);
         }
+
+        @Override
+        public float getBlockBreakingTime(ItemStack item, PlayerEntity player) {
+            return 1;
+        }
+
+        @Override
+        public List<ItemStack> getLoot(PlayerEntity player) {
+            return null;
+        }
     }
     public static class ChestGUI extends InventoryGUI {
-        public final AbstractBlockInstance<ChestBlock> block;
-        public ChestGUI(PlayerEntity player, AbstractBlockInstance<ChestBlock> block) {
+        public final AbstractBlockInstance<BurnerBlock> block;
+        public ChestGUI(PlayerEntity player, AbstractBlockInstance<BurnerBlock> block) {
             super(player, ((ChestBlockInstance)block).inventory);
             this.block = block;
             for(int i = 0;i < 9;i++){

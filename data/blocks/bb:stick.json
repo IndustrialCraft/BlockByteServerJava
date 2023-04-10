@@ -1,8 +1,8 @@
 {
   "model": {
     "type": "static",
-    "model": "rock",
-    "texture": "cobble",
+    "model": "stick",
+    "texture": "stick",
     "up": false,
     "down": false,
     "left": false,
@@ -11,5 +11,5 @@
     "south": false,
     "no_collide": true
   },
-  "loot": {"item":"bb:rock","count": 1}
+  "loot": {"item":"bb:stick","count": 1}
 }

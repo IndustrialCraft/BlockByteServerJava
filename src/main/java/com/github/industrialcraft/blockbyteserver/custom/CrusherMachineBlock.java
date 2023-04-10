@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CrusherMachineBlock extends SimpleBlock {
     public static final int MAX_PROGRESS = 100;
     public CrusherMachineBlock(BlockRegistry.BlockRenderData renderData, AtomicInteger clientId, LootTable lootTable) {
-        super(renderData, clientId, lootTable, Identifier.of("bb","crusher"));
+        super(renderData, clientId, lootTable, Identifier.of("bb","crusher"), null, 0, 1);
     }
     @Override
     public SimpleBlockInstance createBlockInstance(Chunk chunk, int x, int y, int z, Object data) {

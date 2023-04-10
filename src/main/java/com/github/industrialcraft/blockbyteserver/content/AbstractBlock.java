@@ -14,9 +14,9 @@ public abstract class AbstractBlock {
     public boolean onRightClick(World world, BlockPosition blockPosition, AbstractBlockInstance instance, PlayerEntity player){
         return false;
     }
-    public abstract LootTable getLootTable();
     public abstract void registerRenderData(HashMap<Integer, BlockRegistry.BlockRenderData> renderData);
     public abstract int getDefaultClientId();
     public abstract Identifier getIdentifier();
     public boolean isSerializable(){return false;}
+    public void postInit(BlockRegistry blockRegistry){}
 }

@@ -1,0 +1,39 @@
+{
+  "top": "bb:grass",
+  "middle": "bb:dirt",
+  "bottom": "bb:cobble",
+  "height": {
+    "value": 1,
+    "relevance": 1
+  },
+  "temperature": {
+    "value": 0.5,
+    "relevance": 1
+  },
+  "moisture": {
+    "value": 0,
+    "relevance": 1
+  },
+  "structures": [
+    {
+      "structure": "lavender",
+      "chance": 0.05,
+      "replace": true
+    },
+    {
+      "structure": "daisy",
+      "chance": 0.05,
+      "replace": true
+    },
+    {
+      "structure": "grass",
+      "chance": 0.2,
+      "replace": true
+    },
+    {
+      "structure": "rock",
+      "chance": 0.02,
+      "replace": true
+    }
+  ]
+}

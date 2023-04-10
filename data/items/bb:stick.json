@@ -1,0 +1,6 @@
+{
+  "name": "stick",
+  "model": {"type":"texture","value":"stick"},
+  "stackSize": 5,
+  "place": "bb:stick"
+}

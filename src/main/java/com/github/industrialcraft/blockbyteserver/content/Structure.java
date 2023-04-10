@@ -11,18 +11,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Structure {
-    private HashMap<BlockPosition,AbstractBlock> blocks;
+    private HashMap<BlockPosition,BlockWithData> blocks;
     public Structure(JsonArray json, BlockRegistry blockRegistry) {
         this.blocks = new HashMap<>();
         for (JsonElement blockElement : json) {
             JsonObject block = (JsonObject) blockElement;
             BlockPosition position = new BlockPosition(block.get("x").getAsInt(), block.get("y").getAsInt(), block.get("z").getAsInt());
-            blocks.put(position, blockRegistry.getBlock(Identifier.parse(block.get("id").getAsString())));
+            JsonElement data = block.get("data");
+            blocks.put(position, new BlockWithData(blockRegistry.getBlock(Identifier.parse(block.get("id").getAsString())), data==null?null:data.getAsString()));
         }
     }
-    public void place(World world, BlockPosition position){
-        for (Map.Entry<BlockPosition, AbstractBlock> entry : blocks.entrySet()) {
-            world.setBlock(new BlockPosition(entry.getKey().x()+position.x(), entry.getKey().y()+position.y(), entry.getKey().z()+position.z()), entry.getValue(), null);
+    public void place(World world, BlockPosition position, boolean replace){
+        for (Map.Entry<BlockPosition, BlockWithData> entry : blocks.entrySet()) {
+            BlockPosition targetBlock = new BlockPosition(entry.getKey().x()+position.x(), entry.getKey().y()+position.y(), entry.getKey().z()+position.z());
+            if(!replace){
+                AbstractBlockInstance block = world.getBlock(targetBlock);
+                if(block != null && block.parent != SimpleBlock.AIR)
+                    continue;
+            }
+            world.setBlock(targetBlock, entry.getValue().block, entry.getValue().data);
         }
     }
+    private record BlockWithData(AbstractBlock block, String data){}
 }

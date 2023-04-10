@@ -1,6 +1,0 @@
-{
-  "name": "rock",
-  "model": {"type":"texture","value":"rock"},
-  "stackSize": 5,
-  "place": "bb:rock"
-}

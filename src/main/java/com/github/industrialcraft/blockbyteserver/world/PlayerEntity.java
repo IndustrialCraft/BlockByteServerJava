@@ -3,7 +3,6 @@ package com.github.industrialcraft.blockbyteserver.world;
 import com.github.industrialcraft.blockbyteserver.content.AbstractBlockInstance;
 import com.github.industrialcraft.blockbyteserver.content.SimpleBlock;
 import com.github.industrialcraft.blockbyteserver.content.BlockByteItem;
-import com.github.industrialcraft.blockbyteserver.content.SimpleBlockInstance;
 import com.github.industrialcraft.blockbyteserver.net.MessageC2S;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.*;
@@ -13,12 +12,11 @@ import com.github.industrialcraft.inventorysystem.ItemStack;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import mikera.vectorz.Vector2;
-import mikera.vectorz.Vector3;
 import org.java_websocket.WebSocket;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Vector;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class PlayerEntity extends Entity implements IHealthEntity{
@@ -170,10 +168,9 @@ public class PlayerEntity extends Entity implements IHealthEntity{
                 BlockPosition blockPosition = new BlockPosition(breakBlock.x, breakBlock.y, breakBlock.z);
                 AbstractBlockInstance previousBlock = chunk.parent.getBlock(blockPosition);
                 if(previousBlock.parent != SimpleBlock.AIR) {
-                    if(previousBlock.parent.getLootTable() != null) {
-                        var items = previousBlock.parent.getLootTable().toItems(chunk.parent.itemRegistry);
-                        ItemScatterer.scatter(items, chunk.parent, new Position(blockPosition.x() + 0.25f, blockPosition.y() + 0.25f, blockPosition.z() + 0.25f), 0.25f);
-                    }
+                    List<ItemStack> drops = previousBlock.getLoot(this);
+                    if(drops != null)
+                        ItemScatterer.scatter(drops, chunk.parent, new Position(blockPosition.x() + 0.25f, blockPosition.y() + 0.25f, blockPosition.z() + 0.25f), 0.25f);
                     chunk.parent.setBlock(blockPosition, SimpleBlock.AIR, null);
                 }
             }
@@ -202,6 +199,11 @@ public class PlayerEntity extends Entity implements IHealthEntity{
                         }
                     }
                 }
+            }
+            if(message instanceof MessageC2S.RightClick rightClick){
+                ItemStack hand = getItemInHand();
+                if(hand != null)
+                ((BlockByteItem)hand.getItem()).onRightClick(hand, this, rightClick.shifting);
             }
             if(message instanceof MessageC2S.MouseScroll mouseScroll){
                 setSlot((((getSlot()-mouseScroll.y)%9)+9)%9);
@@ -236,7 +238,11 @@ public class PlayerEntity extends Entity implements IHealthEntity{
                 this.setGui(null);
             }
             if(message instanceof MessageC2S.BreakBlockTimeRequest breakBlockTimeRequest){
-                send(new MessageS2C.BlockBreakTimeResponse(breakBlockTimeRequest.id, 0.3f));
+                BlockPosition blockPosition = new BlockPosition(breakBlockTimeRequest.x, breakBlockTimeRequest.y, breakBlockTimeRequest.z);
+                AbstractBlockInstance blockInstance = chunk.parent.getBlock(blockPosition);
+                float time = blockInstance.getBlockBreakingTime(getItemInHand(), this);
+                if(time != -1)
+                    send(new MessageS2C.BlockBreakTimeResponse(breakBlockTimeRequest.id, time));
             }
             if(message instanceof MessageC2S.LeftClickEntity leftClickEntity){
                 Entity entity = chunk.parent.getEntityByClientId(leftClickEntity.id);
@@ -329,10 +335,11 @@ public class PlayerEntity extends Entity implements IHealthEntity{
         }
     }
     public HashSet<ChunkPosition> getLoadingChunks(ChunkPosition chunkPosition){
-        int renderDistance = 5;
+        int renderDistance = 10;
+        int verticalRenderDistance = 8;
         HashSet<ChunkPosition> loadedPosition = new HashSet<>();
         for(int x = -renderDistance;x <= renderDistance;x++){
-            for(int y = -renderDistance;y <= renderDistance;y++){
+            for(int y = -verticalRenderDistance;y <= verticalRenderDistance;y++){
                 for(int z = -renderDistance;z <= renderDistance;z++){
                     loadedPosition.add(new ChunkPosition(chunkPosition.x() + x, chunkPosition.y() + y, chunkPosition.z() + z));
                 }

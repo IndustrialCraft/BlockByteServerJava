@@ -37,13 +37,13 @@ public class Chunk {
         this.viewers = new HashSet<>();
         this.toAdd = new HashSet<>();
         this.blocks = new AbstractBlockInstance[16*16*16];
+        this.tickingBlocks = new LinkedList<>();
         if(this.parent.worldSERDE.isChunkSaved(parent, position)){
             this.populated = this.parent.worldSERDE.load(this, blocks);
         } else {
             this.parent.chunkGenerator.generateChunk(this.blocks, position, parent, this);
             this.populated = false;
         }
-        this.tickingBlocks = new LinkedList<>();
         this.unloadTimer = UNLOAD_TIME;
     }
     public boolean isPopulated() {
@@ -122,10 +122,12 @@ public class Chunk {
         this.blocks[blockOffset] = newInstance;
         boolean previousTicking = instance instanceof ITicking;
         boolean currentTicking = newInstance instanceof ITicking;
-        if(previousTicking && !currentTicking)
+        if(previousTicking && (!currentTicking)) {
             this.tickingBlocks.removeFirstOccurrence(blockOffset);
-        if(currentTicking && !previousTicking)
+        }
+        if(currentTicking && (!previousTicking)) {
             this.tickingBlocks.add(blockOffset);
+        }
 
         BlockPosition blockPosition = new BlockPosition(x, y, z);
         for(EFace face : EFace.values()){

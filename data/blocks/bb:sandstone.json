@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "cube",
+    "north": "sandstone",
+    "south": "sandstone",
+    "left": "sandstone",
+    "right": "sandstone",
+    "up": "sandstone",
+    "down": "sandstone"
+  },
+  "loot": {"item":"bb:sandstone","count": 1}
+}

@@ -1,8 +1,10 @@
 package com.github.industrialcraft.blockbyteserver.content;
 
 import com.github.industrialcraft.blockbyteserver.loot.LootTable;
+import com.github.industrialcraft.blockbyteserver.util.ETool;
 import com.github.industrialcraft.identifier.Identifier;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -57,7 +59,10 @@ public class BlockRegistry {
         JsonObject model = json.getAsJsonObject("model");
         BlockRenderData renderData = new BlockRenderData(model);
         JsonObject lootTableJson = json.getAsJsonObject("loot");
-        SimpleBlock block = new SimpleBlock(renderData, clientIds, lootTableJson==null?null:new LootTable(lootTableJson), id);
+        JsonElement tool = json.get("toolType");
+        JsonElement minToolLevel = json.get("minToolLevel");
+        JsonElement blockHardness = json.get("blockHardness");
+        SimpleBlock block = new SimpleBlock(renderData, clientIds, lootTableJson==null?null:new LootTable(lootTableJson), id, tool==null?null:ETool.fromString(tool.getAsString()), minToolLevel==null?0:minToolLevel.getAsInt(), blockHardness==null?1f:blockHardness.getAsFloat());
         blocks.put(id, block);
         return block;
     }
@@ -71,4 +76,9 @@ public class BlockRegistry {
         return blocks.get(id);
     }
     public record BlockRenderData(JsonObject json){}
+    public void postInit(){
+        for (AbstractBlock value : this.blocks.values()) {
+            value.postInit(this);
+        }
+    }
 }

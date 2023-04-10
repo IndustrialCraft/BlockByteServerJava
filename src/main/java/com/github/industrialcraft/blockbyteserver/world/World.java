@@ -3,6 +3,7 @@ package com.github.industrialcraft.blockbyteserver.world;
 import com.github.industrialcraft.blockbyteserver.content.*;
 import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
 import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
+import com.github.industrialcraft.blockbyteserver.world.gen.IChunkGenerator;
 
 import java.util.ArrayList;
 import java.util.HashMap;

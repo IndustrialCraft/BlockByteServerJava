@@ -32,28 +32,10 @@ public class ConveyorBlock extends AbstractBlock {
     @Override
     public AbstractBlockInstance<ConveyorBlock> createBlockInstance(Chunk chunk, int x, int y, int z, Object data) {
         EHorizontalFace face = EHorizontalFace.FRONT;
-        if(data instanceof PlayerEntity player){
-            var playerPos = player.getPosition().toBlockPos();
-            boolean frontBack = Math.abs(playerPos.z()-z) > Math.abs(playerPos.x()-x);
-            if(frontBack){
-                if(playerPos.z()-z < 0){
-                    face = EHorizontalFace.FRONT;
-                } else {
-                    face = EHorizontalFace.BACK;
-                }
-            } else {
-                if(playerPos.x()-x < 0){
-                    face = EHorizontalFace.LEFT;
-                } else {
-                    face = EHorizontalFace.RIGHT;
-                }
-            }
+        if(data instanceof BlockPlacementContext placementContext){
+            face = placementContext.face;
         }
         return new ConveyorBlockInstance(this, x + (chunk.position.x()*16), y + (chunk.position.y()*16), z + (chunk.position.z()*16), face.opposite(), chunk);
-    }
-    @Override
-    public LootTable getLootTable() {
-        return null;
     }
     @Override
     public void registerRenderData(HashMap<Integer, BlockRegistry.BlockRenderData> renderData) {
@@ -209,6 +191,16 @@ public class ConveyorBlock extends AbstractBlock {
         @Override
         public Inventory getOutput(EFace face) {
             return outputInventory;
+        }
+
+        @Override
+        public float getBlockBreakingTime(ItemStack item, PlayerEntity player) {
+            return 1;
+        }
+
+        @Override
+        public List<ItemStack> getLoot(PlayerEntity player) {
+            return null;
         }
     }
 }

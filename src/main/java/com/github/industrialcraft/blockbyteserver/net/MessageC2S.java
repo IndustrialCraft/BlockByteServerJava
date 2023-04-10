@@ -128,6 +128,12 @@ public class MessageC2S {
             this.shifting = stream.readBoolean();
         }
     }
+    public static class RightClick extends MessageC2S{
+        public final boolean shifting;
+        public RightClick(DataInputStream stream) throws IOException {
+            this.shifting = stream.readBoolean();
+        }
+    }
     public static MessageC2S fromBytes(byte[] data) throws IOException {
         ByteArrayInputStream byteStream = new ByteArrayInputStream(data);
         DataInputStream stream = new DataInputStream(byteStream);
@@ -154,6 +160,8 @@ public class MessageC2S {
                 return new RightClickEntity(stream);
             case 10:
                 return new GuiScroll(stream);
+            case 11:
+                return new RightClick(stream);
             default:
                 return null;
         }

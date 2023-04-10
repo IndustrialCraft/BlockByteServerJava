@@ -2,6 +2,7 @@ package com.github.industrialcraft.blockbyteserver.content;
 
 import com.github.industrialcraft.blockbyteserver.loot.LootTable;
 import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
+import com.github.industrialcraft.blockbyteserver.util.ETool;
 import com.github.industrialcraft.blockbyteserver.world.Chunk;
 import com.github.industrialcraft.blockbyteserver.world.PlayerEntity;
 import com.github.industrialcraft.blockbyteserver.world.World;
@@ -18,11 +19,17 @@ public class SimpleBlock extends AbstractBlock{
     public final LootTable lootTable;
     private final SimpleBlockInstance instance;
     public final Identifier identifier;
-    public SimpleBlock(BlockRegistry.BlockRenderData renderData, AtomicInteger clientIdGenerator, LootTable lootTable, Identifier identifier) {
+    public final ETool tool;
+    public final int minToolLevel;
+    public final float blockHardness;
+    public SimpleBlock(BlockRegistry.BlockRenderData renderData, AtomicInteger clientIdGenerator, LootTable lootTable, Identifier identifier, ETool tool, int minToolLevel, float blockHardness) {
         this.renderData = renderData;
         this.clientId = clientIdGenerator.getAndIncrement();
         this.lootTable = lootTable;
         this.identifier = identifier;
+        this.tool = tool;
+        this.minToolLevel = minToolLevel;
+        this.blockHardness = blockHardness;
         this.instance = new SimpleBlockInstance(this);
     }
     private SimpleBlock(){//air
@@ -31,6 +38,9 @@ public class SimpleBlock extends AbstractBlock{
         this.lootTable = null;
         this.instance = new SimpleBlockInstance(this);
         this.identifier = Identifier.of("bb", "air");
+        this.tool = null;
+        this.minToolLevel = 0;
+        this.blockHardness = 0;
     }
     @Override
     public int getDefaultClientId() {
@@ -49,10 +59,6 @@ public class SimpleBlock extends AbstractBlock{
     @Override
     public boolean onRightClick(World world, BlockPosition blockPosition, AbstractBlockInstance instance, PlayerEntity player){
         return false;
-    }
-    @Override
-    public LootTable getLootTable() {
-        return lootTable;
     }
 
     @Override

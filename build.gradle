@@ -19,6 +19,5 @@ dependencies {
     implementation 'com.github.industrialcraft:identifier:fd2e641267'
     implementation 'com.github.industrialcraft:inventorysystem:61899c57d1'
     implementation 'com.google.code.gson:gson:2.10.1'
-    implementation "org.spongepowered:noise:2.0.0-SNAPSHOT"
     implementation 'net.mikera:vectorz:0.67.0'
 }

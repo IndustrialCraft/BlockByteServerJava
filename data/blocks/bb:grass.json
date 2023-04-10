@@ -1,13 +1,12 @@
 {
   "model": {
     "type": "cube",
-    "north": "grass_side",
-    "south": "grass_side",
-    "left": "grass_side",
-    "right": "grass_side",
+    "north": "grass",
+    "south": "grass",
+    "left": "grass",
+    "right": "grass",
     "up": "grass",
     "down": "dirt"
   },
   "loot": {"item":"bb:grass","count": 1}
-
 }

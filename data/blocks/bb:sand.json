@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "cube",
+    "north": "sand",
+    "south": "sand",
+    "left": "sand",
+    "right": "sand",
+    "up": "sand",
+    "down": "sand"
+  },
+  "loot": {"item":"bb:sand","count": 1}
+}

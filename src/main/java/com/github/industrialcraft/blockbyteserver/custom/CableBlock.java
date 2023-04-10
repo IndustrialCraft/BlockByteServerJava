@@ -7,6 +7,7 @@ import com.github.industrialcraft.blockbyteserver.loot.LootTable;
 import com.github.industrialcraft.blockbyteserver.util.*;
 import com.github.industrialcraft.blockbyteserver.world.*;
 import com.github.industrialcraft.identifier.Identifier;
+import com.github.industrialcraft.inventorysystem.ItemStack;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -67,10 +68,6 @@ public class CableBlock extends AbstractBlock {
             }
         }
         return new CableBlockInstance(this, x + (chunk.position.x()*16), y + (chunk.position.y()*16), z + (chunk.position.z()*16), chunk, connectionState);
-    }
-    @Override
-    public LootTable getLootTable() {
-        return null;
     }
     @Override
     public void registerRenderData(HashMap<Integer, BlockRegistry.BlockRenderData> renderData) {
@@ -150,6 +147,17 @@ public class CableBlock extends AbstractBlock {
                 }
             }
         }
+
+        @Override
+        public float getBlockBreakingTime(ItemStack item, PlayerEntity player) {
+            return 0;
+        }
+
+        @Override
+        public List<ItemStack> getLoot(PlayerEntity player) {
+            return null;
+        }
+
         @Override
         public void serialize(DataOutputStream stream) throws IOException {
             stream.writeByte(connectionState);

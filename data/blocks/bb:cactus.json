@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "cube",
+    "north": "cactus",
+    "south": "cactus",
+    "left": "cactus",
+    "right": "cactus",
+    "up": "cactus",
+    "down": "cactus"
+  },
+  "loot": {"item":"bb:cactus","count": 1}
+}

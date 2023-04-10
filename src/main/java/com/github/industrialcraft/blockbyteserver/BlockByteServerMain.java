@@ -1,29 +1,19 @@
 package com.github.industrialcraft.blockbyteserver;
 
 import com.github.industrialcraft.blockbyteserver.content.*;
-import com.github.industrialcraft.blockbyteserver.custom.CableBlock;
-import com.github.industrialcraft.blockbyteserver.custom.ChestBlock;
-import com.github.industrialcraft.blockbyteserver.custom.ConveyorBlock;
-import com.github.industrialcraft.blockbyteserver.custom.CrusherMachineBlock;
+import com.github.industrialcraft.blockbyteserver.custom.*;
 import com.github.industrialcraft.blockbyteserver.net.WSServer;
-import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
-import com.github.industrialcraft.blockbyteserver.util.ChunkPosition;
-import com.github.industrialcraft.blockbyteserver.util.ISerializable;
-import com.github.industrialcraft.blockbyteserver.util.Position;
+import com.github.industrialcraft.blockbyteserver.util.*;
 import com.github.industrialcraft.blockbyteserver.world.*;
+import com.github.industrialcraft.blockbyteserver.world.gen.WorldGenerator;
 import com.github.industrialcraft.identifier.Identifier;
 import com.github.industrialcraft.inventorysystem.ItemStack;
 import com.google.gson.*;
 import org.java_websocket.WebSocket;
-import org.spongepowered.noise.Noise;
-import org.spongepowered.noise.NoiseQuality;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class BlockByteServerMain {
@@ -31,6 +21,7 @@ public class BlockByteServerMain {
         new File("world").mkdir();
         BlockRegistry blockRegistry = new BlockRegistry();
         blockRegistry.loadDirectory(new File("data/blocks"));
+        blockRegistry.loadBlock(Identifier.of("bb", "log"), LogBlock::new);
         blockRegistry.loadBlock(Identifier.of("bb", "crusher"), clientId -> {
             JsonObject blockRenderData = new JsonObject();
             blockRenderData.addProperty("type", "cube");
@@ -92,62 +83,30 @@ public class BlockByteServerMain {
             var renderData = new BlockRegistry.BlockRenderData(blockRenderData);
             return new ConveyorBlock(clientId, renderData, renderData, renderData, renderData);
         });
+        blockRegistry.postInit();
         ItemRegistry itemRegistry = new ItemRegistry();
         itemRegistry.loadDirectory(new File("data/items"));
+        itemRegistry.register(Identifier.of("bb", "rock"), clientId -> new BlockByteItem(Identifier.of("bb", "rock"), 5, new ItemRenderData("rock", "texture", "rock"), clientId, Identifier.of("bb", "rock")){
+            @Override
+            public void onRightClick(ItemStack stack, PlayerEntity player, boolean shifting) {
+                if(stack.getCount() >= 2) {
+                    stack.removeCount(2);
+                    player.updateHand();
+                    player.setGui(new KnappingScreen(player, player.inventory, ((BlockByteItem)stack.getItem()).id));
+                }
+            }
+        });
         RecipeRegistry recipeRegistry = new RecipeRegistry();
         recipeRegistry.registerCreator(Identifier.of("bb", "crushing"), CrusherMachineBlock.CrusherRecipe::new);
+        recipeRegistry.registerCreator(Identifier.of("bb", "knapping"), KnappingScreen.KnappingRecipe::new);
         recipeRegistry.loadDirectory(new File("data/recipes"));
         EntityRegistry entityRegistry = new EntityRegistry();
         entityRegistry.register(Identifier.of("bb", "player"), "player.bbmodel", "player", 0.6f, 1.7f, 0.6f);
         entityRegistry.register(Identifier.of("bb", "item"), "item.bbmodel", "", 0.5f, 0.5f, 0.5f);
-        Structure tree = new Structure((JsonArray) JsonParser.parseString(Files.readString(Path.of("data/structures/tree.json"))), blockRegistry);
-        World world = new World(blockRegistry, itemRegistry, recipeRegistry, entityRegistry, new IChunkGenerator() {
-            @Override
-            public void generateChunk(AbstractBlockInstance[] blocks, ChunkPosition position, World world, Chunk chunk) {
-                for (int x = 0; x < 16; x++) {
-                    for (int z = 0; z < 16; z++) {
-                        //System.out.println(((position.x()*16)+x) + ":" + ((position.z()*16)+z) + ":" + noise.evaluateNoise((position.x()*16)+x, (position.z()*16)+z, 10));
-                        float scale = 0.05f;
-                        int height = (int) (Noise.gradientCoherentNoise3D((((position.x() * 16) + x) * scale), (((position.z() * 16) + z) * scale), 0, 4321, NoiseQuality.FAST) * 30);
-                        for (int y = 0; y < 16; y++) {
-                            AbstractBlock block;
-                            if (y + (position.y() * 16) < height + 20 - 5) {
-                                block = world.blockRegistry.getBlock(Identifier.of("bb", "cobble"));
-                            } else if (y + (position.y() * 16) < height + 20 - 1) {
-                                block = world.blockRegistry.getBlock(Identifier.of("bb", "dirt"));
-                            } else if (y + (position.y() * 16) < height + 20) {
-                                block = world.blockRegistry.getBlock(Identifier.of("bb", "grass"));
-                            } else {
-                                block = SimpleBlock.AIR;
-                            }
-                            blocks[x + (y * 16) + z * (16 * 16)] = block.createBlockInstance(chunk, x, y, z, null);
-                        }
-                    }
-                }
-            }
-            @Override
-            public void populate(Chunk chunk) {
-                var position = chunk.position;
-                float scale = 0.05f;
-                Random random = new Random(position.x() + position.y()*10 + position.z()*100);
-                int treeX = random.nextInt(16);
-                int treeZ = random.nextInt(16);
-                int height = (int) (Noise.gradientCoherentNoise3D((((position.x() * 16) + treeX) * scale), (((position.z() * 16) + treeZ) * scale), 0, 4321, NoiseQuality.FAST) * 30) + 20;
-                if(height/16 == chunk.position.y()) {
-                    tree.place(chunk.parent, new BlockPosition(position.x() * 16 + treeX, height, position.z() * 16 + treeZ));
-                }
-                int rockX = random.nextInt(16);
-                int rockZ = random.nextInt(16);
-                int rockHeight = (int) (Noise.gradientCoherentNoise3D((((position.x() * 16) + rockX) * scale), (((position.z() * 16) + rockZ) * scale), 0, 4321, NoiseQuality.FAST) * 30) + 20;
-                if(rockHeight/16 == chunk.position.y()) {
-                    chunk.parent.setBlock(new BlockPosition(position.x() * 16 + rockX, rockHeight, position.z() * 16 + rockZ), blockRegistry.getBlock(Identifier.of("bb", "rock")), null);
-                }
-            }
-
-        }, new IWorldSERDE() {
+        World world = new World(blockRegistry, itemRegistry, recipeRegistry, entityRegistry, new WorldGenerator(blockRegistry, 5555), new IWorldSERDE() {
             @Override
             public void save(Chunk chunk) {
-                try {
+                /*try {
                     FileOutputStream fstream = new FileOutputStream("world/chunk" + chunk.position.x() + "," + chunk.position.y() + "," + chunk.position.z());
                     DataOutputStream stream = new DataOutputStream(fstream);
                     stream.writeBoolean(chunk.isPopulated());
@@ -185,7 +144,7 @@ public class BlockByteServerMain {
                     stream.close();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
-                }
+                }*/
             }
             @Override
             public boolean load(Chunk chunk, AbstractBlockInstance[] blocks) {
@@ -210,7 +169,9 @@ public class BlockByteServerMain {
                                     ByteArrayInputStream blockData = new ByteArrayInputStream(stream.readNBytes(length));
                                     data = new DataInputStream(blockData);
                                 }
-                                blocks[x + (y * 16) + z * (16 * 16)] = block.createBlockInstance(chunk, x, y, z, data);
+                                int offset = x + (y * 16) + z * (16 * 16);
+                                AbstractBlockInstance blockInstance = block.createBlockInstance(chunk, x, y, z, data);
+                                blocks[offset] = blockInstance;
                             }
                         }
                     }

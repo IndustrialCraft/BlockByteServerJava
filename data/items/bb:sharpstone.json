@@ -1,0 +1,10 @@
+{
+  "name": "sharpstone",
+  "model": {"type":"texture","value":"cobble"},
+  "stackSize": 1,
+  "tool": {
+    "type": "knife",
+    "level": 0,
+    "speed": 1.0
+  }
+}

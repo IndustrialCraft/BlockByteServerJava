@@ -1,15 +1,16 @@
 {
   "model": {
     "type": "static",
-    "model": "rock",
-    "texture": "cobble",
+    "model": "daisy",
+    "texture": "daisy",
     "up": false,
     "down": false,
     "left": false,
     "right": false,
     "north": false,
     "south": false,
-    "no_collide": true
-  },
-  "loot": {"item":"bb:rock","count": 1}
+    "render_data": 2,
+    "no_collide": true,
+    "foliage": true
+  }
 }

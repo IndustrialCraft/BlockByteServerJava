@@ -1,0 +1,6 @@
+{
+  "name": "sand",
+  "model": {"type":"block","value":"bb:sand"},
+  "stackSize": 10,
+  "place": "bb:sand"
+}

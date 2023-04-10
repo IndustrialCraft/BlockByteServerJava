@@ -1,0 +1,6 @@
+{
+  "name": "cactus",
+  "model": {"type":"block","value":"bb:cactus"},
+  "stackSize": 10,
+  "place": "bb:cactus"
+}

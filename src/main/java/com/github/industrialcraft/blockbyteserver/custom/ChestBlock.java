@@ -12,9 +12,7 @@ import com.github.industrialcraft.inventorysystem.ItemStack;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -51,10 +49,6 @@ public class ChestBlock extends AbstractBlock {
     public boolean onRightClick(World world, BlockPosition blockPosition, AbstractBlockInstance instance, PlayerEntity player) {
         player.setGui(new ChestGUI(player, instance));
         return true;
-    }
-    @Override
-    public LootTable getLootTable() {
-        return null;
     }
     @Override
     public void registerRenderData(HashMap<Integer, BlockRegistry.BlockRenderData> renderData) {
@@ -100,7 +94,7 @@ public class ChestBlock extends AbstractBlock {
         }
         @Override
         public void onDestroy() {
-            ItemScatterer.scatter(List.of(inventory.saveContent().stacks), world, new Position(x + 0.25f, y + 0.25f, z + 0.25f), 0.5f);
+            ItemScatterer.scatter(inventory.saveContent().stacks, world, new Position(x + 0.25f, y + 0.25f, z + 0.25f), 0.5f);
             this.isValid = false;
         }
         @Override
@@ -128,6 +122,16 @@ public class ChestBlock extends AbstractBlock {
         @Override
         public void postSet(Chunk chunk, int x, int y, int z) {
 
+        }
+
+        @Override
+        public float getBlockBreakingTime(ItemStack item, PlayerEntity player) {
+            return 1;
+        }
+
+        @Override
+        public List<ItemStack> getLoot(PlayerEntity player) {
+            return null;
         }
 
         @Override
