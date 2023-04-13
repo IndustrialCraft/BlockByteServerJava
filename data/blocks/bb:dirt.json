@@ -8,5 +8,8 @@
     "up": "dirt",
     "down": "dirt"
   },
-  "loot": {"item":"bb:dirt","count": 1}
+  "loot": {"item":"bb:dirt","count": 1},
+  "toolType": "shovel",
+  "minToolLevel":1,
+  "blockHardness": 2.0
 }

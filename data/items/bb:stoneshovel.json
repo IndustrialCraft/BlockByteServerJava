@@ -1,0 +1,10 @@
+{
+  "name": "stone shovel",
+  "model": {"type":"texture","value":"cobble"},
+  "stackSize": 1,
+  "tool": {
+    "type": "shovel",
+    "level": 1,
+    "speed": 1.0
+  }
+}

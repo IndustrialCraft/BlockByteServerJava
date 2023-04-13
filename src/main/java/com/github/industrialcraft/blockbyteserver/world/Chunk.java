@@ -129,9 +129,9 @@ public class Chunk {
             this.tickingBlocks.add(blockOffset);
         }
 
-        BlockPosition blockPosition = new BlockPosition(x, y, z);
         for(EFace face : EFace.values()){
-            parent.getBlock(new BlockPosition((x + (position.x()*16)) + face.xOffset, (y + (position.y()*16)) + face.yOffset, (z + (position.z() * 16)) + face.zOffset)).onNeighborUpdate(blockPosition, instance, newInstance, face.opposite());
+            BlockPosition blockPosition = new BlockPosition((x + (position.x()*16)) + face.xOffset, (y + (position.y()*16)) + face.yOffset, (z + (position.z() * 16)) + face.zOffset);
+            parent.getBlock(blockPosition).onNeighborUpdate(parent, blockPosition, instance, newInstance, face.opposite());
         }
 
         newInstance.postSet(this, x, y, z);

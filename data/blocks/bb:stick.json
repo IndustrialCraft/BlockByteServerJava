@@ -2,7 +2,7 @@
   "model": {
     "type": "static",
     "model": "stick",
-    "texture": "stick",
+    "texture": "log",
     "up": false,
     "down": false,
     "left": false,

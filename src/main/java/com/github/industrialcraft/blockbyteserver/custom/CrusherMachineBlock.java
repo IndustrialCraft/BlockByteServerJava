@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CrusherMachineBlock extends SimpleBlock {
     public static final int MAX_PROGRESS = 100;
     public CrusherMachineBlock(BlockRegistry.BlockRenderData renderData, AtomicInteger clientId, LootTable lootTable) {
-        super(renderData, clientId, lootTable, Identifier.of("bb","crusher"), null, 0, 1);
+        super(renderData, clientId, lootTable, Identifier.of("bb","crusher"), null, 0, 1, false);
     }
     @Override
     public SimpleBlockInstance createBlockInstance(Chunk chunk, int x, int y, int z, Object data) {
@@ -85,7 +85,7 @@ public class CrusherMachineBlock extends SimpleBlock {
         public void onSentToPlayer(PlayerEntity player) {}
 
         @Override
-        public void onNeighborUpdate(BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {}
+        public void onNeighborUpdate(World world, BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {}
 
         @Override
         public void tick() {

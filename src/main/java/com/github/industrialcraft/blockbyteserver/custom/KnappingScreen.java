@@ -12,6 +12,8 @@ import com.github.industrialcraft.inventorysystem.ItemStack;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import java.util.List;
+
 public class KnappingScreen extends InventoryGUI {
     private final Identifier item;
     private final Inventory inventory;
@@ -64,9 +66,8 @@ public class KnappingScreen extends InventoryGUI {
                     player.send(new MessageS2C.GUIData(json));
                 }
                 knapPattern[knapSpaceId] = false;
-                var recipes = player.getChunk().parent.recipeRegistry.getRecipesForType(Identifier.of("bb","knapping"));
-                for (Recipe e : recipes) {
-                    KnappingRecipe recipe = (KnappingRecipe) e;
+                List<KnappingRecipe> recipes = player.getChunk().parent.recipeRegistry.getRecipesForType(Identifier.of("bb","knapping"));
+                for (KnappingRecipe recipe : recipes) {
                     if(recipe.item.equals(item)){
                         boolean incorrect = false;
                         for(int i = 0;i < 25;i++)

@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "cube",
+    "north": "thatch",
+    "south": "thatch",
+    "left": "thatch",
+    "right": "thatch",
+    "up": "thatch",
+    "down": "thatch"
+  },
+  "loot": {"item":"bb:thatch","count": 1}
+}

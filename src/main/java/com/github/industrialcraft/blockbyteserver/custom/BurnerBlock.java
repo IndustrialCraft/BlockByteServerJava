@@ -124,8 +124,7 @@ public class BurnerBlock extends AbstractBlock {
         }
 
         @Override
-        public void onNeighborUpdate(BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {
-            System.out.println("neighbor update from " + position);
+        public void onNeighborUpdate(World world, BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {
         }
 
         @Override

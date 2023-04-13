@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "foliage",
+    "texture1": "yellow_flower",
+    "texture2": "yellow_flower",
+    "render_data": 2,
+    "no_collide": true,
+    "foliage": true
+  },
+  "needsSupport": true,
+  "blockHardness": 0.2
+}

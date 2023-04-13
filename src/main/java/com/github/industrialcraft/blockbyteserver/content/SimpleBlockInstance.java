@@ -6,6 +6,7 @@ import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
 import com.github.industrialcraft.blockbyteserver.util.EFace;
 import com.github.industrialcraft.blockbyteserver.world.Chunk;
 import com.github.industrialcraft.blockbyteserver.world.PlayerEntity;
+import com.github.industrialcraft.blockbyteserver.world.World;
 import com.github.industrialcraft.inventorysystem.ItemStack;
 
 import java.util.List;
@@ -30,7 +31,11 @@ public class SimpleBlockInstance<T extends SimpleBlock> extends AbstractBlockIns
     @Override
     public void onSentToPlayer(PlayerEntity player) {}
     @Override
-    public void onNeighborUpdate(BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {}
+    public void onNeighborUpdate(World world, BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {
+        if(parent.needsSupport && face == EFace.Down && newInstance.parent == SimpleBlock.AIR){
+            world.setBlock(position, SimpleBlock.AIR, null);
+        }
+    }
 
     @Override
     public void postSet(Chunk chunk, int x, int y, int z) {

@@ -6,10 +6,7 @@
     "left": "grass",
     "right": "grass",
     "up": "grass",
-    "down": "dirt"
+    "down": "clay"
   },
-  "loot": {"item":"bb:grass","count": 1},
-  "toolType": "shovel",
-  "minToolLevel":1,
-  "blockHardness": 2.0
+  "loot": {"item":"bb:clay","count": 1}
 }

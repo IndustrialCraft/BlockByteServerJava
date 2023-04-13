@@ -133,7 +133,7 @@ public class ConveyorBlock extends AbstractBlock {
             }
         }
         @Override
-        public void onNeighborUpdate(BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {}
+        public void onNeighborUpdate(World world, BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {}
 
         @Override
         public void postSet(Chunk chunk, int x, int y, int z) {

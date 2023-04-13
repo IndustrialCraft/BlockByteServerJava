@@ -23,7 +23,7 @@ public class BlockBreakingCalculator {
             }
             if(minToolLevel > toolItem.getToolLevel())
                 return -1;
-            return blockHardness/toolItem.getToolSpeed();
+            return ((float)blockHardness)/toolItem.getToolSpeed();
         } else {
             return -1;
         }

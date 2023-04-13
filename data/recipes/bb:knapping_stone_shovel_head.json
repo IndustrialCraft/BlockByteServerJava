@@ -1,0 +1,12 @@
+{
+    "type": "bb:knapping",
+    "item": "bb:rock",
+    "pattern": [
+        false,true,true,true,false,
+        false,true,true,true,false,
+        false,true,true,true,false,
+        false,true,true,true,false,
+        false,false,true,false,false
+    ],
+    "output": "bb:stoneshovelhead"
+}

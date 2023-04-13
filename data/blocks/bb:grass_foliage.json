@@ -1,20 +1,17 @@
 {
   "model": {
-    "type": "static",
-    "model": "grass",
-    "texture": "grass",
-    "up": false,
-    "down": false,
-    "left": false,
-    "right": false,
-    "north": false,
-    "south": false,
+    "type": "foliage",
+    "texture1": "grass_foliage",
+    "texture2": "grass_foliage",
+    "texture3": "grass_foliage",
+    "texture4": "grass_foliage",
     "render_data": 2,
     "no_collide": true,
     "foliage": true
   },
+  "needsSupport": true,
   "toolType": "knife",
   "minToolLevel":0,
   "blockHardness": 1.0,
-  "loot": {"item":"bb:cobble","count": 1}
+  "loot": {"item":"bb:grass_fiber","count": 1}
 }

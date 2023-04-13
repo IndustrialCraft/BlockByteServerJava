@@ -4,11 +4,10 @@ import com.github.industrialcraft.blockbyteserver.content.AbstractBlock;
 import com.github.industrialcraft.blockbyteserver.content.AbstractBlockInstance;
 import com.github.industrialcraft.blockbyteserver.content.BlockRegistry;
 import com.github.industrialcraft.blockbyteserver.loot.LootTable;
-import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
-import com.github.industrialcraft.blockbyteserver.util.EFace;
-import com.github.industrialcraft.blockbyteserver.util.ISerializable;
+import com.github.industrialcraft.blockbyteserver.util.*;
 import com.github.industrialcraft.blockbyteserver.world.Chunk;
 import com.github.industrialcraft.blockbyteserver.world.PlayerEntity;
+import com.github.industrialcraft.blockbyteserver.world.World;
 import com.github.industrialcraft.identifier.Identifier;
 import com.github.industrialcraft.inventorysystem.ItemStack;
 import com.google.gson.JsonArray;
@@ -17,6 +16,7 @@ import com.google.gson.JsonObject;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -179,7 +179,7 @@ public class LogBlock extends AbstractBlock {
     }
     @Override
     public int getDefaultClientId() {
-        return this.clientId;
+        return this.clientId+7;
     }
 
     @Override
@@ -208,12 +208,21 @@ public class LogBlock extends AbstractBlock {
         public boolean isValid() {
             return true;
         }
-
+        @Override
+        public void onBreak(PlayerEntity player, int x, int y, int z) {
+            for(EFace face : EFace.values()){
+                BlockPosition neighborPos = new BlockPosition(x + face.xOffset, y + face.yOffset, z + face.zOffset);
+                AbstractBlockInstance neighbor = player.getChunk().parent.getBlock(neighborPos);
+                if(neighbor.parent == this.parent){
+                    player.breakAsPlayer(neighborPos);
+                }
+            }
+        }
         @Override
         public void onSentToPlayer(PlayerEntity player) {}
 
         @Override
-        public void onNeighborUpdate(BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {}
+        public void onNeighborUpdate(World world, BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {}
 
         @Override
         public void postSet(Chunk chunk, int x, int y, int z) {}
@@ -225,12 +234,14 @@ public class LogBlock extends AbstractBlock {
 
         @Override
         public float getBlockBreakingTime(ItemStack item, PlayerEntity player) {
-            return 1;
+            return BlockBreakingCalculator.calculateBlockBreakingTime(item, ETool.AXE, 1, 10);
         }
 
         @Override
         public List<ItemStack> getLoot(PlayerEntity player) {
-            return null;
+            ArrayList<ItemStack> loot = new ArrayList<>();
+            loot.add(new ItemStack(player.getChunk().parent.itemRegistry.getItem(Identifier.of("bb","log")), 1));
+            return loot;
         }
     }
 }

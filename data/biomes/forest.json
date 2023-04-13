@@ -34,6 +34,11 @@
       "structure": "grass",
       "chance": 0.1,
       "replace": false
+    },
+    {
+      "structure": "clay_patch",
+      "chance": 0.0005,
+      "replace": false
     }
   ]
 }

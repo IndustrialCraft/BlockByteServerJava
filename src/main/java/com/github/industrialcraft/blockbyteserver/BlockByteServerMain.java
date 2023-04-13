@@ -99,6 +99,7 @@ public class BlockByteServerMain {
         RecipeRegistry recipeRegistry = new RecipeRegistry();
         recipeRegistry.registerCreator(Identifier.of("bb", "crushing"), CrusherMachineBlock.CrusherRecipe::new);
         recipeRegistry.registerCreator(Identifier.of("bb", "knapping"), KnappingScreen.KnappingRecipe::new);
+        recipeRegistry.registerCreator(Identifier.of("bb", "crafting"), PlayerInventoryGUI.CraftingRecipe::new);
         recipeRegistry.loadDirectory(new File("data/recipes"));
         EntityRegistry entityRegistry = new EntityRegistry();
         entityRegistry.register(Identifier.of("bb", "player"), "player.bbmodel", "player", 0.6f, 1.7f, 0.6f);

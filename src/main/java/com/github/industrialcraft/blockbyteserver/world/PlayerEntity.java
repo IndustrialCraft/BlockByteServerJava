@@ -1,6 +1,7 @@
 package com.github.industrialcraft.blockbyteserver.world;
 
 import com.github.industrialcraft.blockbyteserver.content.AbstractBlockInstance;
+import com.github.industrialcraft.blockbyteserver.content.PlayerInventoryGUI;
 import com.github.industrialcraft.blockbyteserver.content.SimpleBlock;
 import com.github.industrialcraft.blockbyteserver.content.BlockByteItem;
 import com.github.industrialcraft.blockbyteserver.net.MessageC2S;
@@ -111,14 +112,8 @@ public class PlayerEntity extends Entity implements IHealthEntity{
             json.addProperty("lock", true);
             PlayerEntity.this.send(new MessageS2C.GUIData(json));
         }
-        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","cobble")), 3));
-        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","crusher")), 3));
-        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
-        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","chest")), 1));
-        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","conveyor")), 1));
-        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","conveyor")), 1));
-        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","conveyor")), 1));
-        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","cable")), 100));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","stoneaxe")), 1));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","stoneshovel")), 1));
     }
     public void setGui(GUI newGui){
         if(this.gui != null)
@@ -165,14 +160,7 @@ public class PlayerEntity extends Entity implements IHealthEntity{
                 this.rotation = playerPosition.rotation;
             }
             if(message instanceof MessageC2S.BreakBlock breakBlock){
-                BlockPosition blockPosition = new BlockPosition(breakBlock.x, breakBlock.y, breakBlock.z);
-                AbstractBlockInstance previousBlock = chunk.parent.getBlock(blockPosition);
-                if(previousBlock.parent != SimpleBlock.AIR) {
-                    List<ItemStack> drops = previousBlock.getLoot(this);
-                    if(drops != null)
-                        ItemScatterer.scatter(drops, chunk.parent, new Position(blockPosition.x() + 0.25f, blockPosition.y() + 0.25f, blockPosition.z() + 0.25f), 0.25f);
-                    chunk.parent.setBlock(blockPosition, SimpleBlock.AIR, null);
-                }
+                breakAsPlayer(new BlockPosition(breakBlock.x, breakBlock.y, breakBlock.z));
             }
             if(message instanceof MessageC2S.RightClickBlock rightClickBlock){
                 boolean placeCancelled = false;
@@ -214,7 +202,7 @@ public class PlayerEntity extends Entity implements IHealthEntity{
                     if (slot >= 0 && slot <= 8) {
                         setSlot(slot);
                     }
-                    if(keyboard.key == 113){
+                    if(keyboard.key == 113){//Q
                         ItemStack handItem = getItemInHand();
                         if(handItem != null) {
                             ItemStack toDrop = handItem.clone(1);
@@ -223,6 +211,9 @@ public class PlayerEntity extends Entity implements IHealthEntity{
                             float power = 0.7f;
                             new ItemEntity(getPosition().add(0, 1.75f, 0), chunk.parent, toDrop).addVelocity((float) Math.sin(Math.toRadians(rotation)) * power, 0, (float) Math.cos(Math.toRadians(rotation)) * power);
                         }
+                    }
+                    if(keyboard.key == 101){//E
+                        this.setGui(new PlayerInventoryGUI(this, this.inventory));
                     }
                 }
             }
@@ -261,6 +252,16 @@ public class PlayerEntity extends Entity implements IHealthEntity{
         if(this.gui != null){
             if(!this.gui.tick())
                 setGui(null);
+        }
+    }
+    public void breakAsPlayer(BlockPosition blockPosition){
+        AbstractBlockInstance previousBlock = chunk.parent.getBlock(blockPosition);
+        if(previousBlock.parent != SimpleBlock.AIR) {
+            List<ItemStack> drops = previousBlock.getLoot(this);
+            if(drops != null)
+                ItemScatterer.scatter(drops, chunk.parent, new Position(blockPosition.x() + 0.25f, blockPosition.y() + 0.25f, blockPosition.z() + 0.25f), 0.25f);
+            chunk.parent.setBlock(blockPosition, SimpleBlock.AIR, null);
+            previousBlock.onBreak(this, blockPosition.x(), blockPosition.y(), blockPosition.z());
         }
     }
     public void setSlot(int slot) {//todo: clamp

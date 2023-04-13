@@ -123,7 +123,7 @@ public class CableBlock extends AbstractBlock {
         public void onSentToPlayer(PlayerEntity player) {}
 
         @Override
-        public void onNeighborUpdate(BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {
+        public void onNeighborUpdate(World world, BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {
             if(previousInstance.parent == newInstance.parent)
                 return;
             if(newInstance instanceof PowerGraph.IPowerGraphComponent powerGraphComponent){

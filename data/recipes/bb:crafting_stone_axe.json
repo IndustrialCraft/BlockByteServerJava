@@ -1,0 +1,11 @@
+{
+    "type": "bb:crafting",
+    "pattern": [
+        "bb:stoneaxehead","bb:grass_twine",null,
+        "bb:stick",null,null,
+        null,null,null,
+        null,null,null,
+        null,null,null
+    ],
+    "output": "bb:stoneaxe"
+}

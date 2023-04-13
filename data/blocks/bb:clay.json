@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "cube",
+    "north": "clay",
+    "south": "clay",
+    "left": "clay",
+    "right": "clay",
+    "up": "clay",
+    "down": "clay"
+  },
+  "loot": {"item":"bb:clay","count": 1}
+}

@@ -1,0 +1,6 @@
+{
+  "name": "thatch",
+  "model": {"type":"block","value":"bb:thatch"},
+  "stackSize": 10,
+  "place": "bb:thatch"
+}

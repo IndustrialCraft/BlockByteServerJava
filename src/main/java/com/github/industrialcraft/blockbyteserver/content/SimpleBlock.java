@@ -22,7 +22,8 @@ public class SimpleBlock extends AbstractBlock{
     public final ETool tool;
     public final int minToolLevel;
     public final float blockHardness;
-    public SimpleBlock(BlockRegistry.BlockRenderData renderData, AtomicInteger clientIdGenerator, LootTable lootTable, Identifier identifier, ETool tool, int minToolLevel, float blockHardness) {
+    public final boolean needsSupport;
+    public SimpleBlock(BlockRegistry.BlockRenderData renderData, AtomicInteger clientIdGenerator, LootTable lootTable, Identifier identifier, ETool tool, int minToolLevel, float blockHardness, boolean needsSupport) {
         this.renderData = renderData;
         this.clientId = clientIdGenerator.getAndIncrement();
         this.lootTable = lootTable;
@@ -30,6 +31,7 @@ public class SimpleBlock extends AbstractBlock{
         this.tool = tool;
         this.minToolLevel = minToolLevel;
         this.blockHardness = blockHardness;
+        this.needsSupport = needsSupport;
         this.instance = new SimpleBlockInstance(this);
     }
     private SimpleBlock(){//air
@@ -41,6 +43,7 @@ public class SimpleBlock extends AbstractBlock{
         this.tool = null;
         this.minToolLevel = 0;
         this.blockHardness = 0;
+        this.needsSupport = false;
     }
     @Override
     public int getDefaultClientId() {
