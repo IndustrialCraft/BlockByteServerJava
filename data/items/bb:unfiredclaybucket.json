@@ -1,0 +1,5 @@
+{
+  "name": "unfired clay bucket",
+  "model": {"type":"texture","value":"unfiredclaybucket"},
+  "stackSize": 1
+}

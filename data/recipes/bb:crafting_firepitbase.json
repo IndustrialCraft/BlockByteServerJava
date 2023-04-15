@@ -1,0 +1,11 @@
+{
+    "type": "bb:crafting",
+    "pattern": [
+        "bb:grass_fiber","bb:grass_fiber","bb:grass_fiber",
+        null,null,null,
+        null,null,null,
+        null,null,null,
+        null,null,null
+    ],
+    "output": "bb:firepitbase"
+}

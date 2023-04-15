@@ -64,7 +64,9 @@ public class ItemRegistry {
                 }
             };
         } else {
-            item = new BlockByteItem(id, json.get("stackSize").getAsInt(), renderData, clientIds, place == null ? null : Identifier.parse(place.getAsString()));
+            JsonObject knappingJson = (JsonObject) json.get("knapping");
+            BlockByteItem.KnappingData knappingData = knappingJson==null?null:new BlockByteItem.KnappingData(knappingJson.get("count").getAsInt(), knappingJson.get("bitTexture").getAsString());
+            item = new BlockByteItem(id, json.get("stackSize").getAsInt(), renderData, clientIds, place == null ? null : Identifier.parse(place.getAsString()), knappingData);
         }
         clientIds++;
         items.put(id, item);
@@ -81,7 +83,7 @@ public class ItemRegistry {
     }
     public abstract class BlockByteToolItem extends BlockByteItem implements ITool{
         public BlockByteToolItem(Identifier id, int maxStackSize, ItemRenderData itemRenderData, int clientId, Identifier place) {
-            super(id, maxStackSize, itemRenderData, clientId, place);
+            super(id, maxStackSize, itemRenderData, clientId, place, null);
         }
     }
 }

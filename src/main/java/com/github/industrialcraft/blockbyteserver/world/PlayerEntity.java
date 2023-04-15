@@ -18,6 +18,7 @@ import org.java_websocket.WebSocket;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class PlayerEntity extends Entity implements IHealthEntity{
@@ -28,6 +29,8 @@ public class PlayerEntity extends Entity implements IHealthEntity{
     private int slot;
     private GUI gui;
     private float health;
+    private float actionbarTimer;
+    private ItemStack lastHandItem;
     public PlayerEntity(Position position, World world, WebSocket socket) {
         super(position, world);
         this.socket = socket;
@@ -112,8 +115,31 @@ public class PlayerEntity extends Entity implements IHealthEntity{
             json.addProperty("lock", true);
             PlayerEntity.this.send(new MessageS2C.GUIData(json));
         }
-        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","stoneaxe")), 1));
+        {
+            JsonObject json = new JsonObject();
+            json.addProperty("id", "actionbar");
+            json.addProperty("type", "setElement");
+            json.addProperty("element_type", "text");
+            json.addProperty("x", 0);setActionBar("ahgfdgiufd");
+            json.addProperty("y", -0.3);
+            json.addProperty("center", true);
+            PlayerEntity.this.send(new MessageS2C.GUIData(json));
+        }
+        //this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","stoneaxe")), 1));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","stoneshovel")), 1));
+        //this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","sharpstone")), 1));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","firepitbase")), 1));
+        this.actionbarTimer = -1;
+        this.lastHandItem = null;
+    }
+    public void setActionBar(String message){
+        JsonObject json = new JsonObject();
+        json.addProperty("id", "actionbar");
+        json.addProperty("type", "editElement");
+        json.addProperty("data_type", "text");
+        json.addProperty("text", message);
+        PlayerEntity.this.send(new MessageS2C.GUIData(json));
+        this.actionbarTimer = 40;
     }
     public void setGui(GUI newGui){
         if(this.gui != null)
@@ -248,6 +274,29 @@ public class PlayerEntity extends Entity implements IHealthEntity{
                 }
             }
             message = this.messages.poll();
+        }
+        if(!Objects.equals(lastHandItem, getItemInHand())){
+            ItemStack hand = getItemInHand();
+            if(hand != null) {
+                setActionBar(((BlockByteItem)hand.getItem()).itemRenderData.name());
+                lastHandItem = hand.clone();
+            } else {
+                setActionBar("");
+                lastHandItem = null;
+            }
+            //todo: call onEquip on item
+        }
+        if(actionbarTimer > 0){
+            actionbarTimer--;
+            if(actionbarTimer == 0){
+                JsonObject json = new JsonObject();
+                json.addProperty("id", "actionbar");
+                json.addProperty("type", "editElement");
+                json.addProperty("data_type", "text");
+                json.addProperty("text", "");
+                PlayerEntity.this.send(new MessageS2C.GUIData(json));
+                actionbarTimer = -1;
+            }
         }
         if(this.gui != null){
             if(!this.gui.tick())

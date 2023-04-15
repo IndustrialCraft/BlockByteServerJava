@@ -17,7 +17,7 @@ dependencies {
     implementation 'org.java-websocket:Java-WebSocket:1.5.3'
     implementation 'com.google.guava:guava:31.1-jre'
     implementation 'com.github.industrialcraft:identifier:fd2e641267'
-    implementation 'com.github.industrialcraft:inventorysystem:61899c57d1'
+    implementation 'com.github.industrialcraft:inventorysystem:f0aaaf1516'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'net.mikera:vectorz:0.67.0'
 }

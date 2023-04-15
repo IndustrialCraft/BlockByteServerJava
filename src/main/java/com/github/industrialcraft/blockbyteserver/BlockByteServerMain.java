@@ -83,23 +83,15 @@ public class BlockByteServerMain {
             var renderData = new BlockRegistry.BlockRenderData(blockRenderData);
             return new ConveyorBlock(clientId, renderData, renderData, renderData, renderData);
         });
+        blockRegistry.loadBlock(Identifier.of("bb", "fire_pit"), FirePitBlock::new);
         blockRegistry.postInit();
         ItemRegistry itemRegistry = new ItemRegistry();
         itemRegistry.loadDirectory(new File("data/items"));
-        itemRegistry.register(Identifier.of("bb", "rock"), clientId -> new BlockByteItem(Identifier.of("bb", "rock"), 5, new ItemRenderData("rock", "texture", "rock"), clientId, Identifier.of("bb", "rock")){
-            @Override
-            public void onRightClick(ItemStack stack, PlayerEntity player, boolean shifting) {
-                if(stack.getCount() >= 2) {
-                    stack.removeCount(2);
-                    player.updateHand();
-                    player.setGui(new KnappingScreen(player, player.inventory, ((BlockByteItem)stack.getItem()).id));
-                }
-            }
-        });
         RecipeRegistry recipeRegistry = new RecipeRegistry();
         recipeRegistry.registerCreator(Identifier.of("bb", "crushing"), CrusherMachineBlock.CrusherRecipe::new);
         recipeRegistry.registerCreator(Identifier.of("bb", "knapping"), KnappingScreen.KnappingRecipe::new);
         recipeRegistry.registerCreator(Identifier.of("bb", "crafting"), PlayerInventoryGUI.CraftingRecipe::new);
+        recipeRegistry.registerCreator(Identifier.of("bb", "fire_pit"), FirePitBlock.FirePitRecipe::new);
         recipeRegistry.loadDirectory(new File("data/recipes"));
         EntityRegistry entityRegistry = new EntityRegistry();
         entityRegistry.register(Identifier.of("bb", "player"), "player.bbmodel", "player", 0.6f, 1.7f, 0.6f);

@@ -19,9 +19,11 @@ public class KnappingScreen extends InventoryGUI {
     private final Inventory inventory;
     private boolean finished;
     private boolean[] knapPattern;
-    public KnappingScreen(PlayerEntity player, Inventory transferInventory, Identifier item) {
+    public final String bitTexture;
+    public KnappingScreen(PlayerEntity player, Inventory transferInventory, Identifier item, String bitTexture) {
         super(player, transferInventory);
         this.item = item;
+        this.bitTexture = bitTexture;
         inventory = new BasicVersionedInventory(1, null, null);
         this.slots.put("gui_output", new Slot(inventory, 0, 0.5f, 0f, transferInventory, true));
         for(int x = 0;x < 5;x++) {
@@ -30,7 +32,7 @@ public class KnappingScreen extends InventoryGUI {
                 json.addProperty("id", "gui_knapping_" + (x+(y*5)));
                 json.addProperty("type", "setElement");
                 json.addProperty("element_type", "image");
-                json.addProperty("texture", "cobble");
+                json.addProperty("texture", bitTexture);
                 json.addProperty("y", -0.25+((4-y)*0.1));
                 json.addProperty("x", -0.5+(x*0.1));
                 json.addProperty("w", 0.1f);

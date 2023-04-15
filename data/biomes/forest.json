@@ -38,7 +38,7 @@
     {
       "structure": "clay_patch",
       "chance": 0.0005,
-      "replace": false
+      "replace": true
     }
   ]
 }

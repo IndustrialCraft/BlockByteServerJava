@@ -2,5 +2,9 @@
   "name": "clay",
   "model": {"type":"block","value":"bb:clay"},
   "stackSize": 10,
-  "place": "bb:clay"
+  "place": "bb:clay",
+  "knapping": {
+    "count": 1,
+    "bitTexture": "clay"
+  }
 }
