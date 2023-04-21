@@ -156,6 +156,14 @@ public class LogBlock extends AbstractBlock {
             blockRenderData[7] = new BlockRegistry.BlockRenderData(renderData);
         }
     }
+    @Override
+    public boolean canPlace(PlayerEntity player, int x, int y, int z, World world) {
+        return true;
+    }
+    @Override
+    public boolean isNoCollide() {
+        return false;
+    }
 
     @Override
     public AbstractBlockInstance<LogBlock> createBlockInstance(Chunk chunk, int x, int y, int z, Object data) {

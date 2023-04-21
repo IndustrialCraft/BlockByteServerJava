@@ -1,6 +1,6 @@
 {
   "name": "rock",
-  "model": {"type":"texture","value":"rock"},
+  "model": {"type":"texture","value":"rock_item"},
   "stackSize": 10,
   "place": "bb:rock",
   "knapping": {

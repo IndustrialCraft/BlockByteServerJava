@@ -72,6 +72,15 @@ public class BurnerBlock extends AbstractBlock {
         return true;
     }
 
+    @Override
+    public boolean canPlace(PlayerEntity player, int x, int y, int z, World world) {
+        return true;
+    }
+    @Override
+    public boolean isNoCollide() {
+        return false;
+    }
+
     public static class ChestBlockInstance extends AbstractBlockInstance<BurnerBlock> implements IInventoryBlock, ISerializable{
         public final int x;
         public final int y;

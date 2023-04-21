@@ -6,7 +6,7 @@ public class BlockBreakingCalculator {
     public static float calculateBlockBreakingTime(ItemStack item, ETool tool, int minToolLevel, float blockHardness){//todo:beautify
         if(tool == null)
             return blockHardness;
-        if(item == null) {
+        if(item == null || (!(item.getItem() instanceof ITool)) || ((ITool)item.getItem()).getToolType()!=tool) {
             if(minToolLevel == 0){
                 return blockHardness;
             } else {

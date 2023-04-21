@@ -8,5 +8,7 @@
     "up": "cobble",
     "down": "cobble"
   },
-  "loot": {"item":"bb:cobble","count": 1}
+  "loot": {"item":"bb:cobble","count": 1},
+  "minToolLevel":1,
+  "blockHardness": 5.0
 }

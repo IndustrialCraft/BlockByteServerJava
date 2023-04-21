@@ -12,5 +12,7 @@
     "render_data": 2,
     "no_collide": true,
     "foliage": true
-  }
+  },
+  "nocollide": true,
+  "needsSupport": true
 }

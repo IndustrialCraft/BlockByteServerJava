@@ -23,7 +23,8 @@ public class SimpleBlock extends AbstractBlock{
     public final int minToolLevel;
     public final float blockHardness;
     public final boolean needsSupport;
-    public SimpleBlock(BlockRegistry.BlockRenderData renderData, AtomicInteger clientIdGenerator, LootTable lootTable, Identifier identifier, ETool tool, int minToolLevel, float blockHardness, boolean needsSupport) {
+    public final boolean isNoCollide;
+    public SimpleBlock(BlockRegistry.BlockRenderData renderData, AtomicInteger clientIdGenerator, LootTable lootTable, Identifier identifier, ETool tool, int minToolLevel, float blockHardness, boolean needsSupport, boolean isNoCollide) {
         this.renderData = renderData;
         this.clientId = clientIdGenerator.getAndIncrement();
         this.lootTable = lootTable;
@@ -32,6 +33,7 @@ public class SimpleBlock extends AbstractBlock{
         this.minToolLevel = minToolLevel;
         this.blockHardness = blockHardness;
         this.needsSupport = needsSupport;
+        this.isNoCollide = isNoCollide;
         this.instance = new SimpleBlockInstance(this);
     }
     private SimpleBlock(){//air
@@ -44,6 +46,7 @@ public class SimpleBlock extends AbstractBlock{
         this.minToolLevel = 0;
         this.blockHardness = 0;
         this.needsSupport = false;
+        this.isNoCollide = true;
     }
     @Override
     public int getDefaultClientId() {
@@ -55,6 +58,14 @@ public class SimpleBlock extends AbstractBlock{
         return identifier;
     }
 
+    @Override
+    public boolean canPlace(PlayerEntity player, int x, int y, int z, World world) {
+        return needsSupport?(!world.getBlock(new BlockPosition(x, y-1, z)).parent.isNoCollide()):true;
+    }
+    @Override
+    public boolean isNoCollide() {
+        return isNoCollide;
+    }
     @Override
     public AbstractBlockInstance createBlockInstance(Chunk chunk, int x, int y, int z, Object data){
         return instance;

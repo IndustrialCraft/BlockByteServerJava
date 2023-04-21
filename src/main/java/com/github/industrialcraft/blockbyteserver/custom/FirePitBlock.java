@@ -26,8 +26,8 @@ public class FirePitBlock extends AbstractBlock {
         for(int i = 0;i < renderData.length;i++){
             JsonObject jsonRenderData = new JsonObject();
             jsonRenderData.addProperty("type", "static");
-            jsonRenderData.addProperty("texture", "log");
-            jsonRenderData.addProperty("model", "fire_put_" + i);
+            jsonRenderData.addProperty("texture", "fire_pit");
+            jsonRenderData.addProperty("model", "fire_pit_" + i);
             renderData[i] = new BlockRegistry.BlockRenderData(jsonRenderData);
         }
         this.clientId = clientId.get();
@@ -59,6 +59,14 @@ public class FirePitBlock extends AbstractBlock {
         return Identifier.of("bb","conveyor");
     }
 
+    @Override
+    public boolean canPlace(PlayerEntity player, int x, int y, int z, World world) {
+        return true;
+    }
+    @Override
+    public boolean isNoCollide() {
+        return false;
+    }
     public static class FirePitBlockInstance extends AbstractBlockInstance<FirePitBlock> implements ITicking {
         public final int x;
         public final int y;
@@ -107,7 +115,7 @@ public class FirePitBlock extends AbstractBlock {
             if(item == null)
                 chunk.announceToViewersExcept(new MessageS2C.BlockRemoveItem(x, y, z, 0), null);
             else
-                chunk.announceToViewersExcept(new MessageS2C.BlockAddItem(x, y, z, 0.25f, 0.1f, 0.25f, 0, ((BlockByteItem) item.getItem()).getClientId()), null);
+                chunk.announceToViewersExcept(new MessageS2C.BlockAddItem(x, y, z, 0.25f, 0.26f, 0.25f, 0, ((BlockByteItem) item.getItem()).getClientId()), null);
         }
         @Override
         public void onNeighborUpdate(World world, BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {}
@@ -139,7 +147,7 @@ public class FirePitBlock extends AbstractBlock {
                 hand.removeCount(1);
                 player.updateHand();
                 resyncItem();
-            } else if(logs < 4 && ((BlockByteItem)hand.getItem()).id.equals(Identifier.of("bb","log"))){
+            } else if(logs < 4 && hand != null && ((BlockByteItem)hand.getItem()).id.equals(Identifier.of("bb","log"))){
                 logs++;
                 hand.removeCount(1);
                 player.updateHand();

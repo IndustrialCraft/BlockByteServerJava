@@ -326,4 +326,18 @@ public abstract class MessageS2C {
             return byteStream.toByteArray();
         }
     }
+    public static class FluidSelectable extends MessageS2C{
+        public final boolean selectable;
+        public FluidSelectable(boolean selectable) {
+            this.selectable = selectable;
+        }
+        @Override
+        public byte[] toBytes() throws IOException {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(byteStream);
+            stream.writeByte(13);
+            stream.writeBoolean(selectable);
+            return byteStream.toByteArray();
+        }
+    }
 }

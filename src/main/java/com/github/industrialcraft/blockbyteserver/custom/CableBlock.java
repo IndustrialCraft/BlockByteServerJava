@@ -88,6 +88,15 @@ public class CableBlock extends AbstractBlock {
         return true;
     }
 
+    @Override
+    public boolean canPlace(PlayerEntity player, int x, int y, int z, World world) {
+        return true;
+    }
+    @Override
+    public boolean isNoCollide() {
+        return false;
+    }
+
     public static class CableBlockInstance extends AbstractBlockInstance<CableBlock> implements ISerializable, PowerGraph.IPowerGraphComponent {
         public final int x;
         public final int y;

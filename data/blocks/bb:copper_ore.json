@@ -1,0 +1,15 @@
+{
+  "model": {
+    "type": "cube",
+    "north": "copper_ore",
+    "south": "copper_ore",
+    "left": "copper_ore",
+    "right": "copper_ore",
+    "up": "copper_ore",
+    "down": "copper_ore"
+  },
+  "loot": {"item":"bb:copper_ore","count": 1},
+  "toolType": "pickaxe",
+  "minToolLevel":1,
+  "blockHardness": 5.0
+}

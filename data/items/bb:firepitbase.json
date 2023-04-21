@@ -1,6 +1,6 @@
 {
   "name": "fire pit base",
-  "model": {"type":"texture","value":"firepitbase"},
+  "model": {"type":"texture","value":"fire_pit_base"},
   "stackSize": 10,
   "place": "bb:fire_pit"
 }

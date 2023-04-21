@@ -1,9 +1,7 @@
 package com.github.industrialcraft.blockbyteserver.world;
 
-import com.github.industrialcraft.blockbyteserver.content.AbstractBlockInstance;
-import com.github.industrialcraft.blockbyteserver.content.PlayerInventoryGUI;
-import com.github.industrialcraft.blockbyteserver.content.SimpleBlock;
-import com.github.industrialcraft.blockbyteserver.content.BlockByteItem;
+import com.github.industrialcraft.blockbyteserver.content.*;
+import com.github.industrialcraft.blockbyteserver.custom.BucketItem;
 import com.github.industrialcraft.blockbyteserver.net.MessageC2S;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.*;
@@ -50,8 +48,16 @@ public class PlayerEntity extends Entity implements IHealthEntity{
             json.addProperty("data_type", "item");
             if(item != null) {
                 JsonObject itemJson = new JsonObject();
-                itemJson.addProperty("item", ((BlockByteItem) item.getItem()).clientId);
+                BlockByteItem blockByteItem = (BlockByteItem) item.getItem();
+                itemJson.addProperty("item", blockByteItem.clientId);
                 itemJson.addProperty("count", item.getCount());
+                BlockByteItem.BarData bar = blockByteItem.getBarData(item);
+                if(bar != null) {
+                    JsonObject jsonBar = new JsonObject();
+                    jsonBar.add("color", MessageS2C.GUIData.createFloatArray(bar.color().r(), bar.color().g(), bar.color().b()));
+                    jsonBar.addProperty("progress", bar.progress());
+                    itemJson.add("bar", jsonBar);
+                }
                 json.add("item", itemJson);
             }
             PlayerEntity.this.send(new MessageS2C.GUIData(json));
@@ -128,7 +134,10 @@ public class PlayerEntity extends Entity implements IHealthEntity{
         //this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","stoneaxe")), 1));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","stoneshovel")), 1));
         //this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","sharpstone")), 1));
-        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","firepitbase")), 1));
+        //this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","claybucket")), 1));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","claybucket")), 1));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","wet_mud_brick")), 50));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","grass_fiber")), 20));
         this.actionbarTimer = -1;
         this.lastHandItem = null;
     }
@@ -191,8 +200,10 @@ public class PlayerEntity extends Entity implements IHealthEntity{
             if(message instanceof MessageC2S.RightClickBlock rightClickBlock){
                 boolean placeCancelled = false;
                 BlockPosition rightClickedPosition = new BlockPosition(rightClickBlock.x, rightClickBlock.y, rightClickBlock.z);
-                if(!isShifting()){
-                    AbstractBlockInstance rightClicked = chunk.parent.getBlock(rightClickedPosition);
+                AbstractBlockInstance rightClicked = chunk.parent.getBlock(rightClickedPosition);
+                if(getItemInHand() != null)
+                    placeCancelled = ((BlockByteItem)getItemInHand().getItem()).onRightClickBlock(getItemInHand(), this, rightClickedPosition, rightClicked, rightClickBlock.shifting);
+                if((!placeCancelled) && (!isShifting())){
                     placeCancelled = rightClicked.parent.onRightClick(chunk.parent, rightClickedPosition, rightClicked, this);
                 }
                 if(!placeCancelled) {
@@ -207,9 +218,12 @@ public class PlayerEntity extends Entity implements IHealthEntity{
                     if(hand != null) {
                         BlockByteItem item = (BlockByteItem) hand.getItem();
                         if (previousBlock.parent == SimpleBlock.AIR && item.place != null) {
-                            chunk.parent.setBlock(blockPosition, chunk.parent.blockRegistry.getBlock(item.place), new BlockPlacementContext(this, blockPosition, rightClickedPosition, rightClickBlock.face));
-                            hand.removeCount(1);
-                            updateHand();
+                            AbstractBlock blockToPlace = chunk.parent.blockRegistry.getBlock(item.place);
+                            if(blockToPlace.canPlace(this, blockPosition.x(), blockPosition.y(), blockPosition.z(), chunk.parent)) {
+                                chunk.parent.setBlock(blockPosition, blockToPlace, new BlockPlacementContext(this, blockPosition, rightClickedPosition, rightClickBlock.face));
+                                hand.removeCount(1);
+                                updateHand();
+                            }
                         }
                     }
                 }
@@ -277,6 +291,12 @@ public class PlayerEntity extends Entity implements IHealthEntity{
         }
         if(!Objects.equals(lastHandItem, getItemInHand())){
             ItemStack hand = getItemInHand();
+            boolean lastBucket = lastHandItem != null && (lastHandItem.getItem() instanceof BucketItem);
+            boolean newBucket = hand != null && (hand.getItem() instanceof BucketItem);
+            if(lastBucket && !newBucket)
+                send(new MessageS2C.FluidSelectable(false));
+            if((!lastBucket) && newBucket)
+                send(new MessageS2C.FluidSelectable(true));
             if(hand != null) {
                 setActionBar(((BlockByteItem)hand.getItem()).itemRenderData.name());
                 lastHandItem = hand.clone();

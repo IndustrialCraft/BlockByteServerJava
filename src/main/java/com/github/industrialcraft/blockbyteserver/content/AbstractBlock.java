@@ -19,4 +19,6 @@ public abstract class AbstractBlock {
     public abstract Identifier getIdentifier();
     public boolean isSerializable(){return false;}
     public void postInit(BlockRegistry blockRegistry){}
+    public abstract boolean canPlace(PlayerEntity player, int x, int y, int z, World world);
+    public abstract boolean isNoCollide();
 }

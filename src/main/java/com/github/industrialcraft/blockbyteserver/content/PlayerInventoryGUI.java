@@ -1,5 +1,6 @@
 package com.github.industrialcraft.blockbyteserver.content;
 
+import com.github.industrialcraft.blockbyteserver.net.MessageC2S;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.world.BasicVersionedInventory;
 import com.github.industrialcraft.blockbyteserver.world.InventoryGUI;
@@ -19,6 +20,7 @@ public class PlayerInventoryGUI extends InventoryGUI {
     public final BasicVersionedInventory craftingGridInventory;
     public final BasicVersionedInventory craftingResultInventory;
     private boolean recheckRecipe;
+    private CraftingRecipe recipe;
     public PlayerInventoryGUI(PlayerEntity player, Inventory transferInventory) {
         super(player, transferInventory);
         this.craftingGridInventory = new BasicVersionedInventory(9, (inventory1, is) -> {
@@ -30,21 +32,7 @@ public class PlayerInventoryGUI extends InventoryGUI {
                 return super.setAt(index, itemStack);
             }
         };
-        this.craftingResultInventory = new BasicVersionedInventory(1, null, null){
-            @Override
-            public ItemStack setAt(int index, ItemStack itemStack) {
-                if(itemStack == null) {
-                    for (int i = 0; i < 9; i++) {
-                        ItemStack is = craftingGridInventory.getAt(i);
-                        if(is != null) {
-                            is.removeCount(1);
-                            craftingGridInventory.setAt(i, is);
-                        }
-                    }
-                }
-                return super.setAt(index, itemStack);
-            }
-        };
+        this.craftingResultInventory = new BasicVersionedInventory(1, null, null);
         for(int x = 0;x < 3;x++) {
             for (int y = 0; y < 3; y++) {
                 this.slots.put("gui_crafting_" + (x+(y*3)), new Slot(craftingGridInventory, (x+(y*3)), -0.5f+(x*0.1f), -0.25f+((2-y)*0.1f), transferInventory, false));
@@ -57,24 +45,41 @@ public class PlayerInventoryGUI extends InventoryGUI {
         for (CraftingRecipe recipe : recipes) {
             boolean incorrect = false;
             for(int i = 0;i < 9;i++){
-                Identifier itemId;
                 ItemStack item = craftingGridInventory.getAt(i);
-                if(item == null){
-                    itemId = null;
-                } else {
-                    itemId = ((BlockByteItem)craftingGridInventory.getAt(i).getItem()).id;
-                }
-                if(!(Objects.equals(recipe.pattern[i], itemId))){
+                if((recipe.pattern[i] == null && item != null) || (recipe.pattern[i] != null && !recipe.pattern[i].matches(item))){
                     incorrect = true;
                     break;
                 }
             }
             if(!incorrect){
-                craftingResultInventory.setAt(0, new ItemStack(player.getChunk().parent.itemRegistry.getItem(recipe.output), 1));
+                craftingResultInventory.setAt(0, recipe.output.create());
+                this.recipe = recipe;
                 return;
             }
         }
     }
+
+    @Override
+    public void onClick(String id, MessageC2S.GUIClick.EMouseButton button, boolean shifting) {
+        Slot slot = slots.get(id);
+        if(slot != null && id.equals("gui_crafting_output")) {
+            int transferred = slotClick(slot, shifting);
+            for(int j = 0;j < transferred;j++) {
+                for (int i = 0; i < 9; i++) {
+                    Recipe.IRecipePart recipePart = recipe.pattern[i];
+                    ItemStack is = craftingGridInventory.getAt(i);
+                    if (recipePart != null) {
+                        recipePart.consume(is);
+                        craftingGridInventory.setAt(i, is);
+                    }
+                }
+                tryUpdateRecipe();
+            }
+        } else {
+            super.onClick(id, button, shifting);
+        }
+    }
+
     @Override
     public boolean onTick() {
         if(recheckRecipe){
@@ -89,20 +94,20 @@ public class PlayerInventoryGUI extends InventoryGUI {
         this.craftingGridInventory.dropAll();
     }
     public static class CraftingRecipe extends Recipe{
-        public final Identifier[] pattern;
-        public final Identifier output;
-        public CraftingRecipe(Identifier id, JsonObject json) {
+        public final IRecipePart[] pattern;
+        public final ItemStackRecipePart output;
+        public CraftingRecipe(Identifier id, JsonObject json, ItemRegistry itemRegistry, FluidRegistry fluidRegistry) {
             super(id);
-            this.pattern = new Identifier[9];
+            this.pattern = new IRecipePart[9];
             JsonArray pattern = json.getAsJsonArray("pattern");
             for(int i = 0;i < 9;i++){
                 JsonElement part = pattern.get(i);
                 if(part == null || part.isJsonNull())
                     this.pattern[i] = null;
                 else
-                    this.pattern[i] = Identifier.parse(part.getAsString());
+                    this.pattern[i] = Recipe.fromJson(part, itemRegistry, fluidRegistry);
             }
-            this.output = Identifier.parse(json.get("output").getAsString());
+            this.output = (ItemStackRecipePart) Recipe.fromJson(json.get("output"), itemRegistry, fluidRegistry);
         }
     }
 }

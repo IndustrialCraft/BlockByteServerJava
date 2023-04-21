@@ -1,5 +1,6 @@
 package com.github.industrialcraft.blockbyteserver.custom;
 
+import com.github.industrialcraft.blockbyteserver.content.ItemRegistry;
 import com.github.industrialcraft.blockbyteserver.content.Recipe;
 import com.github.industrialcraft.blockbyteserver.net.MessageC2S;
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
@@ -78,7 +79,7 @@ public class KnappingScreen extends InventoryGUI {
                                 break;
                             }
                         if(!incorrect){
-                            inventory.setAt(0, new ItemStack(player.getChunk().parent.itemRegistry.getItem(recipe.output), 1));
+                            inventory.setAt(0, recipe.output.create());
                             break;
                         }
                     }
@@ -89,11 +90,11 @@ public class KnappingScreen extends InventoryGUI {
     public static class KnappingRecipe extends Recipe{
         public final Identifier item;
         public final boolean[] pattern;
-        public final Identifier output;
-        public KnappingRecipe(Identifier id, JsonObject json) {
+        public final ItemStackRecipePart output;
+        public KnappingRecipe(Identifier id, JsonObject json, ItemRegistry itemRegistry) {
             super(id);
             this.item = Identifier.parse(json.get("item").getAsString());
-            this.output = Identifier.parse(json.get("output").getAsString());
+            this.output = (ItemStackRecipePart) Recipe.fromJson(json.get("output"), itemRegistry, null);
             JsonArray pattern = json.getAsJsonArray("pattern");
             if(pattern.size() != 25)
                 throw new IllegalStateException("invalid knapping recipe " + id);

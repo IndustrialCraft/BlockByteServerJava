@@ -1,0 +1,6 @@
+{
+  "name": "copper rock",
+  "model": {"type":"texture","value":"copper_rock_item"},
+  "stackSize": 10,
+  "place": "bb:copper_rock"
+}

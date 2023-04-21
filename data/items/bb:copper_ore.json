@@ -1,0 +1,6 @@
+{
+  "name": "copper ore block",
+  "model": {"type":"block","value":"bb:copper_ore"},
+  "stackSize": 10,
+  "place": "bb:copper_ore"
+}

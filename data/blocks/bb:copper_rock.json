@@ -1,18 +1,15 @@
 {
   "model": {
     "type": "static",
-    "model": "daisy",
-    "texture": "daisy",
+    "model": "rock",
+    "texture": "copper_rock",
     "up": false,
     "down": false,
     "left": false,
     "right": false,
     "north": false,
     "south": false,
-    "render_data": 2,
-    "no_collide": true,
-    "foliage": true
+    "no_collide": true
   },
-  "nocollide": true,
-  "needsSupport": true
+  "loot": {"item":"bb:copper_rock","count": 1}
 }

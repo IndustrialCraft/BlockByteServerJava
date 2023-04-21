@@ -7,7 +7,6 @@ import com.github.industrialcraft.blockbyteserver.util.*;
 import com.github.industrialcraft.blockbyteserver.world.*;
 import com.github.industrialcraft.blockbyteserver.world.gen.WorldGenerator;
 import com.github.industrialcraft.identifier.Identifier;
-import com.github.industrialcraft.inventorysystem.ItemStack;
 import com.google.gson.*;
 import org.java_websocket.WebSocket;
 
@@ -20,6 +19,9 @@ public class BlockByteServerMain {
     public static void main(String[] args) throws IOException {
         new File("world").mkdir();
         BlockRegistry blockRegistry = new BlockRegistry();
+        FluidRegistry fluidRegistry = new FluidRegistry();
+        fluidRegistry.loadDirectory(new File("data/fluids"));
+        fluidRegistry.registerBlocks(blockRegistry);
         blockRegistry.loadDirectory(new File("data/blocks"));
         blockRegistry.loadBlock(Identifier.of("bb", "log"), LogBlock::new);
         blockRegistry.loadBlock(Identifier.of("bb", "crusher"), clientId -> {
@@ -84,19 +86,21 @@ public class BlockByteServerMain {
             return new ConveyorBlock(clientId, renderData, renderData, renderData, renderData);
         });
         blockRegistry.loadBlock(Identifier.of("bb", "fire_pit"), FirePitBlock::new);
+        blockRegistry.loadBlock(Identifier.of("bb", "wet_mud_brick"), WetMudBrickBlock::new);
         blockRegistry.postInit();
         ItemRegistry itemRegistry = new ItemRegistry();
         itemRegistry.loadDirectory(new File("data/items"));
+        itemRegistry.register(Identifier.of("bb", "claybucket"), clientId -> new BucketItem(Identifier.of("bb", "claybucket"), 1, new ItemRenderData("clay bucket", "texture", "clay_bucket"), clientId, 100));
         RecipeRegistry recipeRegistry = new RecipeRegistry();
         recipeRegistry.registerCreator(Identifier.of("bb", "crushing"), CrusherMachineBlock.CrusherRecipe::new);
-        recipeRegistry.registerCreator(Identifier.of("bb", "knapping"), KnappingScreen.KnappingRecipe::new);
-        recipeRegistry.registerCreator(Identifier.of("bb", "crafting"), PlayerInventoryGUI.CraftingRecipe::new);
+        recipeRegistry.registerCreator(Identifier.of("bb", "knapping"), (id, json) -> new KnappingScreen.KnappingRecipe(id, json, itemRegistry));
+        recipeRegistry.registerCreator(Identifier.of("bb", "crafting"), (id, json) -> new PlayerInventoryGUI.CraftingRecipe(id, json, itemRegistry, fluidRegistry));
         recipeRegistry.registerCreator(Identifier.of("bb", "fire_pit"), FirePitBlock.FirePitRecipe::new);
         recipeRegistry.loadDirectory(new File("data/recipes"));
         EntityRegistry entityRegistry = new EntityRegistry();
         entityRegistry.register(Identifier.of("bb", "player"), "player.bbmodel", "player", 0.6f, 1.7f, 0.6f);
         entityRegistry.register(Identifier.of("bb", "item"), "item.bbmodel", "", 0.5f, 0.5f, 0.5f);
-        World world = new World(blockRegistry, itemRegistry, recipeRegistry, entityRegistry, new WorldGenerator(blockRegistry, 5555), new IWorldSERDE() {
+        World world = new World(blockRegistry, itemRegistry, recipeRegistry, entityRegistry, fluidRegistry, new WorldGenerator(blockRegistry, 5555), new IWorldSERDE() {
             @Override
             public void save(Chunk chunk) {
                 /*try {

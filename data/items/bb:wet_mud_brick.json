@@ -1,0 +1,6 @@
+{
+  "name": "wet mud brick",
+  "model": {"type":"texture","value":"wet_mud_brick"},
+  "stackSize": 100,
+  "place": "bb:wet_mud_brick"
+}

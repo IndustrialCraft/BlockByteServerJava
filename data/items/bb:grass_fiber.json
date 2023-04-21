@@ -1,5 +1,5 @@
 {
   "name": "grass fiber",
-  "model": {"type":"texture","value":"grass"},
+  "model": {"type":"texture","value":"grass_fiber"},
   "stackSize": 20
 }

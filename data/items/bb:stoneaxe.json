@@ -1,6 +1,6 @@
 {
   "name": "stone axe",
-  "model": {"type":"texture","value":"cobble"},
+  "model": {"type":"texture","value":"stone_axe"},
   "stackSize": 1,
   "tool": {
     "type": "axe",

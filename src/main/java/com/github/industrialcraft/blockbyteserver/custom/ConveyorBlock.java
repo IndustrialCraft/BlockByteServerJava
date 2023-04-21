@@ -50,7 +50,14 @@ public class ConveyorBlock extends AbstractBlock {
     public Identifier getIdentifier() {
         return Identifier.of("bb","conveyor");
     }
-
+    @Override
+    public boolean canPlace(PlayerEntity player, int x, int y, int z, World world) {
+        return true;
+    }
+    @Override
+    public boolean isNoCollide() {
+        return true;
+    }
     public static class ConveyorBlockInstance extends AbstractBlockInstance<ConveyorBlock> implements ITicking, IInventoryBlock {
         public final int x;
         public final int y;

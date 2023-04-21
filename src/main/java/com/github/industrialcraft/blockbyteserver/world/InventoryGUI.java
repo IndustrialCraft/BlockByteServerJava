@@ -39,32 +39,38 @@ public abstract class InventoryGUI extends GUI{
     public void onClick(String id, MessageC2S.GUIClick.EMouseButton button, boolean shifting) {
         Slot slot = slots.get(id);
         if(slot != null) {
-            ItemStack slotItem = slot.inventory.getAt(slot.slot);
-            if(shifting){
-                if(slot.transferInventory != null && slotItem != null) {
-                    int space = Math.min(slotItem.getCount(), slot.transferInventory.getRemainingSpaceFor(slotItem));
-                    slot.transferInventory.addItem(slotItem.clone(space));
-                    slotItem.removeCount(space);
-                    slot.inventory.setAt(slot.slot, slotItem);//update
-                }
-            } else {
-                if (slotItem != null && hand != null && slotItem.stacks(hand)) {
-                    int neededInSlot = slotItem.getItem().getStackSize() - slotItem.getCount();
-                    if (neededInSlot > 0) {
-                        int supplied = Math.min(neededInSlot, hand.getCount());
-                        slotItem.addCount(supplied);
-                        slot.inventory.setAt(slot.slot, slotItem);//update
-                        hand.removeCount(supplied);
-                        if (hand.getCount() == 0)
-                            hand = null;
-                        setHand(hand);
-                        return;
-                    }
-                }
-                ItemStack temp = hand;
-                setHand(slotItem);
-                slot.inventory.setAt(slot.slot, temp);
+            slotClick(slot, shifting);
+        }
+    }
+    protected int slotClick(Slot slot, boolean shifting){//todo: check outputonly
+        ItemStack slotItem = slot.inventory.getAt(slot.slot);
+        if(shifting){
+            if(slot.transferInventory != null && slotItem != null) {
+                int space = Math.min(slotItem.getCount(), slot.transferInventory.getRemainingSpaceFor(slotItem));
+                slot.transferInventory.addItem(slotItem.clone(space));
+                slotItem.removeCount(space);
+                slot.inventory.setAt(slot.slot, slotItem);//update
+                return space;
             }
+            return 0;
+        } else {
+            if (slotItem != null && hand != null && slotItem.stacks(hand)) {
+                int neededInSlot = slotItem.getItem().getStackSize() - slotItem.getCount();
+                if (neededInSlot > 0) {
+                    int supplied = Math.min(neededInSlot, hand.getCount());
+                    slotItem.addCount(supplied);
+                    slot.inventory.setAt(slot.slot, slotItem);//update
+                    hand.removeCount(supplied);
+                    if (hand.getCount() == 0)
+                        hand = null;
+                    setHand(hand);
+                    return supplied;
+                }
+            }
+            ItemStack temp = hand;
+            setHand(slotItem);
+            slot.inventory.setAt(slot.slot, temp);
+            return slotItem==null?0:slotItem.getCount();
         }
     }
 
@@ -114,6 +120,13 @@ public abstract class InventoryGUI extends GUI{
                     JsonObject itemJson = new JsonObject();
                     itemJson.addProperty("item", ((BlockByteItem) item.getItem()).clientId);
                     itemJson.addProperty("count", item.getCount());
+                    BlockByteItem.BarData bar = ((BlockByteItem)item.getItem()).getBarData(item);
+                    if(bar != null) {
+                        JsonObject jsonBar = new JsonObject();
+                        jsonBar.add("color", MessageS2C.GUIData.createFloatArray(bar.color().r(), bar.color().g(), bar.color().b()));
+                        jsonBar.addProperty("progress", bar.progress());
+                        itemJson.add("bar", jsonBar);
+                    }
                     json.add("item", itemJson);
                 }
                 player.send(new MessageS2C.GUIData(json));
@@ -141,6 +154,13 @@ public abstract class InventoryGUI extends GUI{
                 JsonObject itemJson = new JsonObject();
                 itemJson.addProperty("item", ((BlockByteItem)hand.getItem()).clientId);
                 itemJson.addProperty("count", hand.getCount());
+                BlockByteItem.BarData bar = ((BlockByteItem)hand.getItem()).getBarData(hand);
+                if(bar != null) {
+                    JsonObject jsonBar = new JsonObject();
+                    jsonBar.add("color", MessageS2C.GUIData.createFloatArray(bar.color().r(), bar.color().g(), bar.color().b()));
+                    jsonBar.addProperty("progress", bar.progress());
+                    itemJson.add("bar", jsonBar);
+                }
                 json.add("item", itemJson);
             }
         }

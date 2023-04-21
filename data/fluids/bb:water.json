@@ -1,5 +1,7 @@
 {
-  "model": {
+  "name": "water",
+  "color": [0, 0, 1],
+  "block": {
     "type": "cube",
     "north": "water",
     "south": "water",

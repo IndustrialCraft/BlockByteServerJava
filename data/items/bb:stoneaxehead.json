@@ -1,5 +1,5 @@
 {
   "name": "stone axe head",
-  "model": {"type":"texture","value":"cobble"},
+  "model": {"type":"texture","value":"stone_axe_head"},
   "stackSize": 1
 }

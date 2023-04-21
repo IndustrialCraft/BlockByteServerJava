@@ -32,7 +32,7 @@ public class SimpleBlockInstance<T extends SimpleBlock> extends AbstractBlockIns
     public void onSentToPlayer(PlayerEntity player) {}
     @Override
     public void onNeighborUpdate(World world, BlockPosition position, AbstractBlockInstance previousInstance, AbstractBlockInstance newInstance, EFace face) {
-        if(parent.needsSupport && face == EFace.Down && newInstance.parent == SimpleBlock.AIR){
+        if(parent.needsSupport && face == EFace.Down && newInstance.parent.isNoCollide()){
             world.setBlock(position, SimpleBlock.AIR, null);
         }
     }

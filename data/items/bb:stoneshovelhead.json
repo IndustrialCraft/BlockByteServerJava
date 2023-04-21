@@ -1,5 +1,5 @@
 {
   "name": "stone shovel head",
-  "model": {"type":"texture","value":"cobble"},
+  "model": {"type":"texture","value":"stone_shovel_head"},
   "stackSize": 1
 }

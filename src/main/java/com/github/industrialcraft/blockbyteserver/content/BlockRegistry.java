@@ -63,7 +63,8 @@ public class BlockRegistry {
         JsonElement minToolLevel = json.get("minToolLevel");
         JsonElement blockHardness = json.get("blockHardness");
         JsonElement needsSupport = json.get("needsSupport");
-        SimpleBlock block = new SimpleBlock(renderData, clientIds, lootTableJson==null?null:new LootTable(lootTableJson), id, tool==null?null:ETool.fromString(tool.getAsString()), minToolLevel==null?0:minToolLevel.getAsInt(), blockHardness==null?1f:blockHardness.getAsFloat(), needsSupport != null && needsSupport.getAsBoolean());
+        JsonElement isNoCollide = json.get("nocollide");
+        SimpleBlock block = new SimpleBlock(renderData, clientIds, lootTableJson==null?null:new LootTable(lootTableJson), id, tool==null?null:ETool.fromString(tool.getAsString()), minToolLevel==null?0:minToolLevel.getAsInt(), blockHardness==null?1f:blockHardness.getAsFloat(), needsSupport != null && needsSupport.getAsBoolean(), isNoCollide != null && isNoCollide.getAsBoolean());
         blocks.put(id, block);
         return block;
     }

@@ -1,6 +1,8 @@
 package com.github.industrialcraft.blockbyteserver.content;
 
 import com.github.industrialcraft.blockbyteserver.custom.KnappingScreen;
+import com.github.industrialcraft.blockbyteserver.util.BlockPosition;
+import com.github.industrialcraft.blockbyteserver.util.Color;
 import com.github.industrialcraft.blockbyteserver.world.PlayerEntity;
 import com.github.industrialcraft.identifier.Identifier;
 import com.github.industrialcraft.inventorysystem.IItem;
@@ -30,6 +32,9 @@ public class BlockByteItem implements IItem {
             }
         }
     }
+    public boolean onRightClickBlock(ItemStack stack, PlayerEntity player, BlockPosition blockPosition, AbstractBlockInstance blockInstance, boolean shifting){
+        return false;
+    }
     public int getClientId() {
         return clientId;
     }
@@ -38,5 +43,10 @@ public class BlockByteItem implements IItem {
         return maxStackSize;
     }
 
+    public BarData getBarData(ItemStack itemStack){
+        return null;
+    }
+
     public record KnappingData(int itemCount, String bitTexture){}
+    public record BarData(Color color, float progress){}
 }

@@ -9,6 +9,7 @@
     "no_collide": true,
     "foliage": true
   },
+  "nocollide": true,
   "needsSupport": true,
   "toolType": "knife",
   "minToolLevel":0,
