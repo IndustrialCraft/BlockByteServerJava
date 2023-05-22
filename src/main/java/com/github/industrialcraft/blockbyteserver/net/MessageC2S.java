@@ -38,12 +38,14 @@ public class MessageC2S {
         public final float z;
         public final boolean shifting;
         public final float rotation;
+        public final boolean moved;
         public PlayerPosition(DataInputStream stream) throws IOException {
             this.x = stream.readFloat();
             this.y = stream.readFloat();
             this.z = stream.readFloat();
             this.shifting = stream.readBoolean();
             this.rotation = stream.readFloat();
+            this.moved = stream.readBoolean();
         }
     }
     public static class MouseScroll extends MessageC2S{
@@ -134,6 +136,12 @@ public class MessageC2S {
             this.shifting = stream.readBoolean();
         }
     }
+    public static class SendMessage extends MessageC2S{
+        public final String message;
+        public SendMessage(DataInputStream stream) throws IOException {
+            this.message = MessageC2S.readString(stream);
+        }
+    }
     public static MessageC2S fromBytes(byte[] data) throws IOException {
         ByteArrayInputStream byteStream = new ByteArrayInputStream(data);
         DataInputStream stream = new DataInputStream(byteStream);
@@ -162,6 +170,8 @@ public class MessageC2S {
                 return new GuiScroll(stream);
             case 11:
                 return new RightClick(stream);
+            case 12:
+                return new SendMessage(stream);
             default:
                 return null;
         }

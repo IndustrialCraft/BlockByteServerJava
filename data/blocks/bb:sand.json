@@ -6,7 +6,8 @@
     "left": "sand",
     "right": "sand",
     "up": "sand",
-    "down": "sand"
+    "down": "sand",
+    "light": [0,0,15]
   },
   "loot": {"item":"bb:sand","count": 1}
 }

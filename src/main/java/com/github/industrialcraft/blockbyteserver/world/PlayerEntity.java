@@ -29,6 +29,8 @@ public class PlayerEntity extends Entity implements IHealthEntity{
     private float health;
     private float actionbarTimer;
     private ItemStack lastHandItem;
+    private boolean lastPlayerMoving;
+    public final PlayerAbilityStorage abilityStorage;
     public PlayerEntity(Position position, World world, WebSocket socket) {
         super(position, world);
         this.socket = socket;
@@ -37,6 +39,7 @@ public class PlayerEntity extends Entity implements IHealthEntity{
         for (ChunkPosition chunkPosition : currentLoadingChunks) {
             world.getOrLoadChunk(chunkPosition).addViewer(this);
         }
+        this.abilityStorage = new PlayerAbilityStorage(this);
         this.shifting = false;
         this.gui = null;
         this.inventory = new ListeningInventory(9, (inventory1, is) -> {
@@ -133,6 +136,7 @@ public class PlayerEntity extends Entity implements IHealthEntity{
         }
         //this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","stoneaxe")), 1));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","stoneshovel")), 1));
+        this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","stoneaxe")), 1));
         //this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","sharpstone")), 1));
         //this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","claybucket")), 1));
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","claybucket")), 1));
@@ -140,6 +144,7 @@ public class PlayerEntity extends Entity implements IHealthEntity{
         this.inventory.addItem(new ItemStack(world.itemRegistry.getItem(Identifier.of("bb","grass_fiber")), 20));
         this.actionbarTimer = -1;
         this.lastHandItem = null;
+        this.lastPlayerMoving = false;
     }
     public void setActionBar(String message){
         JsonObject json = new JsonObject();
@@ -193,6 +198,10 @@ public class PlayerEntity extends Entity implements IHealthEntity{
                 teleport(new Position(playerPosition.x, playerPosition.y, playerPosition.z));
                 this.shifting = playerPosition.shifting;
                 this.rotation = playerPosition.rotation;
+                if(this.lastPlayerMoving != playerPosition.moved){
+                    animationController.setAnimation(playerPosition.moved?"walk":"idle");
+                    this.lastPlayerMoving = playerPosition.moved;
+                }
             }
             if(message instanceof MessageC2S.BreakBlock breakBlock){
                 breakAsPlayer(new BlockPosition(breakBlock.x, breakBlock.y, breakBlock.z));
@@ -231,7 +240,7 @@ public class PlayerEntity extends Entity implements IHealthEntity{
             if(message instanceof MessageC2S.RightClick rightClick){
                 ItemStack hand = getItemInHand();
                 if(hand != null)
-                ((BlockByteItem)hand.getItem()).onRightClick(hand, this, rightClick.shifting);
+                    ((BlockByteItem)hand.getItem()).onRightClick(hand, this, rightClick.shifting);
             }
             if(message instanceof MessageC2S.MouseScroll mouseScroll){
                 setSlot((((getSlot()-mouseScroll.y)%9)+9)%9);
@@ -252,8 +261,12 @@ public class PlayerEntity extends Entity implements IHealthEntity{
                             new ItemEntity(getPosition().add(0, 1.75f, 0), chunk.parent, toDrop).addVelocity((float) Math.sin(Math.toRadians(rotation)) * power, 0, (float) Math.cos(Math.toRadians(rotation)) * power);
                         }
                     }
-                    if(keyboard.key == 101){//E
-                        this.setGui(new PlayerInventoryGUI(this, this.inventory));
+                    if(keyboard.key == 101) {//E
+                        if (this.gui != null) {
+                            this.setGui(null);
+                        } else {
+                            this.setGui(new PlayerInventoryGUI(this, this.inventory));
+                        }
                     }
                 }
             }
@@ -266,6 +279,7 @@ public class PlayerEntity extends Entity implements IHealthEntity{
                     this.gui.onScroll(guiScroll.id, guiScroll.x, guiScroll.y, guiScroll.shifting);
             }
             if(message instanceof MessageC2S.GUIClose guiClose){
+                send(new MessageS2C.PlaySound("respawn", this.position, 1, 1, false));
                 this.setGui(null);
             }
             if(message instanceof MessageC2S.BreakBlockTimeRequest breakBlockTimeRequest){
@@ -285,6 +299,24 @@ public class PlayerEntity extends Entity implements IHealthEntity{
                 Entity entity = chunk.parent.getEntityByClientId(rightClickEntity.id);
                 if(entity != null){
                     entity.onRightClick(this);
+                }
+            }
+            if(message instanceof MessageC2S.SendMessage sendMessage){
+                String msg = sendMessage.message;
+                if(msg.startsWith(".speed ")){
+                    float speed = Float.parseFloat(msg.replace(".speed ", ""));
+                    abilityStorage.setSpeed(speed);
+                } else if(msg.startsWith(".movetype ")){
+                    PlayerAbilityStorage.EMovementType movementType = null;
+                    try{movementType = PlayerAbilityStorage.EMovementType.valueOf(msg.replace(".movetype ", ""));} catch (Exception e){}
+                    if(movementType != null)
+                        abilityStorage.setMovementType(movementType);
+                    else
+                        sendChatMessage("unknown move type");
+                } else {
+                    for (PlayerEntity player : getChunk().parent.getAllPlayers()) {
+                        player.sendChatMessage(msg);
+                    }
                 }
             }
             message = this.messages.poll();
@@ -332,6 +364,9 @@ public class PlayerEntity extends Entity implements IHealthEntity{
             chunk.parent.setBlock(blockPosition, SimpleBlock.AIR, null);
             previousBlock.onBreak(this, blockPosition.x(), blockPosition.y(), blockPosition.z());
         }
+    }
+    public void sendChatMessage(String message){
+        send(new MessageS2C.ChatMessage(message));
     }
     public void setSlot(int slot) {//todo: clamp
         if(this.slot == slot)
@@ -405,7 +440,7 @@ public class PlayerEntity extends Entity implements IHealthEntity{
         }
     }
     public HashSet<ChunkPosition> getLoadingChunks(ChunkPosition chunkPosition){
-        int renderDistance = 10;
+        int renderDistance = 8;
         int verticalRenderDistance = 8;
         HashSet<ChunkPosition> loadedPosition = new HashSet<>();
         for(int x = -renderDistance;x <= renderDistance;x++){

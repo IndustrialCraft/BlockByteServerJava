@@ -87,7 +87,7 @@ public class Chunk {
             }
         }
         for (Entity entity : toAdd) {
-            announceToViewersExcept(new MessageS2C.AddEntity(entity.getClientType(), entity.clientId, entity.position.x(), entity.position.y(), entity.position.z(), entity.rotation), (entity instanceof PlayerEntity player)?player:null);
+            announceToViewersExcept(new MessageS2C.AddEntity(entity.getClientType(), entity.clientId, entity.position.x(), entity.position.y(), entity.position.z(), entity.rotation, entity.animationController.getCurrentAnimation(), entity.animationController.getCurrentAnimationTime()), (entity instanceof PlayerEntity player)?player:null);
             this.viewers.forEach(entity::onSentToPlayer);
         }
         entities.addAll(toAdd);
@@ -171,7 +171,7 @@ public class Chunk {
             playerEntity.send(new MessageS2C.DeleteEntity(entity.clientId));
         }
         for (PlayerEntity playerEntity : Sets.difference(other.viewers, this.viewers)) {
-            playerEntity.send(new MessageS2C.AddEntity(entity.getClientType(), entity.clientId, entity.position.x(), entity.position.y(), entity.position.z(), entity.rotation));
+            playerEntity.send(new MessageS2C.AddEntity(entity.getClientType(), entity.clientId, entity.position.x(), entity.position.y(), entity.position.z(), entity.rotation, entity.animationController.getCurrentAnimation(), entity.animationController.getCurrentAnimationTime()));
             entity.onSentToPlayer(playerEntity);
         }
     }
@@ -204,7 +204,7 @@ public class Chunk {
         int bytesCount = deflater.deflate(bytes);
         player.send(new MessageS2C.LoadChunk(position.x(), position.y(), position.z(), bytes, bytesCount));
         this.entities.forEach(entity -> {
-            player.send(new MessageS2C.AddEntity(entity.getClientType(), entity.clientId, entity.position.x(), entity.position.y(), entity.position.z(), entity.rotation));
+            player.send(new MessageS2C.AddEntity(entity.getClientType(), entity.clientId, entity.position.x(), entity.position.y(), entity.position.z(), entity.rotation, entity.animationController.getCurrentAnimation(), entity.animationController.getCurrentAnimationTime()));
             entity.onSentToPlayer(player);
         });
     }

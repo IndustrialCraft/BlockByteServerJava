@@ -4,35 +4,35 @@
      "y": 0,
      "z": 0,
      "id": "bb:log",
-     "data": "7"
+     "data": " 7"
    },
    {
      "x": 0,
      "y": 1,
      "z": 0,
      "id": "bb:log",
-     "data": "6"
+     "data": "d6"
    },
    {
      "x": 0,
      "y": 2,
      "z": 0,
      "id": "bb:log",
-     "data": "5"
+     "data": "d5"
    },
    {
      "x": 0,
      "y": 3,
      "z": 0,
      "id": "bb:log",
-     "data": "4"
+     "data": "d4"
    },
    {
      "x": 0,
      "y": 4,
      "z": 0,
      "id": "bb:log",
-     "data": "3"
+     "data": "d3"
    },
    {
      "x": 0,
@@ -64,5 +64,5 @@
      "z": -1,
      "id": "bb:leave"
    },
-   {"x":-2,"y":3,"z":-1,"id":"bb:leave"},{"x":-2,"y":3,"z":0,"id":"bb:leave"},{"x":-2,"y":3,"z":1,"id":"bb:leave"},{"x":-1,"y":3,"z":-2,"id":"bb:leave"},{"x":-1,"y":3,"z":-1,"id":"bb:leave"},{"x":-1,"y":3,"z":0,"id":"bb:log", "data": "3"},{"x":-1,"y":3,"z":1,"id":"bb:leave"},{"x":-1,"y":3,"z":2,"id":"bb:leave"},{"x":0,"y":3,"z":-2,"id":"bb:leave"},{"x":0,"y":3,"z":-1,"id":"bb:log", "data": "3"},{"x":0,"y":3,"z":1,"id":"bb:log", "data": "3"},{"x":0,"y":3,"z":2,"id":"bb:leave"},{"x":1,"y":3,"z":-2,"id":"bb:leave"},{"x":1,"y":3,"z":-1,"id":"bb:leave"},{"x":1,"y":3,"z":0,"id":"bb:log", "data": "3"},{"x":1,"y":3,"z":1,"id":"bb:leave"},{"x":1,"y":3,"z":2,"id":"bb:leave"},{"x":2,"y":3,"z":-1,"id":"bb:leave"},{"x":2,"y":3,"z":0,"id":"bb:leave"},{"x":2,"y":3,"z":1,"id":"bb:leave"}
+   {"x":-2,"y":3,"z":-1,"id":"bb:leave"},{"x":-2,"y":3,"z":0,"id":"bb:leave"},{"x":-2,"y":3,"z":1,"id":"bb:leave"},{"x":-1,"y":3,"z":-2,"id":"bb:leave"},{"x":-1,"y":3,"z":-1,"id":"bb:leave"},{"x":-1,"y":3,"z":0,"id":"bb:log", "data": "f3"},{"x":-1,"y":3,"z":1,"id":"bb:leave"},{"x":-1,"y":3,"z":2,"id":"bb:leave"},{"x":0,"y":3,"z":-2,"id":"bb:leave"},{"x":0,"y":3,"z":-1,"id":"bb:log", "data": "r3"},{"x":0,"y":3,"z":1,"id":"bb:log", "data": "b3"},{"x":0,"y":3,"z":2,"id":"bb:leave"},{"x":1,"y":3,"z":-2,"id":"bb:leave"},{"x":1,"y":3,"z":-1,"id":"bb:leave"},{"x":1,"y":3,"z":0,"id":"bb:log", "data": "l3"},{"x":1,"y":3,"z":1,"id":"bb:leave"},{"x":1,"y":3,"z":2,"id":"bb:leave"},{"x":2,"y":3,"z":-1,"id":"bb:leave"},{"x":2,"y":3,"z":0,"id":"bb:leave"},{"x":2,"y":3,"z":1,"id":"bb:leave"}
  ]

@@ -37,6 +37,16 @@ public class World {
         }
         return null;
     }
+    public List<PlayerEntity> getAllPlayers(){
+        List<PlayerEntity> players = new ArrayList<>();
+        for (Chunk chunk : chunks.values()) {
+            for (Entity entity : chunk.getEntities()) {
+                if(entity instanceof PlayerEntity player)
+                    players.add(player);
+            }
+        }
+        return players;
+    }
     public void tick(){
         List<Chunk> chunksList = new ArrayList<>(chunks.values());
         chunksList.forEach(Chunk::tick);

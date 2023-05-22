@@ -9,7 +9,8 @@
     "right": false,
     "north": false,
     "south": false,
-    "no_collide": true
+    "no_collide": true,
+    "light": [15,0,0]
   },
   "loot": {"item":"bb:stick","count": 1}
 }

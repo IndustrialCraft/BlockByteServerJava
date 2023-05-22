@@ -2,6 +2,7 @@ package com.github.industrialcraft.blockbyteserver.world;
 
 import com.github.industrialcraft.blockbyteserver.net.MessageS2C;
 import com.github.industrialcraft.blockbyteserver.util.AABB;
+import com.github.industrialcraft.blockbyteserver.util.AnimationController;
 import com.github.industrialcraft.blockbyteserver.util.Position;
 import com.github.industrialcraft.identifier.Identifier;
 
@@ -19,6 +20,7 @@ public abstract class Entity {
     protected Chunk chunk;
     private boolean removed;
     private int clientType;
+    public final AnimationController animationController;
     public Entity(Position position, World world) {
         this.clientId = ID_GENERATOR.incrementAndGet();
         this.id = UUID.randomUUID();
@@ -30,6 +32,10 @@ public abstract class Entity {
         this.removed = false;
         this.rotation = 0f;
         this.clientType = world.entityRegistry.getByIdentifier(getIdentifier()).clientId();
+        this.animationController = createAnimationController();
+    }
+    public AnimationController createAnimationController() {
+        return new AnimationController(this, "idle");
     }
     public abstract Identifier getIdentifier();
     public void onSentToPlayer(PlayerEntity player){}

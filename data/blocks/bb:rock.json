@@ -9,7 +9,8 @@
     "right": false,
     "north": false,
     "south": false,
-    "no_collide": true
+    "no_collide": true,
+    "light": [0,15,0]
   },
   "loot": {"item":"bb:rock","count": 1}
 }

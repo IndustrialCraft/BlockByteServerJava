@@ -1,5 +1,7 @@
 package com.github.industrialcraft.blockbyteserver.net;
 
+import com.github.industrialcraft.blockbyteserver.util.PlayerAbilityStorage;
+import com.github.industrialcraft.blockbyteserver.util.Position;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -86,13 +88,17 @@ public abstract class MessageS2C {
         public final float y;
         public final float z;
         public final float rotation;
-        public AddEntity(int entityType, int id, float x, float y, float z, float rotation) {
+        public final String animation;
+        public final float animationStartTime;
+        public AddEntity(int entityType, int id, float x, float y, float z, float rotation, String animation, float animationStartTime) {
             this.entityType = entityType;
             this.id = id;
             this.x = x;
             this.y = y;
             this.z = z;
             this.rotation = rotation;
+            this.animation = animation;
+            this.animationStartTime = animationStartTime;
         }
         @Override
         public byte[] toBytes() throws IOException {
@@ -105,6 +111,8 @@ public abstract class MessageS2C {
             stream.writeFloat(y);
             stream.writeFloat(z);
             stream.writeFloat(rotation);
+            MessageS2C.writeString(stream, animation);
+            stream.writeFloat(animationStartTime);
             return byteStream.toByteArray();
         }
     }
@@ -337,6 +345,82 @@ public abstract class MessageS2C {
             DataOutputStream stream = new DataOutputStream(byteStream);
             stream.writeByte(13);
             stream.writeBoolean(selectable);
+            return byteStream.toByteArray();
+        }
+    }
+    public static class PlaySound extends MessageS2C{
+        public final String id;
+        public final Position position;
+        public final float gain;
+        public final float pitch;
+        public final boolean relative;
+        public PlaySound(String id, Position position, float gain, float pitch, boolean relative) {
+            this.id = id;
+            this.position = position;
+            this.gain = gain;
+            this.pitch = pitch;
+            this.relative = relative;
+        }
+        @Override
+        public byte[] toBytes() throws IOException {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(byteStream);
+            stream.writeByte(14);
+            MessageS2C.writeString(stream, id);
+            stream.writeFloat(position.x());
+            stream.writeFloat(position.y());
+            stream.writeFloat(position.z());
+            stream.writeFloat(gain);
+            stream.writeFloat(pitch);
+            stream.writeBoolean(relative);
+            return byteStream.toByteArray();
+        }
+    }
+    public static class EntityAnimation extends MessageS2C{
+        public final int entityId;
+        public final String animation;
+        public EntityAnimation(int entityId, String animation) {
+            this.entityId = entityId;
+            this.animation = animation;
+        }
+        @Override
+        public byte[] toBytes() throws IOException {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(byteStream);
+            stream.writeByte(15);
+            stream.writeInt(entityId);
+            MessageS2C.writeString(stream, animation);
+            return byteStream.toByteArray();
+        }
+    }
+    public static class ChatMessage extends MessageS2C{
+        public final String message;
+        public ChatMessage(String message) {
+            this.message = message;
+        }
+        @Override
+        public byte[] toBytes() throws IOException {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(byteStream);
+            stream.writeByte(16);
+            MessageS2C.writeString(stream, message);
+            return byteStream.toByteArray();
+        }
+    }
+    public static class PlayerAbilities extends MessageS2C{
+        public final float speed;
+        public final PlayerAbilityStorage.EMovementType movementType;
+        public PlayerAbilities(float speed, PlayerAbilityStorage.EMovementType movementType) {
+            this.speed = speed;
+            this.movementType = movementType;
+        }
+        @Override
+        public byte[] toBytes() throws IOException {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(byteStream);
+            stream.writeByte(17);
+            stream.writeFloat(speed);
+            stream.writeByte(movementType.id);
             return byteStream.toByteArray();
         }
     }

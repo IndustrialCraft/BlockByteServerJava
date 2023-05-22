@@ -7,7 +7,6 @@
     "right": "leave",
     "up": "leave",
     "down": "leave",
-    "transparent": true,
     "render_data": 4
   }
 }

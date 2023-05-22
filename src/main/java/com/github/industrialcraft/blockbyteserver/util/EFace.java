@@ -1,5 +1,7 @@
 package com.github.industrialcraft.blockbyteserver.util;
 
+import java.io.File;
+
 public enum EFace {
     Front(0, 0, 0, -1),
     Back(1, 0, 0, 1),
@@ -23,6 +25,10 @@ public enum EFace {
                 return face;
         }
         return null;
+    }
+    private static final EFace[] FACES_WITH_NULL = {null, Front, Back, Up, Down, Left, Right};
+    public static EFace[] allWithNull(){
+        return FACES_WITH_NULL;
     }
     public EFace opposite(){
         return switch (this){

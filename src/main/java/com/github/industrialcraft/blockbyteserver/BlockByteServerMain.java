@@ -13,6 +13,7 @@ import org.java_websocket.WebSocket;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class BlockByteServerMain {
@@ -87,6 +88,7 @@ public class BlockByteServerMain {
         });
         blockRegistry.loadBlock(Identifier.of("bb", "fire_pit"), FirePitBlock::new);
         blockRegistry.loadBlock(Identifier.of("bb", "wet_mud_brick"), WetMudBrickBlock::new);
+        blockRegistry.loadBlock(Identifier.of("bb", "log_pile"), LogPileBlock::new);
         blockRegistry.postInit();
         ItemRegistry itemRegistry = new ItemRegistry();
         itemRegistry.loadDirectory(new File("data/items"));
@@ -98,12 +100,12 @@ public class BlockByteServerMain {
         recipeRegistry.registerCreator(Identifier.of("bb", "fire_pit"), FirePitBlock.FirePitRecipe::new);
         recipeRegistry.loadDirectory(new File("data/recipes"));
         EntityRegistry entityRegistry = new EntityRegistry();
-        entityRegistry.register(Identifier.of("bb", "player"), "player.bbmodel", "player", 0.6f, 1.7f, 0.6f);
+        entityRegistry.register(Identifier.of("bb", "player"), "player.bbm", "player", 0.6f, 1.7f, 0.6f);
         entityRegistry.register(Identifier.of("bb", "item"), "item.bbmodel", "", 0.5f, 0.5f, 0.5f);
         World world = new World(blockRegistry, itemRegistry, recipeRegistry, entityRegistry, fluidRegistry, new WorldGenerator(blockRegistry, 5555), new IWorldSERDE() {
             @Override
             public void save(Chunk chunk) {
-                /*try {
+                try {
                     FileOutputStream fstream = new FileOutputStream("world/chunk" + chunk.position.x() + "," + chunk.position.y() + "," + chunk.position.z());
                     DataOutputStream stream = new DataOutputStream(fstream);
                     stream.writeBoolean(chunk.isPopulated());
@@ -141,7 +143,7 @@ public class BlockByteServerMain {
                     stream.close();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
-                }*/
+                }
             }
             @Override
             public boolean load(Chunk chunk, AbstractBlockInstance[] blocks) {

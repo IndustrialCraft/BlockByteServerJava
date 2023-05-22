@@ -26,10 +26,12 @@ public class LogBlock extends AbstractBlock {
     public final BlockRegistry.BlockRenderData[] blockRenderData;
     public final LogBlockInstance[] states;
     public LogBlock(AtomicInteger clientId) {
-        this.blockRenderData = new BlockRegistry.BlockRenderData[8];
-        this.states = new LogBlockInstance[8];
-        for(int i = 0;i < 8;i++){
-            this.states[i] = new LogBlockInstance(this, (byte) i);
+        this.blockRenderData = new BlockRegistry.BlockRenderData[8*7];
+        this.states = new LogBlockInstance[8*7];
+        for(int i = 0;i < 8;i++) {
+            for (EFace face : EFace.allWithNull()) {
+                this.states[(i*7)+(face==null?0:(face.id+1))] = new LogBlockInstance(this, (byte) i, face);
+            }
         }
         this.clientId = clientId.get();
         clientId.addAndGet(8);
@@ -168,17 +170,33 @@ public class LogBlock extends AbstractBlock {
     @Override
     public AbstractBlockInstance<LogBlock> createBlockInstance(Chunk chunk, int x, int y, int z, Object data) {
         byte size = 0;
+        EFace face = null;
         if(data instanceof DataInputStream stream){
             try {
                 size = stream.readByte();
+                byte faceData = stream.readByte();
+                face = faceData==0?null:EFace.fromId((byte) (faceData-1));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
         if(data instanceof String val){
-            size = (byte) Integer.parseInt(val);
+            char faceChar = Character.toLowerCase(val.charAt(0));
+            if(faceChar == 'f')
+                face = EFace.Front;
+            if(faceChar == 'b')
+                face = EFace.Back;
+            if(faceChar == 'l')
+                face = EFace.Left;
+            if(faceChar == 'r')
+                face = EFace.Right;
+            if(faceChar == 'u')
+                face = EFace.Up;
+            if(faceChar == 'd')
+                face = EFace.Down;
+            size = (byte) Integer.parseInt(val.substring(1));
         }
-        return states[size];
+        return states[size*7+(face==null?0:(face.id+1))];
     }
     @Override
     public void registerRenderData(HashMap<Integer, BlockRegistry.BlockRenderData> renderData) {
@@ -201,9 +219,11 @@ public class LogBlock extends AbstractBlock {
 
     public static class LogBlockInstance extends AbstractBlockInstance<LogBlock> implements ISerializable {
         private byte size;
-        public LogBlockInstance(LogBlock parent, byte size) {
+        private EFace face;
+        public LogBlockInstance(LogBlock parent, byte size, EFace face) {
             super(parent);
             this.size = size;
+            this.face = face;
         }
         @Override
         public int getClientId() {
@@ -221,7 +241,7 @@ public class LogBlock extends AbstractBlock {
             for(EFace face : EFace.values()){
                 BlockPosition neighborPos = new BlockPosition(x + face.xOffset, y + face.yOffset, z + face.zOffset);
                 AbstractBlockInstance neighbor = player.getChunk().parent.getBlock(neighborPos);
-                if(neighbor.parent == this.parent){
+                if(neighbor.parent == this.parent && ((LogBlockInstance)neighbor).face == face.opposite()){
                     player.breakAsPlayer(neighborPos);
                 }
             }
@@ -238,11 +258,12 @@ public class LogBlock extends AbstractBlock {
         @Override
         public void serialize(DataOutputStream stream) throws IOException {
             stream.writeByte(size);
+            stream.writeByte(face==null?0:(face.id+1));
         }
 
         @Override
         public float getBlockBreakingTime(ItemStack item, PlayerEntity player) {
-            return BlockBreakingCalculator.calculateBlockBreakingTime(item, ETool.AXE, 1, 10);
+            return BlockBreakingCalculator.calculateBlockBreakingTime(item, ETool.AXE, 1, 2);
         }
 
         @Override
